@@ -1,43 +1,58 @@
+import { useState } from "react";
 import Layout from "@/components/Layout";
+import OverallReport from "@/components/report/OverallReport";
+import ActorReport from "@/components/report/ActorReport";
+import PerformanceReport from "@/components/report/PerformanceReport";
+
+type TabType = "전체" | "배우" | "극";
 
 export default function ReportPage() {
+  const [activeTab, setActiveTab] = useState<TabType>("전체");
+
   return (
     <Layout>
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6">리포트</h1>
+      <div className="container mx-auto px-4">
         <div className="space-y-6">
-          {/* 탭 영역 */}
+          {/* 서브 네비게이션 - 전체/배우/극 */}
           <div className="border-b">
-            <nav className="flex gap-4">
-              <button className="px-4 py-2 border-b-2 border-primary font-medium">
+            <nav className="flex gap-6">
+              <button
+                onClick={() => setActiveTab("전체")}
+                className={`px-4 py-2 font-medium transition-colors ${
+                  activeTab === "전체"
+                    ? "border-b-2 border-gray-900 text-gray-900"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
+              >
                 전체
               </button>
-              <button className="px-4 py-2 text-gray-500 hover:text-gray-700">
+              <button
+                onClick={() => setActiveTab("배우")}
+                className={`px-4 py-2 font-medium transition-colors ${
+                  activeTab === "배우"
+                    ? "border-b-2 border-gray-900 text-gray-900"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
+              >
                 배우
               </button>
-              <button className="px-4 py-2 text-gray-500 hover:text-gray-700">
+              <button
+                onClick={() => setActiveTab("극")}
+                className={`px-4 py-2 font-medium transition-colors ${
+                  activeTab === "극"
+                    ? "border-b-2 border-gray-900 text-gray-900"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
+              >
                 극
               </button>
             </nav>
           </div>
 
-          {/* 필터 영역 */}
-          <div className="flex items-center gap-4">
-            <button className="px-4 py-2 bg-primary text-primary-foreground rounded-md">
-              연도
-            </button>
-            <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md">
-              누적
-            </button>
-            <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md">
-              월별
-            </button>
-          </div>
-
-          {/* 리포트 콘텐츠 영역 */}
-          <div className="bg-gray-50 rounded-lg p-6">
-            <p className="text-gray-500">리포트 콘텐츠가 여기에 표시됩니다.</p>
-          </div>
+          {/* 탭별 콘텐츠 */}
+          {activeTab === "전체" && <OverallReport />}
+          {activeTab === "배우" && <ActorReport />}
+          {activeTab === "극" && <PerformanceReport />}
         </div>
       </div>
     </Layout>

@@ -420,7 +420,7 @@ export default function ExplorePage() {
 
   return (
     <Layout>
-      <div className="max-w-7xl mx-auto">
+      <div className="container mx-auto px-4">
         <h1 className="text-3xl font-bold mb-8">탐색</h1>
         <div className="space-y-12">
           {/* 주간 뮤지컬 예매 순위 */}
