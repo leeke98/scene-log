@@ -1,6 +1,8 @@
 import { useState } from "react";
-import Chart from "react-apexcharts";
 import { ChevronRight } from "lucide-react";
+import { type ChartConfig } from "@/components/ui/chart";
+import BarChartCard from "@/components/charts/BarChartCard";
+import PieChartCard from "@/components/charts/PieChartCard";
 
 export default function OverallAnnualTab() {
   const [posterIndex, setPosterIndex] = useState(0);
@@ -20,110 +22,82 @@ export default function OverallAnnualTab() {
   }
 
   // 월별 관람수 막대 그래프 데이터
-  const monthlyViewCountOptions = {
-    chart: {
-      type: "bar" as const,
-      toolbar: { show: false },
-    },
-    xaxis: {
-      categories: [
-        "1월",
-        "2월",
-        "3월",
-        "4월",
-        "5월",
-        "6월",
-        "7월",
-        "8월",
-        "9월",
-        "10월",
-        "11월",
-        "12월",
-      ],
-    },
-    yaxis: {
-      title: { text: "관람수" },
-    },
-    dataLabels: {
-      enabled: false,
-    },
-    colors: ["#3b82f6"],
-  };
-
-  const monthlyViewCountSeries = [
-    {
-      name: "관람수",
-      data: [5, 8, 12, 6, 10, 15, 9, 11, 7, 13, 8, 6],
-    },
+  const monthlyViewCountData = [
+    { month: "1월", 관람수: 5 },
+    { month: "2월", 관람수: 8 },
+    { month: "3월", 관람수: 12 },
+    { month: "4월", 관람수: 6 },
+    { month: "5월", 관람수: 10 },
+    { month: "6월", 관람수: 15 },
+    { month: "7월", 관람수: 9 },
+    { month: "8월", 관람수: 11 },
+    { month: "9월", 관람수: 7 },
+    { month: "10월", 관람수: 13 },
+    { month: "11월", 관람수: 8 },
+    { month: "12월", 관람수: 6 },
   ];
+
+  const monthlyViewCountConfig: ChartConfig = {
+    관람수: {
+      label: "관람수",
+      color: "hsl(var(--chart-1))",
+    },
+  };
 
   // 월별 관람 금액 막대 차트 데이터
-  const monthlyAmountOptions = {
-    chart: {
-      type: "bar" as const,
-      toolbar: { show: false },
-    },
-    xaxis: {
-      categories: [
-        "1월",
-        "2월",
-        "3월",
-        "4월",
-        "5월",
-        "6월",
-        "7월",
-        "8월",
-        "9월",
-        "10월",
-        "11월",
-        "12월",
-      ],
-    },
-    yaxis: {
-      title: { text: "금액 (원)" },
-      labels: {
-        formatter: (value: number) => {
-          return (value / 10000).toFixed(0) + "만";
-        },
-      },
-    },
-    dataLabels: {
-      enabled: false,
-    },
-    colors: ["#10b981"],
-  };
-
-  const monthlyAmountSeries = [
-    {
-      name: "관람 금액",
-      data: [
-        150000, 240000, 360000, 180000, 300000, 450000, 270000, 330000, 210000,
-        390000, 240000, 180000,
-      ],
-    },
+  const monthlyAmountData = [
+    { month: "1월", 금액: 150000 },
+    { month: "2월", 금액: 240000 },
+    { month: "3월", 금액: 360000 },
+    { month: "4월", 금액: 180000 },
+    { month: "5월", 금액: 300000 },
+    { month: "6월", 금액: 450000 },
+    { month: "7월", 금액: 270000 },
+    { month: "8월", 금액: 330000 },
+    { month: "9월", 금액: 210000 },
+    { month: "10월", 금액: 390000 },
+    { month: "11월", 금액: 240000 },
+    { month: "12월", 금액: 180000 },
   ];
 
-  // 관극 요일 파이 차트 데이터
-  const dayOfWeekOptions = {
-    chart: {
-      type: "pie" as const,
+  const monthlyAmountConfig: ChartConfig = {
+    금액: {
+      label: "관람 금액",
+      color: "hsl(var(--chart-2))",
     },
-    labels: ["월", "화", "수", "목", "금", "토", "일"],
-    legend: {
-      position: "bottom" as const,
-    },
-    colors: [
-      "#3b82f6",
-      "#8b5cf6",
-      "#ec4899",
-      "#f59e0b",
-      "#10b981",
-      "#ef4444",
-      "#06b6d4",
-    ],
   };
 
-  const dayOfWeekSeries = [8, 5, 7, 6, 9, 15, 8];
+  // 관극 요일 파이 차트 데이터
+  const dayOfWeekData = [
+    { name: "월", value: 8 },
+    { name: "화", value: 5 },
+    { name: "수", value: 7 },
+    { name: "목", value: 6 },
+    { name: "금", value: 9 },
+    { name: "토", value: 15 },
+    { name: "일", value: 8 },
+  ];
+
+  // 각 요일마다 고유한 색상 정의 (7개의 서로 다른 색상)
+  const dayOfWeekConfig: ChartConfig = {
+    월: { label: "월", color: "hsl(12, 76%, 61%)" }, // 주황색
+    화: { label: "화", color: "hsl(173, 58%, 39%)" }, // 청록색
+    수: { label: "수", color: "hsl(197, 37%, 24%)" }, // 어두운 청록색
+    목: { label: "목", color: "hsl(43, 74%, 66%)" }, // 노란색
+    금: { label: "금", color: "hsl(27, 87%, 67%)" }, // 주황-빨강
+    토: { label: "토", color: "hsl(340, 75%, 55%)" }, // 분홍색
+    일: { label: "일", color: "hsl(220, 70%, 50%)" }, // 파란색
+  };
+
+  const COLORS = [
+    "hsl(12, 76%, 61%)", // 월 - 주황색
+    "hsl(173, 58%, 39%)", // 화 - 청록색
+    "hsl(197, 37%, 24%)", // 수 - 어두운 청록색
+    "hsl(43, 74%, 66%)", // 목 - 노란색
+    "hsl(27, 87%, 67%)", // 금 - 주황-빨강
+    "hsl(340, 75%, 55%)", // 토 - 분홍색
+    "hsl(220, 70%, 50%)", // 일 - 파란색
+  ];
 
   return (
     <div className="space-y-6">
@@ -197,40 +171,36 @@ export default function OverallAnnualTab() {
       {/* 차트 섹션 */}
       <section>
         <h2 className="text-xl font-semibold mb-4">차트</h2>
-        <div className="grid grid-cols-3 gap-4">
-          <div className="bg-white rounded-lg p-4 border border-gray-200">
-            <h3 className="text-sm font-medium text-gray-700 mb-2">
-              월 별 관람수
-            </h3>
-            <Chart
-              options={monthlyViewCountOptions}
-              series={monthlyViewCountSeries}
-              type="bar"
-              height={240}
-            />
-          </div>
-          <div className="bg-white rounded-lg p-4 border border-gray-200">
-            <h3 className="text-sm font-medium text-gray-700 mb-2">
-              월 별 관람 금액
-            </h3>
-            <Chart
-              options={monthlyAmountOptions}
-              series={monthlyAmountSeries}
-              type="bar"
-              height={240}
-            />
-          </div>
-          <div className="bg-white rounded-lg p-4 border border-gray-200">
-            <h3 className="text-sm font-medium text-gray-700 mb-2">
-              관극 요일
-            </h3>
-            <Chart
-              options={dayOfWeekOptions}
-              series={dayOfWeekSeries}
-              type="pie"
-              height={240}
-            />
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-5 lg:grid-cols-5 gap-4">
+          <BarChartCard
+            title="월 별 관람수"
+            data={monthlyViewCountData}
+            dataKey="관람수"
+            xAxisKey="month"
+            config={monthlyViewCountConfig}
+            className="md:col-span-2 lg:col-span-2"
+          />
+          <BarChartCard
+            title="월 별 관람 금액"
+            data={monthlyAmountData}
+            dataKey="금액"
+            xAxisKey="month"
+            config={monthlyAmountConfig}
+            yAxisFormatter={(value) => `${(value / 10000).toFixed(0)}만`}
+            tooltipFormatter={(value: number) =>
+              `${(value / 10000).toFixed(0)}만원`
+            }
+            className="md:col-span-2 lg:col-span-2"
+          />
+          <PieChartCard
+            title="관극 요일"
+            data={dayOfWeekData}
+            config={dayOfWeekConfig}
+            colors={COLORS}
+            nameKey="name"
+            label={({ name, value }) => `${name}: ${value}`}
+            className="md:col-span-1 lg:col-span-1"
+          />
         </div>
       </section>
     </div>
