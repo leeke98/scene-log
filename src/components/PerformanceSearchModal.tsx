@@ -12,9 +12,7 @@ import {
   type KopisPerformance,
 } from "@/services/kopisApi";
 import { useTickets } from "@/contexts/TicketContext";
-import ReactDatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import { ko } from "date-fns/locale";
+import DatePicker from "@/components/DatePicker";
 
 interface PerformanceSearchModalProps {
   isOpen: boolean;
@@ -78,7 +76,13 @@ export default function PerformanceSearchModal({
     }
   }, [selectedGenre]);
 
-  const handleDateChange = (date: Date | null) => {
+  const handleDateChange = (dateString: string | null) => {
+    const date = dateString
+      ? (() => {
+          const [year, month, day] = dateString.split("-").map(Number);
+          return new Date(year, month - 1, day);
+        })()
+      : null;
     setModalDate(date);
     if (onDateChange) {
       onDateChange(date);
@@ -292,14 +296,22 @@ export default function PerformanceSearchModal({
               <CalendarIcon className="w-4 h-4" />
               공연 날짜
             </Label>
-            <ReactDatePicker
-              selected={modalDate}
-              onChange={handleDateChange}
-              dateFormat="yyyy년 MM월 dd일 EEEE"
-              locale={ko}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              placeholderText="공연 날짜를 선택하세요"
-            />
+            <div className="max-w-xs">
+              <DatePicker
+                value={
+                  modalDate
+                    ? `${modalDate.getFullYear()}-${String(
+                        modalDate.getMonth() + 1
+                      ).padStart(2, "0")}-${String(
+                        modalDate.getDate()
+                      ).padStart(2, "0")}`
+                    : undefined
+                }
+                onChange={handleDateChange}
+                placeholder="공연 날짜를 선택하세요"
+                size="small"
+              />
+            </div>
             {modalDate && (
               <p className="text-xs text-gray-500 mt-1">
                 선택된 날짜 기준으로 검색됩니다 (

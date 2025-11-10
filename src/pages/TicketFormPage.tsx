@@ -8,9 +8,7 @@ import { Label } from "@/components/ui/label";
 import PerformanceSearchModal from "@/components/PerformanceSearchModal";
 import TimePicker from "@/components/TimePicker";
 import { Star, Plus, X } from "lucide-react";
-import ReactDatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import { ko } from "date-fns/locale";
+import DatePicker from "@/components/DatePicker";
 
 export default function TicketFormPage() {
   const navigate = useNavigate();
@@ -109,9 +107,12 @@ export default function TicketFormPage() {
 
   const handleDateChange = (date: Date | null) => {
     if (date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
       setFormData((prev) => ({
         ...prev,
-        date: date.toISOString().split("T")[0],
+        date: `${year}-${month}-${day}`,
       }));
     }
   };
@@ -183,15 +184,12 @@ export default function TicketFormPage() {
             </Label>
             <div className="flex gap-3 items-center">
               <div className="flex-1 max-w-xs">
-                <ReactDatePicker
-                  selected={
-                    formData.date ? new Date(formData.date + "T00:00:00") : null
+                <DatePicker
+                  value={formData.date}
+                  onChange={(date) =>
+                    setFormData((prev) => ({ ...prev, date: date || "" }))
                   }
-                  onChange={handleDateChange}
-                  dateFormat="yyyy년 MM월 dd일 EEEE"
-                  locale={ko}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                  placeholderText="날짜 선택"
+                  placeholder="날짜 선택"
                 />
               </div>
               <TimePicker
@@ -497,7 +495,12 @@ export default function TicketFormPage() {
         onClose={() => setShowSearchModal(false)}
         onSelect={handlePerformanceSelect}
         selectedDate={
-          formData.date ? new Date(formData.date + "T00:00:00") : undefined
+          formData.date
+            ? (() => {
+                const [year, month, day] = formData.date.split("-").map(Number);
+                return new Date(year, month - 1, day);
+              })()
+            : undefined
         }
         onDateChange={(date) => {
           if (date) {
