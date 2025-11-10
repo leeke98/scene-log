@@ -1,58 +1,49 @@
-import { useState } from "react";
 import Layout from "@/components/Layout";
 import OverallReport from "@/components/report/OverallReport";
 import ActorReport from "@/components/report/ActorReport";
 import PerformanceReport from "@/components/report/PerformanceReport";
-
-type TabType = "전체" | "배우" | "극";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 export default function ReportPage() {
-  const [activeTab, setActiveTab] = useState<TabType>("전체");
-
   return (
     <Layout>
       <div className="container mx-auto px-4">
+        <h1 className="text-3xl font-bold mb-8">리포트</h1>
         <div className="space-y-6">
           {/* 서브 네비게이션 - 전체/배우/극 */}
-          <div className="border-b">
-            <nav className="flex gap-6">
-              <button
-                onClick={() => setActiveTab("전체")}
-                className={`px-4 py-2 font-medium transition-colors ${
-                  activeTab === "전체"
-                    ? "border-b-2 border-gray-900 text-gray-900"
-                    : "text-gray-500 hover:text-gray-700"
-                }`}
+          <Tabs defaultValue="전체" className="w-full">
+            <TabsList className="w-full h-[45px] bg-white border-b border-border rounded-none p-0 justify-start">
+              <TabsTrigger
+                value="전체"
+                className="flex-1 h-full rounded-none border-0 data-[state=active]:bg-transparent data-[state=active]:shadow-[inset_0_-1px_0_0_currentColor,0_1px_0_0_currentColor] data-[state=active]:text-primary hover:text-primary/80"
               >
                 전체
-              </button>
-              <button
-                onClick={() => setActiveTab("배우")}
-                className={`px-4 py-2 font-medium transition-colors ${
-                  activeTab === "배우"
-                    ? "border-b-2 border-gray-900 text-gray-900"
-                    : "text-gray-500 hover:text-gray-700"
-                }`}
+              </TabsTrigger>
+              <TabsTrigger
+                value="배우"
+                className="flex-1 h-full rounded-none border-0 data-[state=active]:bg-transparent data-[state=active]:shadow-[inset_0_-1px_0_0_currentColor,0_1px_0_0_currentColor] data-[state=active]:text-primary hover:text-primary/80"
               >
                 배우
-              </button>
-              <button
-                onClick={() => setActiveTab("극")}
-                className={`px-4 py-2 font-medium transition-colors ${
-                  activeTab === "극"
-                    ? "border-b-2 border-gray-900 text-gray-900"
-                    : "text-gray-500 hover:text-gray-700"
-                }`}
+              </TabsTrigger>
+              <TabsTrigger
+                value="극"
+                className="flex-1 h-full rounded-none border-0 data-[state=active]:bg-transparent data-[state=active]:shadow-[inset_0_-1px_0_0_currentColor,0_1px_0_0_currentColor] data-[state=active]:text-primary hover:text-primary/80"
               >
                 극
-              </button>
-            </nav>
-          </div>
+              </TabsTrigger>
+            </TabsList>
 
-          {/* 탭별 콘텐츠 */}
-          {activeTab === "전체" && <OverallReport />}
-          {activeTab === "배우" && <ActorReport />}
-          {activeTab === "극" && <PerformanceReport />}
+            {/* 탭별 콘텐츠 */}
+            <TabsContent value="전체" className="mt-6" forceMount>
+              <OverallReport />
+            </TabsContent>
+            <TabsContent value="배우" className="mt-6" forceMount>
+              <ActorReport />
+            </TabsContent>
+            <TabsContent value="극" className="mt-6" forceMount>
+              <PerformanceReport />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </Layout>

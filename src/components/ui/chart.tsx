@@ -42,21 +42,91 @@ const ChartContainer = React.forwardRef<
 >(({ id, className, children, config, ...props }, ref) => {
   const uniqueId = React.useId();
   const chartId = `chart-${id || uniqueId.replace(/:/g, "")}`;
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const [shouldRender, setShouldRender] = React.useState(false);
+  const [containerSize, setContainerSize] = React.useState<{
+    width: number;
+    height: number;
+  } | null>(null);
+
+  // className에서 높이 추출 (예: "h-[240px]" -> 240)
+  const heightMatch = className?.match(/h-\[(\d+)px\]/);
+  const extractedHeight = heightMatch ? parseInt(heightMatch[1], 10) : 240;
+
+  // ref를 containerRef와 병합
+  React.useImperativeHandle(
+    ref,
+    () => containerRef.current as HTMLDivElement,
+    []
+  );
+
+  React.useEffect(() => {
+    if (!containerRef.current) return;
+
+    const element = containerRef.current;
+
+    const updateSize = () => {
+      const rect = element.getBoundingClientRect();
+      if (rect.width > 0 && rect.height > 0) {
+        setContainerSize({ width: rect.width, height: rect.height });
+        setShouldRender(true);
+      }
+    };
+
+    // ResizeObserver로 컨테이너 크기 변화 감지
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        if (width > 0 && height > 0) {
+          setContainerSize({ width, height });
+          setShouldRender(true);
+        }
+      }
+    });
+
+    resizeObserver.observe(element);
+
+    // 초기 크기 확인
+    updateSize();
+    const timer = setTimeout(updateSize, 100);
+
+    return () => {
+      resizeObserver.disconnect();
+      clearTimeout(timer);
+    };
+  }, []);
 
   return (
     <ChartContext.Provider value={{ config }}>
       <div
         data-chart={chartId}
-        ref={ref}
+        ref={containerRef}
         className={cn(
-          "flex aspect-video justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-tooltip-cursor]:fill-muted [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-tooltip-cursor]:stroke-border",
+          "flex justify-center text-xs w-full [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-tooltip-cursor]:fill-muted [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-tooltip-cursor]:stroke-border [&_.recharts-wrapper]:!w-full [&_.recharts-wrapper]:!h-full [&_.recharts-surface]:!w-full [&_.recharts-surface]:!h-full",
           className
         )}
+        style={{
+          minWidth: "100%",
+          minHeight: extractedHeight,
+          width: "100%",
+          height: extractedHeight,
+          ...props.style,
+        }}
         {...props}
       >
-        <RechartsPrimitive.ResponsiveContainer>
-          {children}
-        </RechartsPrimitive.ResponsiveContainer>
+        {shouldRender &&
+          containerSize &&
+          containerSize.width > 0 &&
+          containerSize.height > 0 && (
+            <RechartsPrimitive.ResponsiveContainer
+              width={containerSize.width}
+              height={containerSize.height}
+              minWidth={containerSize.width}
+              minHeight={containerSize.height}
+            >
+              {children}
+            </RechartsPrimitive.ResponsiveContainer>
+          )}
       </div>
     </ChartContext.Provider>
   );
