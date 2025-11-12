@@ -1,73 +1,125 @@
-# React + TypeScript + Vite
+# Scene Log (공연 관람 기록 사이트) / Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+공연 관람 기록을 관리하고 통계를 확인할 수 있는 웹 애플리케이션입니다.
 
-Currently, two official plugins are available:
+## 프로젝트 소개
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Scene Log는 사용자가 관람한 공연(연극, 뮤지컬)의 정보를 기록하고, 이를 바탕으로 다양한 통계와 리포트를 제공하는 서비스입니다. 공연 날짜, 작품명, 배우 정보, 좌석, 가격, 별점, 후기 등을 기록할 수 있으며, 월별/연도별 통계, 작품별/배우별 분석 리포트를 제공합니다.
 
-## React Compiler
+## 기술 스택
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Frontend
 
-## Expanding the ESLint configuration
+- **React 18.3** - UI 라이브러리
+- **TypeScript** - 타입 안정성
+- **Vite** - 빌드 도구 및 개발 서버
+- **React Router DOM** - 클라이언트 사이드 라우팅
+- **Tailwind CSS** - 유틸리티 기반 CSS 프레임워크
+- **Radix UI** - 접근성 있는 UI 컴포넌트 라이브러리
+- **Recharts** - 차트 및 데이터 시각화
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Backend
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- **Node.js** (서버 폴더 구조 확인됨)
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Database
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- **MySQL** - 관계형 데이터베이스
+
+## 프로젝트 구조
+
+```
+scene-log/
+├── database/                    # 데이터베이스 관련 파일
+│   ├── schema.sql              # 데이터베이스 스키마 정의
+│   ├── mock_data.sql           # 테스트용 더미 데이터
+│   └── README.md               # 데이터베이스 문서
+│
+├── src/                        # 프론트엔드 소스 코드
+│   ├── assets/                 # 정적 자산 (이미지 등)
+│   │
+│   ├── components/             # React 컴포넌트
+│   │   ├── charts/             # 차트 컴포넌트
+│   │   ├── report/             # 리포트 관련 컴포넌트
+│   │   ├── ui/                 # 재사용 가능한 Shadcn/UI 컴포넌트
+│   │
+│   ├── contexts/               # React Context
+│   │
+│   ├── data/                   # 데이터 파일
+│   │   └── mockTickets.ts      # 목업 티켓 데이터
+│   │
+│   ├── lib/                    # 유틸리티 함수
+│   │   └── utils.ts            # 공통 유틸리티
+│   │
+│   ├── pages/                  # 페이지 컴포넌트
+│   │
+│   ├── services/               # API 서비스
+│   │   └── kopisApi.ts         # KOPIS API 연동
+│   │
+│   ├── styles/                 # 스타일 파일
+│   │
+│   ├── types/                  # TypeScript 타입 정의
+│   │
+│   ├── App.tsx                 # 메인 App 컴포넌트
+│   ├── App.css                 # App 스타일
+│   ├── index.css               # 전역 스타일
+│   └── main.tsx                # 애플리케이션 진입점
+│
+├── public/                     # 정적 파일
+│   └── vite.svg
+│
+├── .gitignore                  # Git 무시 파일 목록
+├── components.json             # shadcn/ui 설정
+├── eslint.config.js            # ESLint 설정
+├── index.html                  # HTML 진입점
+├── package.json                # 프로젝트 의존성 및 스크립트
+├── package-lock.json           # 의존성 잠금 파일
+├── postcss.config.js           # PostCSS 설정
+├── tailwind.config.js          # Tailwind CSS 설정
+├── tsconfig.json               # TypeScript 설정
+├── tsconfig.app.json           # 앱용 TypeScript 설정
+├── tsconfig.node.json          # Node용 TypeScript 설정
+└── vite.config.ts              # Vite 설정
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 주요 기능
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- 🔐 **사용자 인증**: 로그인 및 회원가입
+- 📝 **공연 기록 관리**: 공연 정보 등록, 수정, 삭제
+- 📅 **캘린더 뷰**: 관람 기록을 캘린더 형식으로 확인
+- 📊 **통계 리포트**:
+  - 전체 통계 (월별/연도별/누적)
+  - 작품별 통계 및 분석
+  - 배우별 통계 및 분석
+- 🔍 **탐색 기능**: 공연 정보 검색 및 탐색
+- 📈 **데이터 시각화**: 차트를 통한 통계 시각화
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## 시작하기
+
+### 필수 요구사항
+
+- Node.js >= 22.12.0
+- npm >= 10.0.0
+
+### 설치 및 실행
+
+```bash
+# 의존성 설치
+npm install
+
+# 개발 서버 실행
+npm run dev
+
+# 프로덕션 빌드
+npm run build
+
+# 빌드 미리보기
+npm run preview
+
+# 린팅
+npm run lint
 ```
+
+## 라이선스
+
+이 프로젝트는 개인 프로젝트입니다.
