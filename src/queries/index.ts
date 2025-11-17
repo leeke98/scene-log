@@ -6,3 +6,6 @@
 
 // 인증 관련
 export * from "./auth";
+
+// 티켓 관련
+export * from "./tickets";

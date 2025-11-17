@@ -11,7 +11,6 @@ import {
   formatDateForKopis,
   type KopisPerformance,
 } from "@/services/kopisApi";
-import { useTickets } from "@/contexts/TicketContext";
 import DatePicker from "@/components/DatePicker";
 
 interface PerformanceSearchModalProps {
@@ -38,7 +37,7 @@ export default function PerformanceSearchModal({
   selectedGenre,
   onGenreChange,
 }: PerformanceSearchModalProps) {
-  const { tickets } = useTickets();
+  const tickets: Array<{ performanceName: string }> = [];
   const [searchTerm, setSearchTerm] = useState("");
   // selectedGenre가 있으면 그것을 사용하고, 없으면 기본값 "뮤지컬"
   const [genre, setGenre] = useState<"AAAA" | "GGGA">(

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useTickets } from "@/contexts/TicketContext";
+import { useTicket, useCreateTicket, useUpdateTicket } from "@/queries/tickets";
+import { toast } from "react-toastify";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,10 +14,27 @@ import DatePicker from "@/components/DatePicker";
 export default function TicketFormPage() {
   const navigate = useNavigate();
   const { id } = useParams<{ id?: string }>();
-  const { addTicket, updateTicket, getTicket } = useTickets();
 
   const isEditMode = !!id;
-  const existingTicket = id ? getTicket(id) : undefined;
+  const { data: ticket, isLoading: isLoadingTicket } = useTicket(id);
+  const createTicketMutation = useCreateTicket();
+  const updateTicketMutation = useUpdateTicket();
+  const [initialTicketData, setInitialTicketData] = useState<{
+    date: string;
+    time: string;
+    performanceName: string;
+    genre: "연극" | "뮤지컬";
+    isChild?: boolean;
+    theater: string;
+    seat: string;
+    casting: string[];
+    ticketPrice: string;
+    companion: string;
+    mdPrice: string;
+    rating: number;
+    review: string;
+    posterUrl: string;
+  } | null>(null);
 
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [formData, setFormData] = useState<{
@@ -35,46 +53,40 @@ export default function TicketFormPage() {
     review: string;
     posterUrl: string;
   }>({
-    date: existingTicket?.date || new Date().toISOString().split("T")[0],
+    date: isEditMode ? "" : new Date().toISOString().split("T")[0],
     time: "20:00", // 기본값: 오후 8시
-    performanceName: existingTicket?.performanceName || "",
-    genre: existingTicket?.genre || "뮤지컬",
-    isChild: existingTicket?.isChild,
-    theater: existingTicket?.theater || "",
-    seat: existingTicket?.seat || "",
-    casting: (() => {
-      const casting = existingTicket?.casting;
-      if (!casting) return [] as string[];
-      if (Array.isArray(casting)) return casting as string[];
-      if (typeof casting === "string") {
-        return (casting as string)
-          .split(",")
-          .map((c: string) => c.trim())
-          .filter(Boolean) as string[];
-      }
-      return [] as string[];
-    })(),
-    ticketPrice: existingTicket?.ticketPrice?.toString() || "",
-    companion: existingTicket?.companion || "",
-    mdPrice: existingTicket?.mdPrice?.toString() || "",
-    rating: existingTicket?.rating || 0,
-    review: existingTicket?.review || "",
-    posterUrl: existingTicket?.posterUrl || "",
+    performanceName: "",
+    genre: "뮤지컬",
+    isChild: undefined,
+    theater: "",
+    seat: "",
+    casting: [],
+    ticketPrice: "",
+    companion: "",
+    mdPrice: "",
+    rating: 0,
+    review: "",
+    posterUrl: "",
   });
 
-  // 수정 모드일 때 기존 데이터 로드
+  // 수정 모드일 때 기존 티켓 데이터 로드
   useEffect(() => {
-    if (isEditMode && existingTicket) {
-      setFormData({
-        date: existingTicket.date,
-        time: "20:00", // 기존 티켓에 시간 정보가 없으면 기본값 사용
-        performanceName: existingTicket.performanceName,
-        genre: existingTicket.genre || "뮤지컬",
-        isChild: existingTicket.isChild,
-        theater: existingTicket.theater,
-        seat: existingTicket.seat,
+    if (isEditMode && ticket) {
+      // time을 HH:MM 형식으로 변환 (HH:MM:SS -> HH:MM)
+      const timeFormatted = ticket.time
+        ? ticket.time.split(":").slice(0, 2).join(":")
+        : "20:00";
+
+      const loadedData = {
+        date: ticket.date,
+        time: timeFormatted,
+        performanceName: ticket.performanceName,
+        genre: ticket.genre || "뮤지컬",
+        isChild: ticket.isChild,
+        theater: ticket.theater,
+        seat: ticket.seat || "",
         casting: (() => {
-          const casting = existingTicket.casting;
+          const casting = ticket.casting;
           if (!casting) return [] as string[];
           if (Array.isArray(casting)) return casting as string[];
           if (typeof casting === "string") {
@@ -85,15 +97,18 @@ export default function TicketFormPage() {
           }
           return [] as string[];
         })(),
-        ticketPrice: existingTicket.ticketPrice?.toString() || "",
-        companion: existingTicket.companion || "",
-        mdPrice: existingTicket.mdPrice?.toString() || "",
-        rating: existingTicket.rating,
-        review: existingTicket.review,
-        posterUrl: existingTicket.posterUrl || "",
-      });
+        ticketPrice: ticket.ticketPrice?.toString() || "",
+        companion: ticket.companion || "",
+        mdPrice: ticket.mdPrice?.toString() || "",
+        rating: ticket.rating || 0,
+        review: ticket.review || "",
+        posterUrl: ticket.posterUrl || "",
+      };
+
+      setFormData(loadedData);
+      setInitialTicketData(loadedData);
     }
-  }, [isEditMode, existingTicket]);
+  }, [isEditMode, ticket]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -139,35 +154,132 @@ export default function TicketFormPage() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  if (isLoadingTicket) {
+    return (
+      <Layout>
+        <div className="max-w-7xl mx-auto p-6">
+          <div className="text-center py-12">
+            <p className="text-gray-500">티켓 정보를 불러오는 중...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const finalDate = formData.date;
+    // 필수 필드 검증
+    if (
+      !formData.date ||
+      !formData.time ||
+      !formData.performanceName ||
+      !formData.theater
+    ) {
+      toast.error("필수 필드(날짜, 시간, 공연명, 극장)를 모두 입력해주세요.");
+      return;
+    }
+
+    // time을 HH:MM:SS 형식으로 변환
+    const timeFormatted = formData.time.includes(":")
+      ? formData.time.split(":").length === 2
+        ? `${formData.time}:00`
+        : formData.time
+      : `${formData.time}:00:00`;
 
     const ticketData = {
-      date: finalDate,
-      time: formData.time || undefined, // 공연 시간 저장
+      date: formData.date,
+      time: timeFormatted,
       performanceName: formData.performanceName,
       genre: formData.genre || undefined,
       isChild: formData.isChild,
       theater: formData.theater,
-      seat: formData.seat,
-      casting: formData.casting,
-      ticketPrice: Number(formData.ticketPrice.replace(/,/g, "")) || 0,
+      seat: formData.seat || undefined,
+      casting: formData.casting.length > 0 ? formData.casting : undefined,
+      ticketPrice: formData.ticketPrice
+        ? Number(formData.ticketPrice.replace(/,/g, ""))
+        : undefined,
       companion: formData.companion || undefined,
-      mdPrice: Number(formData.mdPrice.replace(/,/g, "")) || 0,
-      rating: formData.rating,
-      review: formData.review,
+      mdPrice: formData.mdPrice
+        ? Number(formData.mdPrice.replace(/,/g, ""))
+        : undefined,
+      rating: formData.rating || undefined,
+      review: formData.review || undefined,
       posterUrl: formData.posterUrl || undefined,
     };
 
-    if (isEditMode && id) {
-      updateTicket(id, ticketData);
-    } else {
-      addTicket(ticketData);
-    }
+    try {
+      if (isEditMode && id && initialTicketData) {
+        // 수정 모드: 변경된 필드만 전송
+        const updateData: Record<string, unknown> = {};
 
-    navigate("/");
+        // 각 필드를 비교하여 변경된 것만 추가
+        if (ticketData.date !== initialTicketData.date) {
+          updateData.date = ticketData.date;
+        }
+        if (ticketData.time !== initialTicketData.time) {
+          updateData.time = ticketData.time;
+        }
+        if (ticketData.performanceName !== initialTicketData.performanceName) {
+          updateData.performanceName = ticketData.performanceName;
+        }
+        if (ticketData.genre !== initialTicketData.genre) {
+          updateData.genre = ticketData.genre;
+        }
+        if (ticketData.isChild !== initialTicketData.isChild) {
+          updateData.isChild = ticketData.isChild;
+        }
+        if (ticketData.theater !== initialTicketData.theater) {
+          updateData.theater = ticketData.theater;
+        }
+        if (ticketData.seat !== initialTicketData.seat) {
+          updateData.seat = ticketData.seat;
+        }
+        // casting 배열 비교
+        const castingChanged =
+          JSON.stringify(ticketData.casting?.sort()) !==
+          JSON.stringify(initialTicketData.casting.sort());
+        if (castingChanged) {
+          updateData.casting = ticketData.casting;
+        }
+        const ticketPriceStr = ticketData.ticketPrice?.toString() || "";
+        if (ticketPriceStr !== initialTicketData.ticketPrice) {
+          updateData.ticketPrice = ticketData.ticketPrice;
+        }
+        if (ticketData.companion !== initialTicketData.companion) {
+          updateData.companion = ticketData.companion;
+        }
+        const mdPriceStr = ticketData.mdPrice?.toString() || "";
+        if (mdPriceStr !== initialTicketData.mdPrice) {
+          updateData.mdPrice = ticketData.mdPrice;
+        }
+        if (ticketData.rating !== initialTicketData.rating) {
+          updateData.rating = ticketData.rating;
+        }
+        if (ticketData.review !== initialTicketData.review) {
+          updateData.review = ticketData.review;
+        }
+        if (ticketData.posterUrl !== initialTicketData.posterUrl) {
+          updateData.posterUrl = ticketData.posterUrl;
+        }
+
+        // 변경된 필드가 없으면 경고
+        if (Object.keys(updateData).length === 0) {
+          toast.info("변경된 내용이 없습니다.");
+          return;
+        }
+
+        await updateTicketMutation.mutateAsync({ id, data: updateData });
+      } else {
+        // 생성 모드: 전체 데이터 전송
+        await createTicketMutation.mutateAsync(ticketData);
+      }
+
+      navigate("/");
+    } catch (error: any) {
+      // 에러는 mutation의 onError에서 처리됨
+      console.error("티켓 저장 오류:", error);
+    }
   };
 
   return (

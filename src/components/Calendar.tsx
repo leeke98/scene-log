@@ -1,7 +1,9 @@
-import { useTickets } from "@/contexts/TicketContext";
+import { useMemo } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import "@/components/Calendar.css";
+import { useTicketsByMonth } from "@/queries/tickets";
+import type { CalendarTicket } from "@/services/ticketApi";
 
 interface CalendarProps {
   currentDate: Date;
@@ -14,7 +16,27 @@ export default function PerformanceCalendar({
   onDateChange,
   onTicketClick,
 }: CalendarProps) {
-  const { getTicketsByDate } = useTickets();
+  // 현재 달의 yearMonth 형식 (YYYY-MM)
+  const currentYearMonth = useMemo(() => {
+    const year = currentDate.getFullYear();
+    const month = String(currentDate.getMonth() + 1).padStart(2, "0");
+    return `${year}-${month}`;
+  }, [currentDate]);
+
+  // React Query로 월별 티켓 조회
+  const { data: monthTickets = [] } = useTicketsByMonth(currentYearMonth);
+
+  // 날짜별로 티켓 그룹화
+  const ticketsByDate = useMemo(() => {
+    const grouped: Record<string, CalendarTicket[]> = {};
+    monthTickets.forEach((ticket) => {
+      if (!grouped[ticket.date]) {
+        grouped[ticket.date] = [];
+      }
+      grouped[ticket.date].push(ticket);
+    });
+    return grouped;
+  }, [monthTickets]);
 
   const formatDate = (date: Date) => {
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
@@ -23,17 +45,28 @@ export default function PerformanceCalendar({
     )}-${String(date.getDate()).padStart(2, "0")}`;
   };
 
+  // time을 HH:MM 형식으로 변환
+  const formatTime = (time: string) => {
+    if (!time) return "";
+    const parts = time.split(":");
+    return `${parts[0]}:${parts[1]}`;
+  };
+
   const tileContent = ({ date, view }: { date: Date; view: string }) => {
     if (view !== "month") return null;
 
     const dateStr = formatDate(date);
-    const tickets = getTicketsByDate(dateStr);
+    const tickets = ticketsByDate[dateStr] || [];
 
     return (
       <div className="calendar-tile-content">
         <div className="calendar-day-number">{date.getDate()}</div>
         {tickets.length > 0 && (
-          <div className={`calendar-tickets ${tickets.length === 1 ? "single-ticket" : ""}`}>
+          <div
+            className={`calendar-tickets ${
+              tickets.length === 1 ? "single-ticket" : ""
+            }`}
+          >
             {tickets.length === 1 ? (
               // 티켓이 하나인 경우: 한 칸을 꽉 채워서 표시
               <button
@@ -43,12 +76,12 @@ export default function PerformanceCalendar({
                   onTicketClick(tickets[0].id);
                 }}
                 className="calendar-ticket-poster single"
-                title={`${tickets[0].performanceName}${tickets[0].time ? ` (${tickets[0].time})` : ""}`}
+                title={`${tickets[0].time ? formatTime(tickets[0].time) : ""}`}
               >
                 {tickets[0].posterUrl ? (
                   <img
                     src={tickets[0].posterUrl}
-                    alt={tickets[0].performanceName}
+                    alt="공연 포스터"
                     className="w-full h-full object-cover group-hover:opacity-80 transition-opacity"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
@@ -66,7 +99,7 @@ export default function PerformanceCalendar({
                     tickets[0].posterUrl ? "hidden" : ""
                   }`}
                 >
-                  {tickets[0].performanceName}
+                  {tickets[0].time ? formatTime(tickets[0].time) : "공연"}
                 </div>
               </button>
             ) : (
@@ -80,12 +113,12 @@ export default function PerformanceCalendar({
                       onTicketClick(ticket.id);
                     }}
                     className="calendar-ticket-poster"
-                    title={`${ticket.performanceName}${ticket.time ? ` (${ticket.time})` : ""}`}
+                    title={`${ticket.time ? formatTime(ticket.time) : ""}`}
                   >
                     {ticket.posterUrl ? (
                       <img
                         src={ticket.posterUrl}
-                        alt={ticket.performanceName}
+                        alt="공연 포스터"
                         className="w-full h-full object-cover group-hover:opacity-80 transition-opacity"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
@@ -103,7 +136,7 @@ export default function PerformanceCalendar({
                         ticket.posterUrl ? "hidden" : ""
                       }`}
                     >
-                      {ticket.performanceName}
+                      {ticket.time ? formatTime(ticket.time) : "공연"}
                     </div>
                   </button>
                 ))}
@@ -139,6 +172,12 @@ export default function PerformanceCalendar({
         onChange={(value) => {
           if (value instanceof Date) {
             onDateChange(value);
+          }
+        }}
+        onActiveStartDateChange={({ activeStartDate }) => {
+          // 달이 변경될 때 currentDate 업데이트하여 API 호출 트리거
+          if (activeStartDate) {
+            onDateChange(activeStartDate);
           }
         }}
         value={currentDate}

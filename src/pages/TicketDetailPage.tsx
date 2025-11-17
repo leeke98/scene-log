@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useTickets } from "@/contexts/TicketContext";
+import { useTicket, useDeleteTicket } from "@/queries/tickets";
+import { toast } from "react-toastify";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,15 +8,71 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 export default function TicketDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { getTicket, deleteTicket } = useTickets();
+  const { data: ticket, isLoading, error } = useTicket(id);
+  const deleteTicketMutation = useDeleteTicket();
 
-  const ticket = id ? getTicket(id) : undefined;
+  const handleDelete = () => {
+    if (!id) return;
 
-  if (!ticket) {
+    // 커스텀 확인 toast
+    toast(
+      ({ closeToast }) => (
+        <div className="flex flex-col gap-3">
+          <p className="font-medium">정말 삭제하시겠습니까?</p>
+          <div className="flex gap-2 justify-end">
+            <button
+              onClick={closeToast}
+              className="px-4 py-2 text-sm bg-gray-200 hover:bg-gray-300 rounded-md transition-colors"
+            >
+              취소
+            </button>
+            <button
+              onClick={async () => {
+                closeToast();
+                try {
+                  await deleteTicketMutation.mutateAsync(id);
+                  navigate("/");
+                } catch (err: any) {
+                  // 에러는 mutation의 onError에서 처리됨
+                  console.error("티켓 삭제 오류:", err);
+                }
+              }}
+              className="px-4 py-2 text-sm bg-red-500 hover:bg-red-600 text-white rounded-md transition-colors"
+            >
+              삭제
+            </button>
+          </div>
+        </div>
+      ),
+      {
+        position: "top-center",
+        autoClose: false,
+        closeOnClick: false,
+        draggable: false,
+        closeButton: true,
+      }
+    );
+  };
+
+  if (isLoading) {
     return (
       <Layout>
         <div className="text-center py-12">
-          <p className="text-gray-500">티켓을 찾을 수 없습니다.</p>
+          <p className="text-gray-500">로딩 중...</p>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (error || !ticket) {
+    const errorMessage =
+      (error as any)?.error || "티켓을 불러오는데 실패했습니다.";
+    return (
+      <Layout>
+        <div className="text-center py-12">
+          <p className="text-gray-500">
+            {errorMessage || "티켓을 찾을 수 없습니다."}
+          </p>
           <Button onClick={() => navigate("/")} className="mt-4">
             돌아가기
           </Button>
@@ -23,13 +80,6 @@ export default function TicketDetailPage() {
       </Layout>
     );
   }
-
-  const handleDelete = () => {
-    if (confirm("정말 삭제하시겠습니까?")) {
-      deleteTicket(ticket.id);
-      navigate("/");
-    }
-  };
 
   return (
     <Layout>
@@ -97,7 +147,9 @@ export default function TicketDetailPage() {
             <div>
               <p className="text-sm text-gray-500">티켓 가격</p>
               <p className="font-medium">
-                {ticket.ticketPrice ? `₩${ticket.ticketPrice.toLocaleString()}` : "-"}
+                {ticket.ticketPrice
+                  ? `₩${ticket.ticketPrice.toLocaleString()}`
+                  : "-"}
               </p>
             </div>
             <div>
@@ -137,4 +189,3 @@ export default function TicketDetailPage() {
     </Layout>
   );
 }
-
