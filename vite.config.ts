@@ -21,6 +21,12 @@ export default defineConfig({
           return path.replace(/^\/api\/kopis/, "/openApi/restful");
         },
       },
+      // 백엔드 API 프록시 (개발 환경)
+      "/api": {
+        target: "http://localhost:3001",
+        changeOrigin: true,
+        secure: false,
+      },
     },
   },
 });
