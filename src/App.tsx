@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider, useAuth } from "@/contexts/AuthContext";
-import { TicketProvider } from "@/contexts/TicketContext";
+import { useAuth } from "@/queries/auth";
 import LoginPage from "@/pages/LoginPage";
 import SignupPage from "@/pages/SignupPage";
 import PerformanceRecordPage from "@/pages/PerformanceRecordPage";
@@ -10,12 +9,30 @@ import ReportPage from "@/pages/ReportPage";
 import ExplorePage from "@/pages/ExplorePage";
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        로딩 중...
+      </div>
+    );
+  }
+
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
 }
 
 function PublicRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        로딩 중...
+      </div>
+    );
+  }
+
   return !isAuthenticated ? <>{children}</> : <Navigate to="/" />;
 }
 
@@ -93,11 +110,7 @@ function AppRoutes() {
 function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <TicketProvider>
-          <AppRoutes />
-        </TicketProvider>
-      </AuthProvider>
+      <AppRoutes />
     </BrowserRouter>
   );
 }
