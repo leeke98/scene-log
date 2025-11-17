@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/queries/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,7 +14,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
@@ -23,10 +23,15 @@ export default function LoginPage() {
       return;
     }
 
-    if (login(id, password)) {
-      navigate("/");
-    } else {
-      setError("아이디 또는 비밀번호가 올바르지 않습니다.");
+    try {
+      const result = await login(id, password);
+      if (result.success) {
+        navigate("/");
+      } else {
+        setError(result.error || "아이디 또는 비밀번호가 올바르지 않습니다.");
+      }
+    } catch (error: any) {
+      setError(error?.error || "로그인 중 오류가 발생했습니다.");
     }
   };
 
