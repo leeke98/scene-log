@@ -103,29 +103,6 @@ export default function GrassField({ data }: GrassFieldProps) {
     return months;
   }, [grassData]);
 
-  // 연도별 총 관람 횟수 계산
-  const yearlyTotals = useMemo(() => {
-    const totals: { [year: number]: number } = {};
-    const currentYear = new Date().getFullYear();
-
-    for (let yearOffset = 4; yearOffset >= 0; yearOffset--) {
-      const year = currentYear - yearOffset;
-      totals[year] = grassData
-        .filter((d) => {
-          const date = new Date(d.date);
-          return date.getFullYear() === year;
-        })
-        .reduce((sum, d) => sum + d.count, 0);
-    }
-
-    return totals;
-  }, [grassData]);
-
-  // 최대 관람 횟수 (막대 그래프 스케일링용)
-  const maxCount = useMemo(() => {
-    return Math.max(...Object.values(yearlyTotals), 1);
-  }, [yearlyTotals]);
-
   // 월 약어
   const monthLabels = [
     "JAN",
@@ -179,33 +156,8 @@ export default function GrassField({ data }: GrassFieldProps) {
 
   return (
     <div className="w-full space-y-4">
-      {/* 연도별 막대 그래프 */}
-      {/* <div className="space-y-2">
-        {Object.entries(yearlyTotals)
-          .sort(([a], [b]) => Number(a) - Number(b))
-          .map(([year, total]) => (
-            <div key={year} className="flex items-center gap-3">
-              <span className="text-sm font-medium text-gray-700 w-12">
-                {year}
-              </span>
-              <div className="flex-1 bg-gray-200 rounded-full h-6 relative">
-                <div
-                  className="bg-green-500 h-6 rounded-full transition-all flex items-center justify-end pr-2"
-                  style={{ width: `${(total / maxCount) * 100}%` }}
-                >
-                  {total > 0 && (
-                    <span className="text-xs text-white font-medium">
-                      {total}회
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
-      </div> */}
-
       {/* 잔디밭 그리드 - 날짜 가로, 월 세로 */}
-      <div className="w-full overflow-x-auto">
+      <div className="w-full overflow-x-auto flex justify-center">
         <div className="inline-block">
           {/* 일 레이블 (상단) */}
           <div className="flex mb-1">
@@ -216,7 +168,7 @@ export default function GrassField({ data }: GrassFieldProps) {
                 <div
                   key={day}
                   className="text-xs text-gray-600 text-center flex-shrink-0"
-                  style={{ width: "20px" }}
+                  style={{ width: "24px" }}
                 >
                   {day}
                 </div>
@@ -245,8 +197,8 @@ export default function GrassField({ data }: GrassFieldProps) {
                         className="rounded-sm cursor-pointer hover:ring-2 hover:ring-green-400 transition-all flex-shrink-0"
                         style={{
                           backgroundColor: color,
-                          width: "20px",
-                          height: "20px",
+                          width: "24px",
+                          height: "24px",
                         }}
                         title={
                           cell.date
@@ -266,7 +218,7 @@ export default function GrassField({ data }: GrassFieldProps) {
       </div>
 
       {/* 범례 */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 justify-center">
         <span className="text-xs text-gray-600">Less</span>
         <div className="flex gap-1">
           {[0, 1, 2, 3, 4].map((level) => (

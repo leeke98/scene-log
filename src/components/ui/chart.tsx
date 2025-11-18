@@ -354,7 +354,8 @@ const ChartLegendContent = React.forwardRef<
         {...props}
       >
         {payload?.map((item: (typeof payload)[0]) => {
-          const key = `${nameKey || item.dataKey || "value"}`;
+          // Pie 차트의 경우 item.value가 항목 이름이므로 우선 사용
+          const key = `${item.value || nameKey || item.dataKey || "value"}`;
           const itemConfig = getChartConfigItem(config, key);
 
           return (
@@ -374,7 +375,7 @@ const ChartLegendContent = React.forwardRef<
                   }}
                 />
               )}
-              {itemConfig?.label}
+              {itemConfig?.label || item.value}
             </div>
           );
         })}

@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { ChevronRight } from "lucide-react";
+import { type ChartConfig } from "@/components/ui/chart";
 import SummaryCards from "@/components/report/SummaryCards";
 import GrassField from "@/components/GrassField";
+import PieChartCard from "@/components/charts/PieChartCard";
 
 export default function OverallCumulativeTab() {
   const [posterIndex, setPosterIndex] = useState(0);
@@ -28,6 +30,38 @@ export default function OverallCumulativeTab() {
     mostFrequentActor: "아무개 / 17회",
     mostFrequentTheater: "블루스퀘어 | 17회",
   };
+
+  // 관극 요일 파이 차트 데이터
+  const dayOfWeekData = [
+    { name: "월", value: 8 },
+    { name: "화", value: 5 },
+    { name: "수", value: 7 },
+    { name: "목", value: 6 },
+    { name: "금", value: 9 },
+    { name: "토", value: 15 },
+    { name: "일", value: 8 },
+  ];
+
+  // 각 요일마다 고유한 색상 정의 (7개의 서로 다른 색상)
+  const dayOfWeekConfig: ChartConfig = {
+    월: { label: "월", color: "hsl(12, 76%, 61%)" }, // 주황색
+    화: { label: "화", color: "hsl(173, 58%, 39%)" }, // 청록색
+    수: { label: "수", color: "hsl(197, 37%, 24%)" }, // 어두운 청록색
+    목: { label: "목", color: "hsl(43, 74%, 66%)" }, // 노란색
+    금: { label: "금", color: "hsl(27, 87%, 67%)" }, // 주황-빨강
+    토: { label: "토", color: "hsl(340, 75%, 55%)" }, // 분홍색
+    일: { label: "일", color: "hsl(220, 70%, 50%)" }, // 파란색
+  };
+
+  const COLORS = [
+    "hsl(12, 76%, 61%)", // 월 - 주황색
+    "hsl(173, 58%, 39%)", // 화 - 청록색
+    "hsl(197, 37%, 24%)", // 수 - 어두운 청록색
+    "hsl(43, 74%, 66%)", // 목 - 노란색
+    "hsl(27, 87%, 67%)", // 금 - 주황-빨강
+    "hsl(340, 75%, 55%)", // 토 - 분홍색
+    "hsl(220, 70%, 50%)", // 일 - 파란색
+  ];
 
   return (
     <div className="space-y-6">
@@ -62,11 +96,28 @@ export default function OverallCumulativeTab() {
         </div>
       </div>
 
-      {/* 잔디밭 섹션 */}
+      {/* 잔디밭 및 차트 섹션 */}
       <section>
         <h2 className="text-xl font-semibold mb-4">관람 내역</h2>
-        <div className="bg-white rounded-lg p-6 border border-gray-200">
-          <GrassField data={[]} />
+        <div className="grid grid-cols-6 gap-4 items-stretch">
+          {/* 잔디밭 - 3칸 차지 */}
+          <div className="col-span-4 md:col-span-4 bg-white rounded-lg px-8 py-6 border border-gray-200 flex flex-col">
+            <GrassField data={[]} />
+          </div>
+          {/* 관극 요일 파이 차트 - 2칸 차지 */}
+          <div className="col-span-2 md:col-span-2 flex">
+            <PieChartCard
+              title="관극 요일"
+              data={dayOfWeekData}
+              config={dayOfWeekConfig}
+              colors={COLORS}
+              nameKey="name"
+              label={({ name, value }) => `${name}: ${value}`}
+              className="w-full h-full flex flex-col"
+              height="h-full"
+              showLegend={true}
+            />
+          </div>
         </div>
       </section>
     </div>
