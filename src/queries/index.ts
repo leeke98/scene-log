@@ -9,3 +9,6 @@ export * from "./auth";
 
 // 티켓 관련
 export * from "./tickets";
+
+// 리포트 관련
+export * from "./reports";

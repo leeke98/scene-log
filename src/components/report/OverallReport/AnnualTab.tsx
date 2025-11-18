@@ -1,42 +1,89 @@
-import { useState } from "react";
-import { ChevronRight } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
 import { type ChartConfig } from "@/components/ui/chart";
 import BarChartCard from "@/components/charts/BarChartCard";
 import PieChartCard from "@/components/charts/PieChartCard";
 import SummaryCards from "@/components/report/SummaryCards";
+import TopPerformancesPoster from "@/components/report/TopPerformancesPoster";
+import {
+  useSummary,
+  useMonthlyStats,
+  useDayOfWeekStats,
+  useMostViewedPerformance,
+} from "@/queries/reports/queries";
 
-export default function OverallAnnualTab() {
-  const [posterIndex, setPosterIndex] = useState(0);
+interface OverallAnnualTabProps {
+  year: string;
+}
 
-  const handlePosterNext = () => {
-    setPosterIndex((prev) => (prev + 1) % 10);
-  };
+export default function OverallAnnualTab({ year }: OverallAnnualTabProps) {
+  const summaryRef = useRef<HTMLDivElement>(null);
+  const [posterHeight, setPosterHeight] = useState<number | null>(null);
 
-  const posters = Array.from({ length: 10 }, (_, i) => ({
-    id: i,
-    title: `작품 ${i + 1}`,
-  }));
+  // 전체 요약 데이터 가져오기
+  const { data: summary } = useSummary(year);
 
-  const displayedPosters = posters.slice(posterIndex, posterIndex + 6);
-  if (displayedPosters.length < 6) {
-    displayedPosters.push(...posters.slice(0, 6 - displayedPosters.length));
-  }
+  // 월별 통계 데이터 가져오기
+  const { data: monthlyStats } = useMonthlyStats(year);
 
-  // 월별 관람수 막대 그래프 데이터
-  const monthlyViewCountData = [
-    { month: "1월", 관람수: 5 },
-    { month: "2월", 관람수: 8 },
-    { month: "3월", 관람수: 12 },
-    { month: "4월", 관람수: 6 },
-    { month: "5월", 관람수: 10 },
-    { month: "6월", 관람수: 15 },
-    { month: "7월", 관람수: 9 },
-    { month: "8월", 관람수: 11 },
-    { month: "9월", 관람수: 7 },
-    { month: "10월", 관람수: 13 },
-    { month: "11월", 관람수: 8 },
-    { month: "12월", 관람수: 6 },
-  ];
+  // 요일별 통계 데이터 가져오기
+  const { data: dayOfWeekStats } = useDayOfWeekStats(year);
+
+  // 가장 많이 본 작품 데이터 가져오기
+  const { data: top10Performances } = useMostViewedPerformance(year);
+
+  // 요약 섹션의 높이를 측정하여 포스터 높이에 반영
+  useEffect(() => {
+    const updateHeight = () => {
+      if (summaryRef.current) {
+        const summaryHeight = summaryRef.current.offsetHeight;
+        // 제목 높이(약 1.5rem + mb-4 = 1rem)를 제외한 높이
+        const titleHeight = 40; // text-lg + mb-4
+        setPosterHeight(summaryHeight - titleHeight);
+      }
+    };
+
+    // 초기 측정
+    const timer = setTimeout(updateHeight, 0);
+
+    // ResizeObserver로 더 정확하게 측정
+    const resizeObserver = new ResizeObserver(() => {
+      updateHeight();
+    });
+
+    if (summaryRef.current) {
+      resizeObserver.observe(summaryRef.current);
+    }
+
+    window.addEventListener("resize", updateHeight);
+
+    return () => {
+      clearTimeout(timer);
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", updateHeight);
+    };
+  }, [summary]);
+
+  // 월별 관람수 차트 데이터 매핑 (실제 데이터 기반)
+  // 1월부터 12월까지 모든 달을 표시하고, 데이터가 없는 달은 0으로 채움
+  const monthlyViewCountData = (() => {
+    // 1월부터 12월까지 기본 배열 생성
+    const allMonths = Array.from({ length: 12 }, (_, i) => ({
+      month: `${i + 1}월`,
+      관람수: 0,
+    }));
+
+    if (monthlyStats && monthlyStats.length > 0) {
+      // API에서 받은 데이터를 월별로 매핑
+      monthlyStats.forEach((item) => {
+        const month = parseInt(item.yearMonth.split("-")[1], 10);
+        if (month >= 1 && month <= 12) {
+          allMonths[month - 1].관람수 = item.count;
+        }
+      });
+    }
+
+    return allMonths;
+  })();
 
   const monthlyViewCountConfig: ChartConfig = {
     관람수: {
@@ -45,100 +92,74 @@ export default function OverallAnnualTab() {
     },
   };
 
-  // 월별 관람 금액 막대 차트 데이터
-  const monthlyAmountData = [
-    { month: "1월", 금액: 150000 },
-    { month: "2월", 금액: 240000 },
-    { month: "3월", 금액: 360000 },
-    { month: "4월", 금액: 180000 },
-    { month: "5월", 금액: 300000 },
-    { month: "6월", 금액: 450000 },
-    { month: "7월", 금액: 270000 },
-    { month: "8월", 금액: 330000 },
-    { month: "9월", 금액: 210000 },
-    { month: "10월", 금액: 390000 },
-    { month: "11월", 금액: 240000 },
-    { month: "12월", 금액: 180000 },
-  ];
+  // 월별 금액 차트 데이터 매핑 (실제 데이터 기반)
+  // 1월부터 12월까지 모든 달을 표시하고, 데이터가 없는 달은 0으로 채움
+  const monthlyAmountData = (() => {
+    // 1월부터 12월까지 기본 배열 생성
+    const allMonths = Array.from({ length: 12 }, (_, i) => ({
+      month: `${i + 1}월`,
+      금액: 0,
+    }));
+
+    if (monthlyStats && monthlyStats.length > 0) {
+      // API에서 받은 데이터를 월별로 매핑
+      monthlyStats.forEach((item) => {
+        const month = parseInt(item.yearMonth.split("-")[1], 10);
+        if (month >= 1 && month <= 12) {
+          allMonths[month - 1].금액 = item.totalPrice;
+        }
+      });
+    }
+
+    return allMonths;
+  })();
 
   const monthlyAmountConfig: ChartConfig = {
     금액: {
-      label: "관람 금액",
+      label: "금액",
       color: "hsl(var(--chart-2))",
     },
   };
 
-  // 관극 요일 파이 차트 데이터
-  const dayOfWeekData = [
-    { name: "월", value: 8 },
-    { name: "화", value: 5 },
-    { name: "수", value: 7 },
-    { name: "목", value: 6 },
-    { name: "금", value: 9 },
-    { name: "토", value: 15 },
-    { name: "일", value: 8 },
-  ];
-
-  // 각 요일마다 고유한 색상 정의 (7개의 서로 다른 색상)
-  const dayOfWeekConfig: ChartConfig = {
-    월: { label: "월", color: "hsl(12, 76%, 61%)" }, // 주황색
-    화: { label: "화", color: "hsl(173, 58%, 39%)" }, // 청록색
-    수: { label: "수", color: "hsl(197, 37%, 24%)" }, // 어두운 청록색
-    목: { label: "목", color: "hsl(43, 74%, 66%)" }, // 노란색
-    금: { label: "금", color: "hsl(27, 87%, 67%)" }, // 주황-빨강
-    토: { label: "토", color: "hsl(340, 75%, 55%)" }, // 분홍색
-    일: { label: "일", color: "hsl(220, 70%, 50%)" }, // 파란색
-  };
-
-  const COLORS = [
-    "hsl(12, 76%, 61%)", // 월 - 주황색
-    "hsl(173, 58%, 39%)", // 화 - 청록색
-    "hsl(197, 37%, 24%)", // 수 - 어두운 청록색
-    "hsl(43, 74%, 66%)", // 목 - 노란색
-    "hsl(27, 87%, 67%)", // 금 - 주황-빨강
-    "hsl(340, 75%, 55%)", // 토 - 분홍색
-    "hsl(220, 70%, 50%)", // 일 - 파란색
-  ];
-
-  const summaryData = {
-    totalViewCount: 58,
-    totalPerformanceCount: 26,
-    totalAmount: 123456789,
-    totalMdAmount: 234567,
-    mostFrequentActor: "아무개",
-    mostFrequentTheater: "블루스퀘어",
-  };
+  // SummaryCards에 전달할 데이터 매핑
+  const summaryData = summary
+    ? {
+        totalViewCount: summary.totalCount,
+        totalPerformanceCount: summary.uniquePerformances,
+        totalAmount: summary.totalTicketPrice,
+        totalMdAmount: summary.totalMdPrice,
+        mostFrequentActor: summary.mostViewedActor?.name || "-",
+        mostFrequentTheater: summary.mostViewedTheater?.name || "-",
+      }
+    : {
+        totalViewCount: 0,
+        totalPerformanceCount: 0,
+        totalAmount: 0,
+        totalMdAmount: 0,
+        mostFrequentActor: "-",
+        mostFrequentTheater: "-",
+      };
 
   return (
     <div className="space-y-6">
       {/* 요약과 가장 많이 본 작품 동일 선상 */}
-      <div className="grid grid-cols-5 gap-6 items-stretch">
+      <div className="grid grid-cols-5 gap-6 items-start">
         {/* 요약 섹션 */}
-        <div className="col-span-2 flex flex-col">
+        <div
+          className="col-span-2 flex flex-col"
+          id="summary-section"
+          ref={summaryRef}
+        >
           <SummaryCards data={summaryData} />
         </div>
 
         {/* 가장 많이 본 작품 섹션 */}
         <div className="col-span-3 flex flex-col">
           <h2 className="text-lg font-semibold mb-3">가장 많이 본 작품</h2>
-          <div className="flex items-center gap-2 flex-1">
-            <div className="flex gap-3 flex-1 overflow-hidden h-full">
-              {displayedPosters.map((poster) => (
-                <div
-                  key={poster.id}
-                  className="bg-gray-200 rounded-lg aspect-[3/4] h-full flex-shrink-0 flex items-center justify-center"
-                >
-                  <span className="text-gray-500 text-xs">포스터</span>
-                </div>
-              ))}
-            </div>
-            <button
-              onClick={handlePosterNext}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0"
-            >
-              <ChevronRight className="w-5 h-5 text-gray-600" />
-            </button>
-          </div>
+          <TopPerformancesPoster
+            performances={top10Performances || []}
+            height={posterHeight}
+          />
         </div>
       </div>
 
@@ -160,19 +181,13 @@ export default function OverallAnnualTab() {
             dataKey="금액"
             xAxisKey="month"
             config={monthlyAmountConfig}
-            yAxisFormatter={(value) => `${(value / 10000).toFixed(0)}만`}
-            tooltipFormatter={(value: number) =>
-              `${(value / 10000).toFixed(0)}만원`
-            }
+            yAxisFormatter={(value) => `${(value / 10000).toLocaleString()}만`}
+            tooltipFormatter={(value: number) => `${value.toLocaleString()}원`}
             className="md:col-span-2 lg:col-span-2"
           />
           <PieChartCard
             title="관극 요일"
-            data={dayOfWeekData}
-            config={dayOfWeekConfig}
-            colors={COLORS}
-            nameKey="name"
-            label={({ name, value }) => `${name}: ${value}`}
+            dayOfWeekStats={dayOfWeekStats}
             className="md:col-span-1 lg:col-span-1"
           />
         </div>

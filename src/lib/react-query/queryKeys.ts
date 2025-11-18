@@ -28,18 +28,58 @@ export const queryKeys = {
   // 리포트 관련
   reports: {
     all: ["reports"] as const,
-    summary: (year?: string) =>
-      [...queryKeys.reports.all, "summary", year] as const,
+    summary: (year?: string, month?: string) =>
+      [...queryKeys.reports.all, "summary", year, month] as const,
     monthly: (year?: string) =>
       [...queryKeys.reports.all, "monthly", year] as const,
-    annual: (year?: string) =>
-      [...queryKeys.reports.all, "annual", year] as const,
-    cumulative: () => [...queryKeys.reports.all, "cumulative"] as const,
-    byActor: (actorName?: string) =>
-      [...queryKeys.reports.all, "actor", actorName] as const,
-    byPerformance: (performanceName?: string) =>
-      [...queryKeys.reports.all, "performance", performanceName] as const,
-    grassField: (year?: string) =>
-      [...queryKeys.reports.all, "grassField", year] as const,
+    weekly: (yearMonth?: string) =>
+      [...queryKeys.reports.all, "weekly", yearMonth] as const,
+    dayOfWeek: (year?: string, month?: string) =>
+      [...queryKeys.reports.all, "dayOfWeek", year, month] as const,
+    actors: (params?: { search?: string; year?: string; month?: string }) =>
+      [
+        ...queryKeys.reports.all,
+        "actors",
+        params?.search,
+        params?.year,
+        params?.month,
+      ] as const,
+    actorDetail: (params: {
+      actorName: string;
+      year?: string;
+      month?: string;
+    }) =>
+      [
+        ...queryKeys.reports.all,
+        "actorDetail",
+        params.actorName,
+        params.year,
+        params.month,
+      ] as const,
+    performances: (params?: {
+      search?: string;
+      year?: string;
+      month?: string;
+    }) =>
+      [
+        ...queryKeys.reports.all,
+        "performances",
+        params?.search,
+        params?.year,
+        params?.month,
+      ] as const,
+    performanceDetail: (params: {
+      performanceName: string;
+      year?: string;
+      month?: string;
+    }) =>
+      [
+        ...queryKeys.reports.all,
+        "performanceDetail",
+        params.performanceName,
+        params.year,
+        params.month,
+      ] as const,
+    grass: () => [...queryKeys.reports.all, "grass"] as const,
   },
 } as const;

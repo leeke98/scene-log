@@ -33,8 +33,17 @@ export default function OverallReport() {
       </div>
 
       {/* 탭별 콘텐츠 */}
-      {activePeriod === "연간" && <AnnualTab />}
-      {activePeriod === "월" && <MonthlyTab />}
+      {activePeriod === "연간" && (
+        <AnnualTab year={selectedYear.getFullYear().toString()} />
+      )}
+      {activePeriod === "월" && (
+        <MonthlyTab
+          year={selectedMonth.getFullYear().toString()}
+          month={`${selectedMonth.getFullYear()}-${String(
+            selectedMonth.getMonth() + 1
+          ).padStart(2, "0")}`}
+        />
+      )}
       {activePeriod === "누적" && <CumulativeTab />}
     </div>
   );

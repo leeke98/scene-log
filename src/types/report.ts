@@ -13,6 +13,10 @@ export interface TicketSummary {
     name: string;
     count: number;
   }; // 가장 많이 본 작품
+  mostViewedTheater: {
+    name: string;
+    count: number;
+  }; // 가장 많이 간 극장
 }
 
 export interface MonthlyStats {
@@ -28,8 +32,7 @@ export interface WeeklyStats {
 }
 
 export interface DayOfWeekStats {
-  dayOfWeek: number; // 1=일요일, 7=토요일
-  dayName: string; // 요일 이름
+  dayOfWeek: string; // "일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"
   count: number; // 관람 수
 }
 
@@ -50,6 +53,12 @@ export interface PerformanceStats {
   lastViewed: string; // 마지막 관람일 (YYYY-MM-DD)
   posterUrl?: string; // 포스터 URL
   genre?: "연극" | "뮤지컬"; // 장르
+}
+
+export interface Top10Performance {
+  performanceName: string;
+  count: number;
+  posterUrl?: string;
 }
 
 export interface GrassData {

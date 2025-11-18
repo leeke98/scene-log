@@ -1,11 +1,11 @@
 import { useMemo } from "react";
 
 interface GrassFieldProps {
-  data: Array<{ date: string; count: number }>; // YYYY-MM-DD 형식, 관람 수
+  data: Array<{ date: string; count: number }>; // MM-DD 형식, 관람 수
 }
 
 export default function GrassField({ data }: GrassFieldProps) {
-  // 5년치 데이터 생성 (가짜 데이터)
+  // 5년치 데이터 생성
   const grassData = useMemo(() => {
     const today = new Date();
     const fiveYearsAgo = new Date(today);
@@ -19,11 +19,24 @@ export default function GrassField({ data }: GrassFieldProps) {
       date <= today;
       date.setDate(date.getDate() + 1)
     ) {
-      const dateStr = date.toISOString().split("T")[0];
-      const existingData = data.find((d) => d.date === dateStr);
+      const dateStr = date.toISOString().split("T")[0]; // YYYY-MM-DD
+      // MM-DD 형식으로 변환하여 데이터 찾기
+      const monthDay = `${String(date.getMonth() + 1).padStart(
+        2,
+        "0"
+      )}-${String(date.getDate()).padStart(2, "0")}`; // MM-DD
+
+      // 모든 연도에서 해당 MM-DD의 데이터를 찾아 합산
+      let totalCount = 0;
+      data.forEach((d) => {
+        if (d.date === monthDay) {
+          totalCount += d.count;
+        }
+      });
+
       days.push({
         date: dateStr,
-        count: existingData?.count || 0,
+        count: totalCount,
       });
     }
 
