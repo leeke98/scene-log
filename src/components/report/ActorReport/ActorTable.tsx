@@ -1,3 +1,13 @@
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Card, CardContent } from "@/components/ui/card";
+
 export interface ActorData {
   name: string;
   totalViewCount: number;
@@ -50,56 +60,48 @@ export default function ActorTable({
   };
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-gray-50 border-b border-gray-200">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                이름
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                총 관극 횟수
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                관람 작품
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                관람 금액
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+    <Card>
+      <CardContent className="p-0">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="px-6 py-3">이름</TableHead>
+              <TableHead className="px-6 py-3">총 관극 횟수</TableHead>
+              <TableHead className="px-6 py-3">관람 작품</TableHead>
+              <TableHead className="px-6 py-3">관람 금액</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {actors.length > 0 ? (
               actors.map((actor, index) => (
-                <tr
+                <TableRow
                   key={`${actor.name}-${index}`}
-                  className="hover:bg-gray-50 transition-colors cursor-pointer"
+                  className="cursor-pointer"
                   onClick={() => onActorClick(actor.name)}
                 >
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <TableCell className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       {getRankBadge(index)}
-                      <span className="text-gray-900 font-medium">
-                        {actor.name}
-                      </span>
+                      <span className="font-medium">{actor.name}</span>
                     </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {actor.totalViewCount}회
-                    <div className="bg-gray-200 rounded-full h-2 w-24">
-                      <div
-                        className="bg-green-500 h-2 rounded-full transition-all"
-                        style={{
-                          width: `${Math.min(
-                            (actor.totalViewCount / 30) * 100,
-                            100
-                          )}%`,
-                        }}
-                      />
+                  </TableCell>
+                  <TableCell className="px-6 py-4 whitespace-nowrap">
+                    <div className="space-y-1">
+                      <div>{actor.totalViewCount}회</div>
+                      <div className="bg-gray-200 rounded-full h-2 w-24">
+                        <div
+                          className="bg-green-500 h-2 rounded-full transition-all"
+                          style={{
+                            width: `${Math.min(
+                              (actor.totalViewCount / 30) * 100,
+                              100
+                            )}%`,
+                          }}
+                        />
+                      </div>
                     </div>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
+                  </TableCell>
+                  <TableCell className="px-6 py-4">
                     <div className="flex flex-wrap gap-2">
                       {actor.watchedPerformances.map((performance, idx) => (
                         <span
@@ -110,22 +112,22 @@ export default function ActorTable({
                         </span>
                       ))}
                     </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  </TableCell>
+                  <TableCell className="px-6 py-4 whitespace-nowrap">
                     {actor.totalAmount.toLocaleString()}원
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))
             ) : (
-              <tr>
-                <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+              <TableRow>
+                <TableCell colSpan={4} className="px-6 py-8 text-center">
                   검색 결과가 없습니다.
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
-      </div>
-    </div>
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
   );
 }

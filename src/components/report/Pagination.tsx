@@ -1,11 +1,20 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+"use client";
+
+import React from "react";
+import {
+  Pagination as PaginationRoot,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
   total: number;
-  limit: number;
   onPageChange: (page: number) => void;
 }
 
@@ -13,7 +22,6 @@ export default function Pagination({
   currentPage,
   totalPages,
   total,
-  limit,
   onPageChange,
 }: PaginationProps) {
   if (totalPages <= 1) {
@@ -65,51 +73,66 @@ export default function Pagination({
   };
 
   return (
-    <div className="flex items-center justify-between">
-      <div className="text-sm text-gray-600">
-        전체 {total}개 중 {(currentPage - 1) * limit + 1}-
-        {Math.min(currentPage * limit, total)}개 표시
+    <div className="relative flex items-center">
+      <div className="absolute left-0 text-sm text-muted-foreground whitespace-nowrap">
+        전체 {total}개
       </div>
-      <div className="flex items-center gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handlePrevPage}
-          disabled={currentPage === 1}
-        >
-          <ChevronLeft className="w-4 h-4" />
-        </Button>
-        <div className="flex items-center gap-1">
+      <PaginationRoot className="mx-auto">
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationPrevious
+              href="#"
+              onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                e.preventDefault();
+                handlePrevPage();
+              }}
+              className={
+                currentPage === 1
+                  ? "pointer-events-none opacity-50"
+                  : "cursor-pointer"
+              }
+            />
+          </PaginationItem>
           {getPageNumbers().map((page, index) => {
             if (page === "...") {
               return (
-                <span key={`ellipsis-${index}`} className="px-2">
-                  ...
-                </span>
+                <PaginationItem key={`ellipsis-${index}`}>
+                  <PaginationEllipsis />
+                </PaginationItem>
               );
             }
             return (
-              <Button
-                key={page}
-                variant={currentPage === page ? "default" : "outline"}
-                size="sm"
-                onClick={() => onPageChange(page as number)}
-                className="min-w-[2.5rem]"
-              >
-                {page}
-              </Button>
+              <PaginationItem key={page}>
+                <PaginationLink
+                  href="#"
+                  onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                    e.preventDefault();
+                    onPageChange(page as number);
+                  }}
+                  isActive={currentPage === page}
+                  className="cursor-pointer min-w-[2.5rem]"
+                >
+                  {page}
+                </PaginationLink>
+              </PaginationItem>
             );
           })}
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleNextPage}
-          disabled={currentPage === totalPages}
-        >
-          <ChevronRight className="w-4 h-4" />
-        </Button>
-      </div>
+          <PaginationItem>
+            <PaginationNext
+              href="#"
+              onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                e.preventDefault();
+                handleNextPage();
+              }}
+              className={
+                currentPage === totalPages
+                  ? "pointer-events-none opacity-50"
+                  : "cursor-pointer"
+              }
+            />
+          </PaginationItem>
+        </PaginationContent>
+      </PaginationRoot>
     </div>
   );
 }
