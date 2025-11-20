@@ -36,13 +36,21 @@ export const queryKeys = {
       [...queryKeys.reports.all, "weekly", yearMonth] as const,
     dayOfWeek: (year?: string, month?: string) =>
       [...queryKeys.reports.all, "dayOfWeek", year, month] as const,
-    actors: (params?: { search?: string; year?: string; month?: string }) =>
+    actors: (params?: {
+      search?: string;
+      year?: string;
+      month?: string;
+      page?: number;
+      limit?: number;
+    }) =>
       [
         ...queryKeys.reports.all,
         "actors",
         params?.search,
         params?.year,
         params?.month,
+        params?.page,
+        params?.limit,
       ] as const,
     actorDetail: (params: {
       actorName: string;

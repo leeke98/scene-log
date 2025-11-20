@@ -7,12 +7,12 @@ import type {
   MonthlyStats,
   WeeklyStats,
   DayOfWeekStats,
-  ActorStats,
   PerformanceStats,
   GrassData,
   ActorDetail,
   PerformanceDetail,
   Top10Performance,
+  ActorListStats,
 } from "@/types/report";
 
 /**
@@ -74,16 +74,20 @@ export async function getActorStats(params?: {
   search?: string;
   year?: string;
   month?: string;
-}): Promise<ActorStats[]> {
-  const { search, year, month } = params || {};
+  page?: number;
+  limit?: number;
+}): Promise<ActorListStats> {
+  const { search, year, month, page, limit } = params || {};
   const queryParams = new URLSearchParams();
   if (search) queryParams.append("search", search);
   if (year) queryParams.append("year", year);
   if (month) queryParams.append("month", month);
+  if (page) queryParams.append("page", page.toString());
+  if (limit) queryParams.append("limit", limit.toString());
   const endpoint = `/reports/actors${
     queryParams.toString() ? `?${queryParams.toString()}` : ""
   }`;
-  return apiGet<ActorStats[]>(endpoint);
+  return apiGet<ActorListStats>(endpoint);
 }
 
 /**

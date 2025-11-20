@@ -52,6 +52,8 @@ export function useActorStats(params?: {
   search?: string;
   year?: string;
   month?: string;
+  page?: number;
+  limit?: number;
 }) {
   return useQuery({
     queryKey: queryKeys.reports.actors(params),

@@ -3,36 +3,83 @@ import { useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useActorDetail } from "@/queries/reports/queries";
 
 interface ActorDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   actorName: string;
+  year?: string;
+  month?: string;
 }
 
 export default function ActorDetailModal({
   isOpen,
   onClose,
   actorName,
+  year,
+  month,
 }: ActorDetailModalProps) {
   const navigate = useNavigate();
 
+  // 배우 상세 정보 가져오기
+  const { data: actorDetail, isLoading } = useActorDetail({
+    actorName,
+    year,
+    month,
+  });
+
   if (!isOpen) return null;
 
-  // 가짜 데이터 (추후 실제 데이터로 교체)
+  // 로딩 중이거나 데이터가 없을 때
+  if (isLoading) {
+    return createPortal(
+      <div
+        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50"
+        onClick={onClose}
+      >
+        <Card
+          className="w-full max-w-lg mx-4 bg-gray-100"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <CardContent className="p-6">
+            <div className="text-center">로딩 중...</div>
+          </CardContent>
+        </Card>
+      </div>,
+      document.body
+    );
+  }
+
+  if (!actorDetail) {
+    return createPortal(
+      <div
+        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50"
+        onClick={onClose}
+      >
+        <Card
+          className="w-full max-w-lg mx-4 bg-gray-100"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <CardContent className="p-6">
+            <div className="text-center">데이터를 불러올 수 없습니다.</div>
+          </CardContent>
+        </Card>
+      </div>,
+      document.body
+    );
+  }
+
+  const actor = actorDetail.actor;
   const actorData = {
-    name: actorName,
-    totalViewCount: 24,
-    watchedPerformances: ["알라딘", "일 테노레", "킹키부츠"],
-    totalAmount: 123456789,
-    firstWatchedDate: "2023년 4월 4일",
-    daysSinceFirst: 684,
-    tickets: [
-      { id: "ticket-1", displayText: "251012 일 테노레" },
-      { id: "ticket-2", displayText: "251012 일 테노레" },
-      { id: "ticket-3", displayText: "251012 일 테노레" },
-      { id: "ticket-4", displayText: "251012 일 테노레" },
-    ],
+    name: actor.actorName,
+    totalViewCount: actor.viewCount,
+    watchedPerformances: actor.performanceList,
+    totalAmount: actor.totalTicketPrice,
+    tickets: actorDetail.tickets.map((ticket) => ({
+      id: ticket.id,
+      displayText: `${ticket.date} ${ticket.performanceName}`,
+    })),
   };
 
   const handleTicketClick = (ticketId: string) => {
@@ -41,7 +88,7 @@ export default function ActorDetailModal({
     onClose(); // 모달 닫기
   };
 
-  const maxViewCount = 50;
+  const maxViewCount = 30;
   const percentage = (actorData.totalViewCount / maxViewCount) * 100;
 
   const modalContent = (
@@ -115,28 +162,17 @@ export default function ActorDetailModal({
                 </span>
               </div>
 
-              {/* 처음 본 날 */}
-              <div className="flex items-center gap-4">
-                <span className="text-sm font-medium text-gray-700 w-24 flex-shrink-0">
-                  처음 본 날
-                </span>
-                <span className="text-sm font-medium">
-                  {actorData.firstWatchedDate} (D+{actorData.daysSinceFirst}
-                  일째)
-                </span>
-              </div>
-
               {/* 관람 티켓 */}
               <div className="flex items-start gap-4">
                 <span className="text-sm font-medium text-gray-700 w-24 flex-shrink-0">
                   관람 티켓
                 </span>
-                <div className="flex flex-col gap-1 flex-1">
+                <div className="flex flex-col gap-1 flex-1 max-h-32 overflow-y-auto">
                   {actorData.tickets.map((ticket) => (
                     <button
                       key={ticket.id}
                       onClick={() => handleTicketClick(ticket.id)}
-                      className="text-sm text-gray-900 hover:text-blue-600 hover:underline text-left transition-colors"
+                      className="text-sm text-gray-900 hover:text-blue-600 hover:underline text-left transition-colors py-1"
                     >
                       {ticket.displayText}
                     </button>

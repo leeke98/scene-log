@@ -36,8 +36,18 @@ export interface DayOfWeekStats {
   count: number; // 관람 수
 }
 
+export interface ActorListStats {
+  data: ActorStats[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
 export interface ActorStats {
-  name: string; // 배우 이름
+  actorName: string; // 배우 이름
   viewCount: number; // 총 관람 횟수
   totalTicketPrice: number; // 관람 금액
   uniquePerformances: number; // 본 작품 수

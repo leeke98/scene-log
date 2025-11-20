@@ -49,8 +49,21 @@ export default function ActorReport() {
       </div>
 
       {/* 탭별 콘텐츠 */}
-      {activePeriod === "연간" && <AnnualTab searchTerm={searchTerm} />}
-      {activePeriod === "월" && <MonthlyTab searchTerm={searchTerm} />}
+      {activePeriod === "연간" && (
+        <AnnualTab
+          searchTerm={searchTerm}
+          year={selectedYear.getFullYear().toString()}
+        />
+      )}
+      {activePeriod === "월" && (
+        <MonthlyTab
+          searchTerm={searchTerm}
+          year={selectedMonth.getFullYear().toString()}
+          month={`${selectedMonth.getFullYear()}-${String(
+            selectedMonth.getMonth() + 1
+          ).padStart(2, "0")}`}
+        />
+      )}
       {activePeriod === "누적" && <CumulativeTab searchTerm={searchTerm} />}
     </div>
   );
