@@ -83,13 +83,20 @@ export function usePerformanceStats(params?: {
   search?: string;
   year?: string;
   month?: string;
+  limit?: number;
+  page?: number;
 }) {
   return useQuery({
-    queryKey: queryKeys.reports.performances(params),
+    queryKey: queryKeys.reports.performances({
+      search: params?.search,
+      year: params?.year,
+      month: params?.month,
+      page: params?.page,
+      limit: params?.limit,
+    }),
     queryFn: () => reportApi.getPerformanceStats(params),
   });
 }
-
 /**
  * 가장 많이 본 작품 Top 10 조회
  */

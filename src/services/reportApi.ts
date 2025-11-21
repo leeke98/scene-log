@@ -7,12 +7,12 @@ import type {
   MonthlyStats,
   WeeklyStats,
   DayOfWeekStats,
-  PerformanceStats,
   GrassData,
   ActorDetail,
   PerformanceDetail,
   Top10Performance,
   ActorListStats,
+  PerformanceListStats,
 } from "@/types/report";
 
 /**
@@ -116,15 +116,19 @@ export async function getPerformanceStats(params?: {
   search?: string;
   year?: string;
   month?: string;
-}): Promise<PerformanceStats[]> {
+  limit?: number;
+  page?: number;
+}): Promise<PerformanceListStats> {
   const queryParams = new URLSearchParams();
   if (params?.search) queryParams.append("search", params.search);
   if (params?.year) queryParams.append("year", params.year);
   if (params?.month) queryParams.append("month", params.month);
+  if (params?.limit) queryParams.append("limit", params.limit.toString());
+  if (params?.page) queryParams.append("page", params.page.toString());
   const endpoint = `/reports/performances${
     queryParams.toString() ? `?${queryParams.toString()}` : ""
   }`;
-  return apiGet<PerformanceStats[]>(endpoint);
+  return apiGet<PerformanceListStats>(endpoint);
 }
 
 /**

@@ -68,6 +68,8 @@ export const queryKeys = {
       search?: string;
       year?: string;
       month?: string;
+      page?: number;
+      limit?: number;
     }) =>
       [
         ...queryKeys.reports.all,
@@ -75,6 +77,8 @@ export const queryKeys = {
         params?.search,
         params?.year,
         params?.month,
+        params?.page,
+        params?.limit,
       ] as const,
     performanceDetail: (params: {
       performanceName: string;

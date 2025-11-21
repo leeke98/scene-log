@@ -59,10 +59,18 @@ export interface PerformanceStats {
   viewCount: number; // 관극 회수
   totalTicketPrice: number; // 관극 금액
   avgRating: number; // 후기 별점 평균
-  firstViewed: string; // 첫 관람일 (YYYY-MM-DD)
-  lastViewed: string; // 마지막 관람일 (YYYY-MM-DD)
   posterUrl?: string; // 포스터 URL
   genre?: "연극" | "뮤지컬"; // 장르
+}
+
+export interface PerformanceListStats {
+  data: PerformanceStats[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
 }
 
 export interface Top10Performance {
