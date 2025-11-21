@@ -19,6 +19,8 @@ export function useLogin() {
     mutationFn: (data: { username: string; password: string }) =>
       authApi.login(data),
     onSuccess: (response) => {
+      // 이전 사용자의 모든 캐시 데이터 초기화
+      queryClient.clear();
       setUser(response.user);
       queryClient.setQueryData(queryKeys.auth.currentUser(), response.user);
       toast.success("로그인되었습니다.");
@@ -66,14 +68,16 @@ export function useLogout() {
     mutationFn: () => authApi.logout(),
     onSuccess: () => {
       clearUser();
-      queryClient.removeQueries({ queryKey: queryKeys.auth.all });
+      // 모든 캐시 데이터 초기화 (다른 사용자의 데이터가 남지 않도록)
+      queryClient.clear();
       toast.success("로그아웃되었습니다.");
     },
     onError: (error) => {
       console.error("로그아웃 오류:", error);
       // 에러가 발생해도 로컬 상태는 정리
       clearUser();
-      queryClient.removeQueries({ queryKey: queryKeys.auth.all });
+      // 모든 캐시 데이터 초기화
+      queryClient.clear();
     },
   });
 }

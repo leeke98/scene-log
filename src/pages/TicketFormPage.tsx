@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useTicket, useCreateTicket, useUpdateTicket } from "@/queries/tickets";
 import { toast } from "react-toastify";
 import Layout from "@/components/Layout";
@@ -8,17 +8,138 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import PerformanceSearchModal from "@/components/PerformanceSearchModal";
 import TimePicker from "@/components/TimePicker";
-import { Star, Plus, X } from "lucide-react";
+import { Star, Plus, X, Loader2, GripVertical } from "lucide-react";
 import DatePicker from "@/components/DatePicker";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  type DragStartEvent,
+  DragOverlay,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+
+// 드래그 가능한 캐스팅 아이템 컴포넌트
+function SortableCastingItem({
+  actor,
+  index,
+  onRemove,
+}: {
+  actor: string;
+  index: number;
+  onRemove: () => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: index });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary rounded-md text-sm ${
+        isDragging ? "opacity-50" : ""
+      }`}
+    >
+      <button
+        type="button"
+        {...attributes}
+        {...listeners}
+        className="hover:bg-primary/20 rounded p-0.5 transition-colors flex items-center cursor-grab active:cursor-grabbing"
+      >
+        <GripVertical className="w-3.5 h-3.5" />
+      </button>
+      <span>{actor}</span>
+      <button
+        type="button"
+        onClick={onRemove}
+        className="hover:bg-primary/20 rounded-full p-0.5 transition-colors"
+      >
+        <X className="w-3.5 h-3.5" />
+      </button>
+    </div>
+  );
+}
+
+// 드래그 오버레이용 정적 아이템 컴포넌트
+function CastingItemPreview({ actor }: { actor: string }) {
+  return (
+    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary rounded-md text-sm shadow-lg">
+      <GripVertical className="w-3.5 h-3.5" />
+      <span>{actor}</span>
+    </div>
+  );
+}
 
 export default function TicketFormPage() {
   const navigate = useNavigate();
   const { id } = useParams<{ id?: string }>();
+  const [searchParams] = useSearchParams();
 
   const isEditMode = !!id;
+
+  // URL 쿼리 파라미터에서 날짜 가져오기
+  const dateFromUrl = searchParams.get("date");
   const { data: ticket, isLoading: isLoadingTicket } = useTicket(id);
   const createTicketMutation = useCreateTicket();
   const updateTicketMutation = useUpdateTicket();
+
+  // 드래그 앤 드롭 센서 설정
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const [activeId, setActiveId] = useState<number | null>(null);
+
+  // 드래그 시작 핸들러
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as number);
+  };
+
+  // 드래그 종료 핸들러
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    setActiveId(null);
+
+    if (over && active.id !== over.id) {
+      setFormData((prev) => {
+        const oldIndex = active.id as number;
+        const newIndex = over.id as number;
+
+        const newCasting = arrayMove(prev.casting, oldIndex, newIndex);
+
+        return {
+          ...prev,
+          casting: newCasting,
+        };
+      });
+    }
+  };
   const [initialTicketData, setInitialTicketData] = useState<{
     date: string;
     time: string;
@@ -53,7 +174,9 @@ export default function TicketFormPage() {
     review: string;
     posterUrl: string;
   }>({
-    date: isEditMode ? "" : new Date().toISOString().split("T")[0],
+    date: isEditMode
+      ? ""
+      : dateFromUrl || new Date().toISOString().split("T")[0],
     time: "20:00", // 기본값: 오후 8시
     performanceName: "",
     genre: "뮤지컬",
@@ -68,6 +191,11 @@ export default function TicketFormPage() {
     review: "",
     posterUrl: "",
   });
+
+  // 페이지 로드 시 스크롤을 맨 위로 이동
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   // 수정 모드일 때 기존 티켓 데이터 로드
   useEffect(() => {
@@ -235,10 +363,10 @@ export default function TicketFormPage() {
         if (ticketData.seat !== initialTicketData.seat) {
           updateData.seat = ticketData.seat;
         }
-        // casting 배열 비교
+        // casting 배열 비교 (순서 포함)
         const castingChanged =
-          JSON.stringify(ticketData.casting?.sort()) !==
-          JSON.stringify(initialTicketData.casting.sort());
+          JSON.stringify(ticketData.casting || []) !==
+          JSON.stringify(initialTicketData.casting || []);
         if (castingChanged) {
           updateData.casting = ticketData.casting;
         }
@@ -427,30 +555,44 @@ export default function TicketFormPage() {
                 <div className="space-y-2">
                   {/* 입력된 배우 태그들 */}
                   {formData.casting.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {formData.casting.map((actor: string, index: number) => (
-                        <div
-                          key={index}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary rounded-md text-sm"
-                        >
-                          <span>{actor}</span>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setFormData((prev) => ({
-                                ...prev,
-                                casting: prev.casting.filter(
-                                  (_: string, i: number) => i !== index
-                                ),
-                              }));
-                            }}
-                            className="hover:bg-primary/20 rounded-full p-0.5 transition-colors"
-                          >
-                            <X className="w-3.5 h-3.5" />
-                          </button>
+                    <DndContext
+                      sensors={sensors}
+                      collisionDetection={closestCenter}
+                      onDragStart={handleDragStart}
+                      onDragEnd={handleDragEnd}
+                    >
+                      <SortableContext
+                        items={formData.casting.map((_, index) => index)}
+                        strategy={verticalListSortingStrategy}
+                      >
+                        <div className="flex flex-wrap gap-2">
+                          {formData.casting.map(
+                            (actor: string, index: number) => (
+                              <SortableCastingItem
+                                key={`${actor}-${index}`}
+                                actor={actor}
+                                index={index}
+                                onRemove={() => {
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    casting: prev.casting.filter(
+                                      (_: string, i: number) => i !== index
+                                    ),
+                                  }));
+                                }}
+                              />
+                            )
+                          )}
                         </div>
-                      ))}
-                    </div>
+                      </SortableContext>
+                      <DragOverlay>
+                        {activeId !== null ? (
+                          <CastingItemPreview
+                            actor={formData.casting[activeId]}
+                          />
+                        ) : null}
+                      </DragOverlay>
+                    </DndContext>
                   )}
                   {/* 배우 입력 필드 */}
                   <Input
@@ -589,11 +731,32 @@ export default function TicketFormPage() {
                   variant="outline"
                   onClick={() => navigate("/")}
                   className="flex-1"
+                  disabled={
+                    createTicketMutation.isPending ||
+                    updateTicketMutation.isPending
+                  }
                 >
                   취소
                 </Button>
-                <Button type="submit" className="flex-1">
-                  {isEditMode ? "수정" : "저장"}
+                <Button
+                  type="submit"
+                  className="flex-1"
+                  disabled={
+                    createTicketMutation.isPending ||
+                    updateTicketMutation.isPending
+                  }
+                >
+                  {createTicketMutation.isPending ||
+                  updateTicketMutation.isPending ? (
+                    <span className="flex items-center gap-2">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      처리 중...
+                    </span>
+                  ) : isEditMode ? (
+                    "수정"
+                  ) : (
+                    "저장"
+                  )}
                 </Button>
               </div>
             </div>

@@ -9,12 +9,14 @@ interface CalendarProps {
   currentDate: Date;
   onDateChange: (date: Date) => void;
   onTicketClick: (ticketId: string) => void;
+  onDateClick?: (date: Date) => void;
 }
 
 export default function PerformanceCalendar({
   currentDate,
   onDateChange,
   onTicketClick,
+  onDateClick,
 }: CalendarProps) {
   // 현재 달의 yearMonth 형식 (YYYY-MM)
   const currentYearMonth = useMemo(() => {
@@ -171,6 +173,10 @@ export default function PerformanceCalendar({
       <Calendar
         onChange={(value) => {
           if (value instanceof Date) {
+            // 날짜 클릭 시 티켓 생성 페이지로 이동
+            if (onDateClick) {
+              onDateClick(value);
+            }
             onDateChange(value);
           }
         }}

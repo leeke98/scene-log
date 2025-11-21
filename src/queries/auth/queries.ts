@@ -1,7 +1,7 @@
 /**
  * 인증 관련 Queries
  */
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "@/stores/authStore";
 import * as authApi from "@/services/authApi";
 import { queryKeys } from "@/lib/react-query/queryKeys";
@@ -22,6 +22,7 @@ function hasToken(): boolean {
  */
 export function useCurrentUser() {
   const { setUser, clearUser } = useAuthStore();
+  const queryClient = useQueryClient();
   const tokenExists = hasToken();
 
   return useQuery({
@@ -33,6 +34,8 @@ export function useCurrentUser() {
         return user;
       } catch (error) {
         clearUser();
+        // 인증 실패 시 모든 캐시 데이터 초기화
+        queryClient.clear();
         throw error;
       }
     },
