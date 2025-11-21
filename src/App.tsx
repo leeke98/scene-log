@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "@/queries/auth";
 import LoginPage from "@/pages/LoginPage";
 import SignupPage from "@/pages/SignupPage";
+import HomePage from "@/pages/HomePage";
 import PerformanceRecordPage from "@/pages/PerformanceRecordPage";
 import TicketFormPage from "@/pages/TicketFormPage";
 import TicketDetailPage from "@/pages/TicketDetailPage";
@@ -57,6 +58,14 @@ function AppRoutes() {
       />
       <Route
         path="/"
+        element={
+          <PrivateRoute>
+            <HomePage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/records"
         element={
           <PrivateRoute>
             <PerformanceRecordPage />

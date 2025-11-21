@@ -117,3 +117,43 @@ export async function getTicketById(id: string): Promise<Ticket> {
 export async function deleteTicket(id: string): Promise<DeleteTicketResponse> {
   return apiDelete<DeleteTicketResponse>(`/tickets/${id}`);
 }
+
+/**
+ * 티켓 목록 조회 (페이징)
+ */
+export interface TicketsListPagination {
+  page: number;
+  limit: number;
+  total: number;
+}
+
+export interface TicketsListResponse {
+  data: Ticket[];
+  pagination: TicketsListPagination;
+}
+
+export interface TicketsListParams {
+  page?: number;
+  limit?: number;
+  performanceName?: string;
+  genre?: "연극" | "뮤지컬";
+}
+
+export async function getTicketsList(
+  params?: TicketsListParams
+): Promise<TicketsListResponse> {
+  const queryParams = new URLSearchParams();
+  if (params?.page) queryParams.append("page", params.page.toString());
+  if (params?.limit) queryParams.append("limit", params.limit.toString());
+  if (params?.performanceName) {
+    queryParams.append("performanceName", params.performanceName);
+  }
+  if (params?.genre) {
+    queryParams.append("genre", params.genre);
+  }
+
+  const queryString = queryParams.toString();
+  const endpoint = `/tickets${queryString ? `?${queryString}` : ""}`;
+
+  return apiGet<TicketsListResponse>(endpoint);
+}

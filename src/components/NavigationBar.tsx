@@ -25,7 +25,7 @@ export default function NavigationBar() {
   };
 
   const menuItems = [
-    { path: "/", label: "공연기록" },
+    { path: "/records", label: "공연기록" },
     { path: "/report", label: "리포트" },
     { path: "/explore", label: "탐색" },
   ];

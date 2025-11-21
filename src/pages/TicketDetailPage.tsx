@@ -31,7 +31,7 @@ export default function TicketDetailPage() {
                 closeToast();
                 try {
                   await deleteTicketMutation.mutateAsync(id);
-                  navigate("/");
+                  navigate("/records");
                 } catch (err: any) {
                   // 에러는 mutation의 onError에서 처리됨
                   console.error("티켓 삭제 오류:", err);
@@ -73,7 +73,7 @@ export default function TicketDetailPage() {
           <p className="text-gray-500">
             {errorMessage || "티켓을 찾을 수 없습니다."}
           </p>
-          <Button onClick={() => navigate("/")} className="mt-4">
+          <Button onClick={() => navigate("/records")} className="mt-4">
             돌아가기
           </Button>
         </div>
@@ -172,7 +172,7 @@ export default function TicketDetailPage() {
           <div className="flex gap-4 pt-4">
             <Button
               variant="outline"
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/records")}
               className="flex-1"
             >
               목록으로
