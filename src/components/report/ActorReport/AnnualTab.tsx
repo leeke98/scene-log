@@ -90,7 +90,6 @@ export default function ActorAnnualTab({
           currentPage={currentPage}
           totalPages={pagination.totalPages}
           total={pagination.total}
-          limit={limit}
           onPageChange={handlePageChange}
         />
       )}

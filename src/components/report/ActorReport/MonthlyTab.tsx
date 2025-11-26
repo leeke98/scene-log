@@ -96,7 +96,6 @@ export default function ActorMonthlyTab({
           currentPage={currentPage}
           totalPages={pagination.totalPages}
           total={pagination.total}
-          limit={limit}
           onPageChange={handlePageChange}
         />
       )}
