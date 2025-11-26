@@ -1,6 +1,10 @@
 // KOPIS API 서비스 키 (환경변수로 관리하는 것을 권장)
 const KOPIS_SERVICE_KEY = import.meta.env.VITE_KOPIS_SERVICE_KEY || "";
 
+// CORS 프록시 URL (환경변수로 설정 가능)
+// 예: https://cors-anywhere.herokuapp.com/ 또는 자체 프록시 서버
+const CORS_PROXY = import.meta.env.VITE_CORS_PROXY || "";
+
 export interface KopisPerformance {
   mt20id: string; // 공연 ID
   prfnm: string; // 공연명
@@ -122,12 +126,20 @@ export async function searchPerformances(
     )}${String(today.getDate()).padStart(2, "0")}`;
   }
 
-  // 개발 환경에서는 프록시를 통해 호출, 프로덕션에서는 직접 호출
-  const apiUrl = import.meta.env.DEV
-    ? "/api/kopis/pblprfr"
-    : "http://www.kopis.or.kr/openApi/restful/pblprfr";
+  // 개발 환경에서는 Vite 프록시 사용, 프로덕션에서는 CORS 프록시 또는 직접 호출
+  let apiUrl: string;
+  if (import.meta.env.DEV) {
+    // 개발 환경: Vite 프록시 사용
+    apiUrl = "/api/kopis/pblprfr";
+  } else if (CORS_PROXY) {
+    // 프로덕션: CORS 프록시 사용
+    apiUrl = `${CORS_PROXY}http://www.kopis.or.kr/openApi/restful/pblprfr`;
+  } else {
+    // 프록시 없이 직접 호출 (CORS 에러 발생 가능)
+    apiUrl = "http://www.kopis.or.kr/openApi/restful/pblprfr";
+  }
 
-  const url = new URL(apiUrl, window.location.origin);
+  const url = new URL(apiUrl, CORS_PROXY ? undefined : window.location.origin);
   url.searchParams.append("service", KOPIS_SERVICE_KEY);
   url.searchParams.append("stdate", startDateStr);
   url.searchParams.append("eddate", endDateStr);
@@ -370,13 +382,20 @@ export async function getPerformanceDetail(
     throw new Error("KOPIS API 서비스 키가 설정되지 않았습니다.");
   }
 
-  // 개발 환경에서는 프록시를 통해 호출, 프로덕션에서는 직접 호출
-  // 상세 정보 API는 경로에 mt20id를 포함
-  const apiUrl = import.meta.env.DEV
-    ? `/api/kopis/pblprfr/${mt20id}`
-    : `http://www.kopis.or.kr/openApi/restful/pblprfr/${mt20id}`;
+  // 개발 환경에서는 Vite 프록시 사용, 프로덕션에서는 CORS 프록시 또는 직접 호출
+  let apiUrl: string;
+  if (import.meta.env.DEV) {
+    // 개발 환경: Vite 프록시 사용
+    apiUrl = `/api/kopis/pblprfr/${mt20id}`;
+  } else if (CORS_PROXY) {
+    // 프로덕션: CORS 프록시 사용
+    apiUrl = `${CORS_PROXY}http://www.kopis.or.kr/openApi/restful/pblprfr/${mt20id}`;
+  } else {
+    // 프록시 없이 직접 호출 (CORS 에러 발생 가능)
+    apiUrl = `http://www.kopis.or.kr/openApi/restful/pblprfr/${mt20id}`;
+  }
 
-  const url = new URL(apiUrl, window.location.origin);
+  const url = new URL(apiUrl, CORS_PROXY ? undefined : window.location.origin);
   url.searchParams.append("service", KOPIS_SERVICE_KEY);
 
   try {
@@ -493,12 +512,20 @@ export async function getWeeklyBoxOffice(
       "0"
     )}${String(oneWeekAgo.getDate()).padStart(2, "0")}`;
 
-  // 개발 환경에서는 프록시를 통해 호출, 프로덕션에서는 직접 호출
-  const apiUrl = import.meta.env.DEV
-    ? "/api/kopis/boxoffice"
-    : "http://www.kopis.or.kr/openApi/restful/boxoffice";
+  // 개발 환경에서는 Vite 프록시 사용, 프로덕션에서는 CORS 프록시 또는 직접 호출
+  let apiUrl: string;
+  if (import.meta.env.DEV) {
+    // 개발 환경: Vite 프록시 사용
+    apiUrl = "/api/kopis/boxoffice";
+  } else if (CORS_PROXY) {
+    // 프로덕션: CORS 프록시 사용
+    apiUrl = `${CORS_PROXY}http://www.kopis.or.kr/openApi/restful/boxoffice`;
+  } else {
+    // 프록시 없이 직접 호출 (CORS 에러 발생 가능)
+    apiUrl = "http://www.kopis.or.kr/openApi/restful/boxoffice";
+  }
 
-  const url = new URL(apiUrl, window.location.origin);
+  const url = new URL(apiUrl, CORS_PROXY ? undefined : window.location.origin);
   url.searchParams.append("service", KOPIS_SERVICE_KEY);
   url.searchParams.append("stdate", stdateStr);
   url.searchParams.append("eddate", eddateStr);
