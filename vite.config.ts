@@ -23,7 +23,7 @@ export default defineConfig({
       },
       // 백엔드 API 프록시 (개발 환경)
       "/api": {
-        target: "http://localhost:3001",
+        target: "https://scene-log-backend.onrender.com",
         changeOrigin: true,
         secure: false,
       },
