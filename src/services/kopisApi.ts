@@ -1,5 +1,5 @@
-// KOPIS API 서비스 키 (환경변수로 관리하는 것을 권장)
-const KOPIS_SERVICE_KEY = import.meta.env.VITE_KOPIS_SERVICE_KEY || "";
+// KOPIS API는 백엔드를 통해 호출하므로 서비스 키는 백엔드에서 관리
+import { apiGet } from "@/lib/apiClient";
 
 export interface KopisPerformance {
   mt20id: string; // 공연 ID
@@ -27,41 +27,7 @@ export interface KopisPerformanceDetail extends KopisPerformance {
 }
 
 /**
- * XML 문자열을 파싱하여 공연 목록 추출
- */
-function parseKopisXml(xmlString: string): KopisPerformance[] {
-  const parser = new DOMParser();
-  const xmlDoc = parser.parseFromString(xmlString, "text/xml");
-  const dbElements = xmlDoc.getElementsByTagName("db");
-
-  const performances: KopisPerformance[] = [];
-
-  for (let i = 0; i < dbElements.length; i++) {
-    const db = dbElements[i];
-    const getTextContent = (tagName: string) => {
-      const element = db.getElementsByTagName(tagName)[0];
-      return element ? element.textContent || "" : "";
-    };
-
-    performances.push({
-      mt20id: getTextContent("mt20id"),
-      prfnm: getTextContent("prfnm"),
-      prfpdfrom: getTextContent("prfpdfrom"),
-      prfpdto: getTextContent("prfpdto"),
-      fcltynm: getTextContent("fcltynm"),
-      poster: getTextContent("poster"),
-      area: getTextContent("area"),
-      genrenm: getTextContent("genrenm"),
-      openrun: getTextContent("openrun"),
-      prfstate: getTextContent("prfstate"),
-    });
-  }
-
-  return performances;
-}
-
-/**
- * 공연 검색
+ * 공연 목록 검색
  * @param searchTerm 작품명
  * @param startDate 검색 시작일 (YYYYMMDD 형식)
  * @param endDate 검색 종료일 (YYYYMMDD 형식, 기본값: 오늘)
@@ -77,10 +43,6 @@ export async function searchPerformances(
   page: number = 1,
   rows: number = 20
 ): Promise<KopisPerformance[]> {
-  if (!KOPIS_SERVICE_KEY) {
-    throw new Error("KOPIS API 서비스 키가 설정되지 않았습니다.");
-  }
-
   // startDate가 없으면 사용자가 선택한 날짜로 설정 (없으면 1년 전)
   const oneYearAgo = new Date();
   oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
@@ -122,91 +84,27 @@ export async function searchPerformances(
     )}${String(today.getDate()).padStart(2, "0")}`;
   }
 
-  // 개발 환경에서는 Vite 프록시 사용, 프로덕션에서는 CORS 프록시 사용
-  let url: URL;
-  if (import.meta.env.DEV) {
-    // 개발 환경: Vite 프록시 사용
-    const apiUrl = "/api/kopis/pblprfr";
-    url = new URL(apiUrl, window.location.origin);
-  } else {
-    // 프로덕션: CORS 프록시 사용 (전체 URL 직접 구성)
-    const targetUrl = "http://www.kopis.or.kr/openApi/restful/pblprfr";
-    const proxyUrl = `https://cors-anywhere.herokuapp.com/${targetUrl}`;
-    url = new URL(proxyUrl);
+  // 백엔드 API 호출
+  const queryParams = new URLSearchParams();
+  queryParams.append("stdate", startDateStr);
+  queryParams.append("eddate", endDateStr);
+  queryParams.append("page", page.toString());
+  queryParams.append("limit", rows.toString());
+
+  if (searchTerm) {
+    queryParams.append("search", searchTerm);
   }
 
-  url.searchParams.append("service", KOPIS_SERVICE_KEY);
-  url.searchParams.append("stdate", startDateStr);
-  url.searchParams.append("eddate", endDateStr);
-  url.searchParams.append("cpage", page.toString());
-  url.searchParams.append("rows", rows.toString());
-  url.searchParams.append("shprfnm", searchTerm);
-
-  // 장르 코드가 있으면 추가
+  // 장르 코드를 한글로 변환 (AAAA -> 연극, GGGA -> 뮤지컬)
   if (genre) {
-    url.searchParams.append("shcate", genre);
+    const genreKorean = genre === "AAAA" ? "연극" : "뮤지컬";
+    queryParams.append("genre", genreKorean);
   }
 
-  // 아동 공연 여부 필터 (기본값: N - 성인 공연만)
-  url.searchParams.append("kidstate", "N");
-
-  try {
-    const response = await fetch(url.toString());
-    if (!response.ok) {
-      throw new Error(`API 요청 실패: ${response.status}`);
-    }
-
-    const xmlText = await response.text();
-    return parseKopisXml(xmlText);
-  } catch (error) {
-    console.error("KOPIS API 검색 오류:", error);
-    throw error;
-  }
-}
-
-/**
- * 공연 상세 정보 XML 파싱
- */
-function parseKopisDetailXml(xmlString: string): KopisPerformanceDetail | null {
-  const parser = new DOMParser();
-  const xmlDoc = parser.parseFromString(xmlString, "text/xml");
-  const dbElements = xmlDoc.getElementsByTagName("db");
-
-  if (dbElements.length === 0) {
-    return null;
-  }
-
-  const db = dbElements[0];
-  const getTextContent = (tagName: string) => {
-    const element = db.getElementsByTagName(tagName)[0];
-    return element ? element.textContent || "" : "";
-  };
-
-  const baseInfo: KopisPerformance = {
-    mt20id: getTextContent("mt20id"),
-    prfnm: getTextContent("prfnm"),
-    prfpdfrom: getTextContent("prfpdfrom"),
-    prfpdto: getTextContent("prfpdto"),
-    fcltynm: getTextContent("fcltynm"),
-    poster: getTextContent("poster"),
-    area: getTextContent("area"),
-    genrenm: getTextContent("genrenm"),
-    openrun: getTextContent("openrun"),
-    prfstate: getTextContent("prfstate"),
-  };
-
-  const detail: KopisPerformanceDetail = {
-    ...baseInfo,
-    prfcast: getTextContent("prfcast"),
-    prfcrew: getTextContent("prfcrew"),
-    prfruntime: getTextContent("prfruntime"),
-    prfage: getTextContent("prfage"),
-    pcseguidance: getTextContent("pcseguidance"),
-    dtguidance: getTextContent("dtguidance"),
-    mt10id: getTextContent("mt10id"),
-  };
-
-  return detail;
+  const endpoint = `/kopis/performances${
+    queryParams.toString() ? `?${queryParams.toString()}` : ""
+  }`;
+  return apiGet<KopisPerformance[]>(endpoint);
 }
 
 /**
@@ -373,43 +271,9 @@ export function cleanTheaterName(fcltynm: string): string {
 export async function getPerformanceDetail(
   mt20id: string
 ): Promise<KopisPerformanceDetail> {
-  if (!KOPIS_SERVICE_KEY) {
-    throw new Error("KOPIS API 서비스 키가 설정되지 않았습니다.");
-  }
-
-  // 개발 환경에서는 Vite 프록시 사용, 프로덕션에서는 CORS 프록시 사용
-  let url: URL;
-  if (import.meta.env.DEV) {
-    // 개발 환경: Vite 프록시 사용
-    const apiUrl = `/api/kopis/pblprfr/${mt20id}`;
-    url = new URL(apiUrl, window.location.origin);
-  } else {
-    // 프로덕션: CORS 프록시 사용 (전체 URL 직접 구성)
-    const targetUrl = `http://www.kopis.or.kr/openApi/restful/pblprfr/${mt20id}`;
-    const proxyUrl = `https://cors-anywhere.herokuapp.com/${targetUrl}`;
-    url = new URL(proxyUrl);
-  }
-
-  url.searchParams.append("service", KOPIS_SERVICE_KEY);
-
-  try {
-    const response = await fetch(url.toString());
-    if (!response.ok) {
-      throw new Error(`API 요청 실패: ${response.status}`);
-    }
-
-    const xmlText = await response.text();
-    const detail = parseKopisDetailXml(xmlText);
-
-    if (!detail) {
-      throw new Error("공연 정보를 찾을 수 없습니다.");
-    }
-
-    return detail;
-  } catch (error) {
-    console.error("KOPIS API 상세 조회 오류:", error);
-    throw error;
-  }
+  // 백엔드 API 호출
+  const endpoint = `/kopis/performances/${mt20id}`;
+  return apiGet<KopisPerformanceDetail>(endpoint);
 }
 
 /**
@@ -424,116 +288,24 @@ export function formatDateForKopis(date: Date | string): string {
 }
 
 /**
- * 주간 예매 순위 XML 파싱 (boxof 태그 사용)
- */
-function parseBoxOfficeXml(xmlString: string): KopisPerformance[] {
-  const parser = new DOMParser();
-  const xmlDoc = parser.parseFromString(xmlString, "text/xml");
-  const boxofElements = xmlDoc.getElementsByTagName("boxof");
-
-  const performances: KopisPerformance[] = [];
-
-  for (let i = 0; i < boxofElements.length; i++) {
-    const boxof = boxofElements[i];
-    const getTextContent = (tagName: string) => {
-      const element = boxof.getElementsByTagName(tagName)[0];
-      return element ? element.textContent || "" : "";
-    };
-
-    // prfpd 형식: "2023.07.21~2023.11.19" -> prfpdfrom, prfpdto로 분리
-    const prfpd = getTextContent("prfpd");
-    let prfpdfrom = "";
-    let prfpdto = "";
-    if (prfpd) {
-      const parts = prfpd.split("~");
-      if (parts.length === 2) {
-        prfpdfrom = parts[0].trim().replace(/\./g, ""); // "2023.07.21" -> "20230721"
-        prfpdto = parts[1].trim().replace(/\./g, ""); // "2023.11.19" -> "20231119"
-      }
-    }
-
-    // cate를 genrenm으로 사용
-    const cate = getTextContent("cate");
-
-    performances.push({
-      mt20id: getTextContent("mt20id"),
-      prfnm: getTextContent("prfnm"),
-      prfpdfrom: prfpdfrom,
-      prfpdto: prfpdto,
-      fcltynm: getTextContent("prfplcnm"), // prfplcnm -> fcltynm
-      poster: getTextContent("poster"),
-      area: getTextContent("area"),
-      genrenm: cate, // cate -> genrenm
-      openrun: "", // boxof 응답에는 없음
-      prfstate: "", // boxof 응답에는 없음
-    });
-  }
-
-  return performances;
-}
-
-/**
  * 주간 예매 순위 조회
  * @param catecode 장르 코드 (AAAA: 연극, GGGA: 뮤지컬)
  * @param stdate 시작일 (YYYYMMDD 형식, 기본값: 오늘로부터 일주일 전)
  * @param eddate 종료일 (YYYYMMDD 형식, 기본값: 오늘)
  */
 export async function getWeeklyBoxOffice(
-  catecode: "AAAA" | "GGGA",
-  stdate?: string,
-  eddate?: string
+  catecode: "AAAA" | "GGGA"
 ): Promise<KopisPerformance[]> {
-  if (!KOPIS_SERVICE_KEY) {
-    throw new Error("KOPIS API 서비스 키가 설정되지 않았습니다.");
-  }
+  // 백엔드 API 호출
+  const queryParams = new URLSearchParams();
 
-  // eddate: 오늘 날짜
-  const today = new Date();
-  const eddateStr =
-    eddate ||
-    `${today.getFullYear()}${String(today.getMonth() + 1).padStart(
-      2,
-      "0"
-    )}${String(today.getDate()).padStart(2, "0")}`;
+  // 장르 코드를 한글로 변환 (AAAA -> 연극, GGGA -> 뮤지컬)
+  const genreKorean = catecode === "AAAA" ? "연극" : "뮤지컬";
+  queryParams.append("genre", genreKorean);
 
-  // stdate: 오늘로부터 일주일 전
-  const oneWeekAgo = new Date(today);
-  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-  const stdateStr =
-    stdate ||
-    `${oneWeekAgo.getFullYear()}${String(oneWeekAgo.getMonth() + 1).padStart(
-      2,
-      "0"
-    )}${String(oneWeekAgo.getDate()).padStart(2, "0")}`;
-
-  // 개발 환경에서는 Vite 프록시 사용, 프로덕션에서는 CORS 프록시 사용
-  let url: URL;
-  if (import.meta.env.DEV) {
-    // 개발 환경: Vite 프록시 사용
-    const apiUrl = "/api/kopis/boxoffice";
-    url = new URL(apiUrl, window.location.origin);
-  } else {
-    // 프로덕션: CORS 프록시 사용 (전체 URL 직접 구성)
-    const targetUrl = "http://www.kopis.or.kr/openApi/restful/boxoffice";
-    const proxyUrl = `https://cors-anywhere.herokuapp.com/${targetUrl}`;
-    url = new URL(proxyUrl);
-  }
-
-  url.searchParams.append("service", KOPIS_SERVICE_KEY);
-  url.searchParams.append("stdate", stdateStr);
-  url.searchParams.append("eddate", eddateStr);
-  url.searchParams.append("catecode", catecode);
-
-  try {
-    const response = await fetch(url.toString());
-    if (!response.ok) {
-      throw new Error(`API 요청 실패: ${response.status}`);
-    }
-
-    const xmlText = await response.text();
-    return parseBoxOfficeXml(xmlText);
-  } catch (error) {
-    console.error("KOPIS API 주간 예매 순위 조회 오류:", error);
-    throw error;
-  }
+  const endpoint = `/kopis/boxoffice${
+    queryParams.toString() ? `?${queryParams.toString()}` : ""
+  }`;
+  const response = await apiGet<{ data: KopisPerformance[] }>(endpoint);
+  return response.data;
 }

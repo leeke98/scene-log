@@ -5,9 +5,7 @@
 
 // 개발 환경에서는 항상 Vite 프록시 사용 (/api)
 // 프로덕션에서는 환경 변수 또는 기본값 사용
-const API_BASE_URL = import.meta.env.DEV
-  ? "/api" // 개발 환경: 프록시 사용 (CORS 문제 해결)
-  : import.meta.env.VITE_API_BASE_URL || "http://localhost:3001/api";
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export interface ApiError {
   error: string;
