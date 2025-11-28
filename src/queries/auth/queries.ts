@@ -32,9 +32,12 @@ export function useCurrentUser() {
         const user = await authApi.getCurrentUser();
         setUser(user);
         return user;
-      } catch (error) {
+      } catch (error: any) {
         clearUser();
-        // 인증 실패 시 모든 캐시 데이터 초기화
+        // 인증 실패 시 토큰 제거 및 모든 캐시 데이터 초기화
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("token");
+        }
         queryClient.clear();
         throw error;
       }

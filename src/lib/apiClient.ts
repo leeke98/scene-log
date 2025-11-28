@@ -112,6 +112,19 @@ async function apiRequest<T>(
 
     // 에러 응답 처리
     if (!response.ok) {
+      // 401 Unauthorized: 토큰 만료 또는 인증 실패
+      if (response.status === 401) {
+        // 토큰 제거
+        removeToken();
+        // 로그인 페이지로 리다이렉트 (현재 페이지가 로그인 페이지가 아닐 때만)
+        if (
+          typeof window !== "undefined" &&
+          !window.location.pathname.includes("/login")
+        ) {
+          window.location.href = "/login";
+        }
+      }
+
       const error: ApiError = {
         error: data.error || `HTTP ${response.status} 오류가 발생했습니다.`,
         code: data.code,
