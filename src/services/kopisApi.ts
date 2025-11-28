@@ -131,12 +131,10 @@ export async function searchPerformances(
   if (import.meta.env.DEV) {
     // 개발 환경: Vite 프록시 사용
     apiUrl = "/api/kopis/pblprfr";
-  } else if (CORS_PROXY) {
-    // 프로덕션: CORS 프록시 사용
-    apiUrl = `${CORS_PROXY}http://www.kopis.or.kr/openApi/restful/pblprfr`;
   } else {
-    // 프록시 없이 직접 호출 (CORS 에러 발생 가능)
-    apiUrl = "http://www.kopis.or.kr/openApi/restful/pblprfr";
+    // 프로덕션: CORS 프록시 사용
+    apiUrl =
+      "https://cors-anywhere.herokuapp.com/http://www.kopis.or.kr/openApi/restful/pblprfr";
   }
 
   const url = new URL(apiUrl, CORS_PROXY ? undefined : window.location.origin);
