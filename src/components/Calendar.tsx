@@ -71,13 +71,22 @@ export default function PerformanceCalendar({
           >
             {tickets.length === 1 ? (
               // 티켓이 하나인 경우: 한 칸을 꽉 채워서 표시
-              <button
+              <div
                 key={tickets[0].id}
                 onClick={(e) => {
                   e.stopPropagation();
                   onTicketClick(tickets[0].id);
                 }}
-                className="calendar-ticket-poster single"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onTicketClick(tickets[0].id);
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                className="calendar-ticket-poster single cursor-pointer"
                 title={`${tickets[0].time ? formatTime(tickets[0].time) : ""}`}
               >
                 {tickets[0].posterUrl ? (
@@ -103,18 +112,27 @@ export default function PerformanceCalendar({
                 >
                   {tickets[0].time ? formatTime(tickets[0].time) : "공연"}
                 </div>
-              </button>
+              </div>
             ) : (
               // 티켓이 여러 개인 경우: 칸을 나눠서 표시
               <>
                 {tickets.slice(0, 3).map((ticket) => (
-                  <button
+                  <div
                     key={ticket.id}
                     onClick={(e) => {
                       e.stopPropagation();
                       onTicketClick(ticket.id);
                     }}
-                    className="calendar-ticket-poster"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        onTicketClick(ticket.id);
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    className="calendar-ticket-poster cursor-pointer"
                     title={`${ticket.time ? formatTime(ticket.time) : ""}`}
                   >
                     {ticket.posterUrl ? (
@@ -140,19 +158,28 @@ export default function PerformanceCalendar({
                     >
                       {ticket.time ? formatTime(ticket.time) : "공연"}
                     </div>
-                  </button>
+                  </div>
                 ))}
                 {tickets.length > 3 && (
-                  <button
+                  <div
                     onClick={(e) => {
                       e.stopPropagation();
                       onTicketClick(tickets[0].id);
                     }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        onTicketClick(tickets[0].id);
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
                     className="calendar-ticket-more cursor-pointer hover:bg-gray-100 rounded"
                     title={`총 ${tickets.length}개의 공연이 있습니다`}
                   >
                     +{tickets.length - 3}
-                  </button>
+                  </div>
                 )}
               </>
             )}
