@@ -1,4 +1,4 @@
-// KOPIS API는 백엔드를 통해 호출하므로 서비스 키는 백엔드에서 관리
+// KOPIS API는 백엔드를 통해 호출
 import { apiGet } from "@/lib/apiClient";
 
 export interface KopisPerformance {
@@ -27,7 +27,7 @@ export interface KopisPerformanceDetail extends KopisPerformance {
 }
 
 /**
- * 공연 목록 검색
+ * 공연 목록 검색 (백엔드 API 호출)
  * @param searchTerm 작품명
  * @param startDate 검색 시작일 (YYYYMMDD 형식)
  * @param endDate 검색 종료일 (YYYYMMDD 형식, 기본값: 오늘)
@@ -265,13 +265,12 @@ export function cleanTheaterName(fcltynm: string): string {
 }
 
 /**
- * 공연 상세 정보 조회
+ * 공연 상세 정보 조회 (백엔드 API 호출)
  * @param mt20id 공연 ID
  */
 export async function getPerformanceDetail(
   mt20id: string
 ): Promise<KopisPerformanceDetail> {
-  // 백엔드 API 호출
   const endpoint = `/kopis/performances/${mt20id}`;
   return apiGet<KopisPerformanceDetail>(endpoint);
 }
@@ -289,19 +288,21 @@ export function formatDateForKopis(date: Date | string): string {
 
 /**
  * 주간 예매 순위 조회
- * @param catecode 장르 코드 (AAAA: 연극, GGGA: 뮤지컬)
+ * @param genre 장르 (연극 | 뮤지컬)
  * @param stdate 시작일 (YYYYMMDD 형식, 기본값: 오늘로부터 일주일 전)
  * @param eddate 종료일 (YYYYMMDD 형식, 기본값: 오늘)
  */
 export async function getWeeklyBoxOffice(
-  catecode: "AAAA" | "GGGA"
+  genre: "연극" | "뮤지컬",
+  stdate: string,
+  eddate: string
 ): Promise<KopisPerformance[]> {
   // 백엔드 API 호출
   const queryParams = new URLSearchParams();
 
-  // 장르 코드를 한글로 변환 (AAAA -> 연극, GGGA -> 뮤지컬)
-  const genreKorean = catecode === "AAAA" ? "연극" : "뮤지컬";
-  queryParams.append("genre", genreKorean);
+  queryParams.append("genre", genre);
+  queryParams.append("stdate", stdate);
+  queryParams.append("eddate", eddate);
 
   const endpoint = `/kopis/boxoffice${
     queryParams.toString() ? `?${queryParams.toString()}` : ""

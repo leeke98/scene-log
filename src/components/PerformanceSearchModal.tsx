@@ -1,16 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { X, Search, Loader2, Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  searchPerformances,
-  getPerformanceDetail,
   cleanTheaterName,
   normalizePerformanceName,
   formatDateForKopis,
   type KopisPerformance,
 } from "@/services/kopisApi";
+import { useSearchPerformances, usePerformanceDetail } from "@/queries/kopis";
 import DatePicker from "@/components/DatePicker";
 
 interface PerformanceSearchModalProps {
@@ -43,12 +42,6 @@ export default function PerformanceSearchModal({
   const [genre, setGenre] = useState<"AAAA" | "GGGA">(
     selectedGenre === "연극" ? "AAAA" : "GGGA"
   ); // 연극: AAAA, 뮤지컬: GGGA
-  const [performances, setPerformances] = useState<KopisPerformance[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
   const [modalDate, setModalDate] = useState<Date | null>(
     selectedDate
       ? typeof selectedDate === "string"
@@ -56,6 +49,54 @@ export default function PerformanceSearchModal({
         : selectedDate
       : null
   );
+
+  // 검색 실행 여부를 제어하는 상태
+  const [shouldSearch, setShouldSearch] = useState(false);
+
+  // 검색 파라미터
+  const startDate = modalDate ? formatDateForKopis(modalDate) : undefined;
+  const canSearch = !!searchTerm.trim() && !!startDate && !!genre;
+
+  // TanStack Query를 사용한 공연 검색
+  const {
+    data,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    error: queryError,
+  } = useSearchPerformances({
+    searchTerm: searchTerm.trim(),
+    startDate,
+    genre,
+    rows: 20,
+    enabled: shouldSearch && canSearch, // 검색 버튼을 눌렀을 때만 실행
+  });
+
+  // 모든 페이지의 결과를 하나의 배열로 합치기
+  const performances = useMemo(() => {
+    return data?.pages.flat() || [];
+  }, [data]);
+
+  const [error, setError] = useState<string | null>(null);
+  const [selectedMt20id, setSelectedMt20id] = useState<string | undefined>(
+    undefined
+  );
+
+  // 공연 상세 정보 조회
+  const { data: detailData, error: detailError } =
+    usePerformanceDetail(selectedMt20id);
+
+  // queryError가 있으면 error 상태 업데이트
+  useEffect(() => {
+    if (queryError) {
+      setError(
+        queryError instanceof Error
+          ? queryError.message
+          : "공연 검색에 실패했습니다."
+      );
+    }
+  }, [queryError]);
 
   // selectedDate가 변경되면 modalDate도 업데이트
   useEffect(() => {
@@ -75,6 +116,11 @@ export default function PerformanceSearchModal({
     }
   }, [selectedGenre]);
 
+  // 검색어, 날짜, 장르가 변경되면 검색 상태 리셋
+  useEffect(() => {
+    setShouldSearch(false);
+  }, [searchTerm, modalDate, genre]);
+
   const handleDateChange = (dateString: string | null) => {
     const date = dateString
       ? (() => {
@@ -88,69 +134,6 @@ export default function PerformanceSearchModal({
     }
   };
 
-  const handleSearch = async (page: number = 1, append: boolean = false) => {
-    if (!searchTerm.trim()) {
-      setError("작품명을 입력해주세요.");
-      return;
-    }
-
-    if (!modalDate) {
-      setError("공연 날짜를 먼저 선택해주세요.");
-      return;
-    }
-
-    if (!genre) {
-      setError("장르를 선택해주세요.");
-      return;
-    }
-
-    if (append) {
-      setIsLoadingMore(true);
-    } else {
-      setIsLoading(true);
-      setError(null);
-      setCurrentPage(1);
-      setHasMore(true);
-    }
-
-    try {
-      const startDate = modalDate ? formatDateForKopis(modalDate) : undefined;
-      const results = await searchPerformances(
-        searchTerm,
-        startDate,
-        undefined,
-        genre,
-        page,
-        20
-      );
-
-      if (append) {
-        // 추가 로드인 경우 기존 결과에 추가
-        setPerformances((prev) => [...prev, ...results]);
-      } else {
-        // 새 검색인 경우 결과 교체
-        setPerformances(results);
-      }
-
-      // 결과가 20개 미만이면 더 이상 데이터가 없음
-      setHasMore(results.length === 20);
-
-      if (!append && results.length === 0) {
-        setError("검색 결과가 없습니다. 날짜 범위를 확인해주세요.");
-      }
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "공연 검색에 실패했습니다."
-      );
-      if (!append) {
-        setPerformances([]);
-      }
-    } finally {
-      setIsLoading(false);
-      setIsLoadingMore(false);
-    }
-  };
-
   // 무한 스크롤 처리
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const target = e.currentTarget;
@@ -161,23 +144,23 @@ export default function PerformanceSearchModal({
     // 스크롤이 끝에서 200px 이내에 도달하면 다음 페이지 로드
     if (
       scrollHeight - scrollTop - clientHeight < 200 &&
-      !isLoadingMore &&
+      !isFetchingNextPage &&
       !isLoading &&
-      hasMore
+      hasNextPage
     ) {
-      const nextPage = currentPage + 1;
-      setCurrentPage(nextPage);
-      handleSearch(nextPage, true);
+      fetchNextPage();
     }
   };
 
-  const handleSelectPerformance = async (performance: KopisPerformance) => {
-    setIsLoading(true);
+  const handleSelectPerformance = (performance: KopisPerformance) => {
     setError(null);
+    setSelectedMt20id(performance.mt20id);
+  };
 
-    try {
-      // 공연 상세 정보 조회하여 정확한 극장 정보 가져오기
-      const detail = await getPerformanceDetail(performance.mt20id);
+  // 상세 정보가 로드되면 처리
+  useEffect(() => {
+    if (detailData && selectedMt20id) {
+      const detail = detailData;
 
       // 검색 결과에서 대괄호가 없는 작품명 찾기 (진짜 작품명)
       const performancesWithoutBracket = performances.filter(
@@ -228,50 +211,63 @@ export default function PerformanceSearchModal({
       // 모달 닫기
       onClose();
       setSearchTerm("");
-      setPerformances([]);
       setError(null);
-    } catch (err) {
+      setSelectedMt20id(undefined);
+    }
+  }, [detailData, selectedMt20id, performances, tickets, onSelect, onClose]);
+
+  // 상세 정보 조회 에러 처리
+  useEffect(() => {
+    if (detailError) {
       setError(
-        err instanceof Error
-          ? err.message
+        detailError instanceof Error
+          ? detailError.message
           : "공연 상세 정보를 불러오는데 실패했습니다."
       );
-      // 실패해도 검색 결과의 기본 정보라도 사용
-      // 검색 결과에서 대괄호가 없는 작품명 찾기
-      const performancesWithoutBracket = performances.filter(
-        (p) => !p.prfnm.includes("[")
-      );
-      const referenceName =
-        performancesWithoutBracket.length > 0
-          ? performancesWithoutBracket[0].prfnm
-          : undefined;
 
-      const normalizedPerformanceName = normalizePerformanceName(
-        performance.prfnm,
-        referenceName
-      );
-      const cleanedTheater = cleanTheaterName(performance.fcltynm);
-      onSelect({
-        performanceName: normalizedPerformanceName,
-        theater: cleanedTheater,
-        posterUrl: performance.poster || "",
-      });
-      onClose();
-      setSearchTerm("");
-      setPerformances([]);
-    } finally {
-      setIsLoading(false);
+      // 실패해도 검색 결과의 기본 정보라도 사용
+      if (selectedMt20id) {
+        const performance = performances.find(
+          (p) => p.mt20id === selectedMt20id
+        );
+        if (performance) {
+          // 검색 결과에서 대괄호가 없는 작품명 찾기
+          const performancesWithoutBracket = performances.filter(
+            (p) => !p.prfnm.includes("[")
+          );
+          const referenceName =
+            performancesWithoutBracket.length > 0
+              ? performancesWithoutBracket[0].prfnm
+              : undefined;
+
+          const normalizedPerformanceName = normalizePerformanceName(
+            performance.prfnm,
+            referenceName
+          );
+          const cleanedTheater = cleanTheaterName(performance.fcltynm);
+          onSelect({
+            performanceName: normalizedPerformanceName,
+            theater: cleanedTheater,
+            posterUrl: performance.poster || "",
+          });
+          onClose();
+          setSearchTerm("");
+        }
+      }
+      setSelectedMt20id(undefined);
     }
-  };
+  }, [detailError, selectedMt20id, performances, onSelect, onClose]);
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && !isLoading && !isLoadingMore) {
-      handleSearch(1, false);
+    if (e.key === "Enter" && canSearch && !isLoading) {
+      setShouldSearch(true);
     }
   };
 
   const handleSearchClick = () => {
-    handleSearch(1, false);
+    if (canSearch && !isLoading) {
+      setShouldSearch(true);
+    }
   };
 
   if (!isOpen) return null;
@@ -372,7 +368,7 @@ export default function PerformanceSearchModal({
               />
               <Button
                 onClick={handleSearchClick}
-                disabled={isLoading || isLoadingMore || !modalDate || !genre}
+                disabled={isLoading || !canSearch}
               >
                 {isLoading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -387,7 +383,7 @@ export default function PerformanceSearchModal({
 
         {/* 검색 결과 */}
         <div className="flex-1 overflow-y-auto p-6" onScroll={handleScroll}>
-          {isLoading ? (
+          {isLoading && !performances.length ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
             </div>
@@ -437,7 +433,7 @@ export default function PerformanceSearchModal({
               ))}
             </div>
           ) : null}
-          {isLoadingMore && (
+          {isFetchingNextPage && (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
               <span className="ml-2 text-sm text-gray-500">
@@ -446,9 +442,9 @@ export default function PerformanceSearchModal({
             </div>
           )}
           {!isLoading &&
-            !isLoadingMore &&
+            !isFetchingNextPage &&
             performances.length > 0 &&
-            !hasMore && (
+            !hasNextPage && (
               <div className="text-center py-4 text-gray-500 text-sm">
                 모든 결과를 불러왔습니다.
               </div>

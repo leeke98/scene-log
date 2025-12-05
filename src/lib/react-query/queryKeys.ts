@@ -94,4 +94,41 @@ export const queryKeys = {
       ] as const,
     grass: () => [...queryKeys.reports.all, "grass"] as const,
   },
+
+  // KOPIS API 관련
+  kopis: {
+    all: ["kopis"] as const,
+    performances: (params?: {
+      searchTerm?: string;
+      startDate?: string;
+      endDate?: string;
+      genre?: "AAAA" | "GGGA";
+      page?: number;
+      rows?: number;
+    }) =>
+      [
+        ...queryKeys.kopis.all,
+        "performances",
+        params?.searchTerm,
+        params?.startDate,
+        params?.endDate,
+        params?.genre,
+        params?.page,
+        params?.rows,
+      ] as const,
+    performanceDetail: (mt20id: string) =>
+      [...queryKeys.kopis.all, "performanceDetail", mt20id] as const,
+    boxOffice: (params?: {
+      genre?: "연극" | "뮤지컬";
+      stdate?: string;
+      eddate?: string;
+    }) =>
+      [
+        ...queryKeys.kopis.all,
+        "boxOffice",
+        params?.genre,
+        params?.stdate,
+        params?.eddate,
+      ] as const,
+  },
 } as const;
