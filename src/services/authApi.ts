@@ -31,17 +31,13 @@ export interface AuthResponse {
  * 회원가입
  * 회원가입 후 자동 로그인하지 않으므로 토큰을 저장하지 않음
  */
-export async function signup(
-  data: SignupRequest
-): Promise<AuthResponse> {
-  const response = await apiPost<AuthResponse>(
-    "/auth/signup",
-    data,
-    { requireAuth: false }
-  );
-  
+export async function signup(data: SignupRequest): Promise<AuthResponse> {
+  const response = await apiPost<AuthResponse>("/auth/signup", data, {
+    requireAuth: false,
+  });
+
   // 회원가입 후 자동 로그인하지 않으므로 토큰 저장하지 않음
-  
+
   return response;
 }
 
@@ -54,17 +50,15 @@ export { removeToken } from "@/lib/apiClient";
  * 로그인
  */
 export async function login(data: LoginRequest): Promise<AuthResponse> {
-  const response = await apiPost<AuthResponse>(
-    "/auth/login",
-    data,
-    { requireAuth: false }
-  );
-  
+  const response = await apiPost<AuthResponse>("/auth/login", data, {
+    requireAuth: false,
+  });
+
   // 토큰 저장
   if (response.token) {
     setToken(response.token);
   }
-  
+
   return response;
 }
 
@@ -77,15 +71,8 @@ export async function getCurrentUser(): Promise<User> {
 
 /**
  * 로그아웃
+ * JWT 토큰 기반 인증이므로 클라이언트 측에서 토큰만 제거하면 됨
  */
 export async function logout(): Promise<void> {
-  try {
-    await apiPost("/auth/logout");
-  } catch (error) {
-    // 로그아웃 실패해도 토큰은 제거
-    console.error("로그아웃 오류:", error);
-  } finally {
-    removeToken();
-  }
+  removeToken();
 }
-
