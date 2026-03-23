@@ -60,9 +60,17 @@ export default function PerformanceCalendar({
     const dateStr = formatDate(date);
     const tickets = ticketsByDate[dateStr] || [];
 
+    const dayOfWeek = date.getDay();
+    const dayClass =
+      dayOfWeek === 0 ? "sunday" : dayOfWeek === 6 ? "saturday" : "";
+
     return (
       <div className="calendar-tile-content">
-        <div className="calendar-day-number">{date.getDate()}</div>
+        <div className="calendar-day-header">
+          <div className={`calendar-day-number ${dayClass}`}>
+            {date.getDate()}
+          </div>
+        </div>
         {tickets.length > 0 && (
           <div
             className={`calendar-tickets ${
@@ -112,6 +120,11 @@ export default function PerformanceCalendar({
                 >
                   {tickets[0].time ? formatTime(tickets[0].time) : "공연"}
                 </div>
+                {tickets[0].time && (
+                  <div className="calendar-ticket-overlay">
+                    {formatTime(tickets[0].time)}
+                  </div>
+                )}
               </div>
             ) : (
               // 티켓이 여러 개인 경우: 칸을 나눠서 표시
@@ -158,6 +171,11 @@ export default function PerformanceCalendar({
                     >
                       {ticket.time ? formatTime(ticket.time) : "공연"}
                     </div>
+                    {ticket.time && (
+                      <div className="calendar-ticket-overlay">
+                        {formatTime(ticket.time)}
+                      </div>
+                    )}
                   </div>
                 ))}
                 {tickets.length > 3 && (
