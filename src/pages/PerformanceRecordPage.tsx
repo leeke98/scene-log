@@ -91,11 +91,8 @@ export default function PerformanceRecordPage() {
           <h1 className="text-3xl font-bold text-gray-900 mb-4">공연기록</h1>
 
           {/* 검색 및 필터 */}
-          <div className="flex items-center justify-between">
-            <p className="text-gray-600">
-              총 {totalCount}개의 공연 기록이 있습니다
-            </p>
-            <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               <Select
                 value={selectedGenre}
                 onValueChange={(value) =>
@@ -111,7 +108,7 @@ export default function PerformanceRecordPage() {
                   <SelectItem value="연극">연극</SelectItem>
                 </SelectContent>
               </Select>
-              <div className="relative max-w-md">
+              <div className="relative flex-1 sm:flex-none">
                 <button
                   onClick={handleSearchClick}
                   className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary transition-colors"
@@ -124,7 +121,7 @@ export default function PerformanceRecordPage() {
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyDown={handleSearchKeyDown}
-                  className="pl-10 pr-8 w-[300px]"
+                  className="pl-10 pr-8 w-full sm:w-[300px]"
                 />
                 {inputValue && (
                   <button
@@ -138,15 +135,24 @@ export default function PerformanceRecordPage() {
                   </button>
                 )}
               </div>
-              <Button
-                onClick={() => navigate("/tickets/new")}
-                className="bg-primary hover:bg-primary/90 text-white"
-              >
-                새 기록 추가
-              </Button>
             </div>
+            <Button
+              onClick={() => navigate("/tickets/new")}
+              className="bg-primary hover:bg-primary/90 text-white sm:ml-auto w-full sm:w-auto"
+            >
+              새 기록 추가
+            </Button>
           </div>
         </div>
+
+        {/* 검색 결과 건수 */}
+        {!isLoading && !error && (
+          <p className="text-sm text-gray-500 mb-4">
+            {searchTerm || selectedGenre !== "전체"
+              ? `검색 결과 ${totalCount}개`
+              : `총 ${totalCount}개의 공연 기록`}
+          </p>
+        )}
 
         {/* 티켓 그리드 */}
         {isLoading ? (
