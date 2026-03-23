@@ -34,11 +34,23 @@ export default function PerformanceRecordPage() {
     error,
   } = useTicketsList(20, searchTerm || undefined, genreValue);
 
-  // 엔터 키 입력 시 검색 실행
+  // 500ms 디바운스 자동검색
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchTerm(inputValue);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [inputValue]);
+
+  // 엔터 키 또는 아이콘 클릭 시 즉시 검색
   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       setSearchTerm(inputValue);
     }
+  };
+
+  const handleSearchClick = () => {
+    setSearchTerm(inputValue);
   };
 
   // 무한 스크롤을 위한 Intersection Observer
@@ -100,10 +112,15 @@ export default function PerformanceRecordPage() {
                 </SelectContent>
               </Select>
               <div className="relative max-w-md">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <button
+                  onClick={handleSearchClick}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary transition-colors"
+                >
+                  <Search className="w-4 h-4" />
+                </button>
                 <Input
                   type="text"
-                  placeholder="작품명 검색 (Enter)"
+                  placeholder="작품명 검색"
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyDown={handleSearchKeyDown}
