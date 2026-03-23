@@ -114,7 +114,7 @@ export default function PerformanceRecordPage() {
                 onClick={() => navigate("/tickets/new")}
                 className="bg-primary hover:bg-primary/90 text-white"
               >
-                새 티켓 추가
+                새 기록 추가
               </Button>
             </div>
           </div>
