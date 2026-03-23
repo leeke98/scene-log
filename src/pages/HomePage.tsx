@@ -28,6 +28,13 @@ export default function HomePage() {
       <div className="mb-6 flex items-center justify-between max-w-[1200px] mx-auto">
         <div className="flex items-center gap-2">
           <MonthPicker value={currentDate} onChange={handleMonthChange} />
+          <Button
+            variant="outline"
+            className="h-10"
+            onClick={() => setCurrentDate(new Date())}
+          >
+            오늘
+          </Button>
         </div>
         <Button
           onClick={() => navigate("/tickets/new")}
