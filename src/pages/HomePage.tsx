@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { formatDateToISO } from "@/lib/dateUtils";
 import Layout from "@/components/Layout";
 import Calendar from "@/components/Calendar";
 import MonthPicker from "@/components/MonthPicker";
@@ -18,12 +19,7 @@ export default function HomePage() {
   };
 
   const handleDateClick = (date: Date) => {
-    // 날짜를 YYYY-MM-DD 형식으로 변환하여 티켓 생성 페이지로 이동
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    navigate(`/tickets/new?date=${year}-${month}-${day}`);
-    // 페이지 이동 후 스크롤을 맨 위로 이동
+    navigate(`/tickets/new?date=${formatDateToISO(date)}`);
     window.scrollTo(0, 0);
   };
 

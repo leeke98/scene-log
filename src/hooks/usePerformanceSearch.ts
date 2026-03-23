@@ -2,9 +2,9 @@ import { useState, useEffect, useMemo } from "react";
 import {
   cleanTheaterName,
   normalizePerformanceName,
-  formatDateForKopis,
   type KopisPerformance,
 } from "@/services/kopisApi";
+import { formatDateToKopis } from "@/lib/dateUtils";
 import { useSearchPerformances, usePerformanceDetail } from "@/queries/kopis";
 
 interface UsePerformanceSearchParams {
@@ -42,7 +42,7 @@ export function usePerformanceSearch({
     undefined
   );
 
-  const startDate = modalDate ? formatDateForKopis(modalDate) : undefined;
+  const startDate = modalDate ? formatDateToKopis(modalDate) : undefined;
   const canSearch = !!searchTerm.trim() && !!startDate && !!genre;
 
   const {

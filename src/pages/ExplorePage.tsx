@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { formatDateToKopis } from "@/lib/dateUtils";
 import Layout from "@/components/Layout";
 import { useWeeklyBoxOffice } from "@/queries/kopis";
 import {
@@ -15,17 +16,9 @@ export default function ExplorePage() {
     const today = new Date();
     const oneWeekAgo = new Date(today);
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 6);
-
-    const formatDate = (date: Date): string => {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, "0");
-      const day = String(date.getDate()).padStart(2, "0");
-      return `${year}${month}${day}`;
-    };
-
     return {
-      stdate: formatDate(oneWeekAgo),
-      eddate: formatDate(today),
+      stdate: formatDateToKopis(oneWeekAgo),
+      eddate: formatDateToKopis(today),
     };
   }, []);
 

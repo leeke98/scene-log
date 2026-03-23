@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { formatDateToISO } from "@/lib/dateUtils";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useTicket, useCreateTicket, useUpdateTicket } from "@/queries/tickets";
 import { toast } from "react-toastify";
@@ -143,10 +144,7 @@ export function useTicketForm() {
 
   const handleDateChange = (date: Date | null) => {
     if (date) {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, "0");
-      const day = String(date.getDate()).padStart(2, "0");
-      setFormData((prev) => ({ ...prev, date: `${year}-${month}-${day}` }));
+      setFormData((prev) => ({ ...prev, date: formatDateToISO(date) }));
     }
   };
 

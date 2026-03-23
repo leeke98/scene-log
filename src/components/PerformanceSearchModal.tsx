@@ -1,4 +1,5 @@
 import { X, Search, Loader2, Calendar as CalendarIcon } from "lucide-react";
+import { formatDateToISO } from "@/lib/dateUtils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -92,15 +93,7 @@ export default function PerformanceSearchModal({
             </Label>
             <div className="max-w-xs">
               <DatePicker
-                value={
-                  modalDate
-                    ? `${modalDate.getFullYear()}-${String(
-                        modalDate.getMonth() + 1
-                      ).padStart(2, "0")}-${String(
-                        modalDate.getDate()
-                      ).padStart(2, "0")}`
-                    : undefined
-                }
+                value={modalDate ? formatDateToISO(modalDate) : undefined}
                 onChange={handleDateChange}
                 placeholder="공연 날짜를 선택하세요"
                 size="small"

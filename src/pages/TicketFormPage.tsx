@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { formatDateToISO } from "@/lib/dateUtils";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -311,13 +312,7 @@ export default function TicketFormPage() {
         }
         onDateChange={(date) => {
           if (date) {
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, "0");
-            const day = String(date.getDate()).padStart(2, "0");
-            setFormData((prev) => ({
-              ...prev,
-              date: `${year}-${month}-${day}`,
-            }));
+            setFormData((prev) => ({ ...prev, date: formatDateToISO(date) }));
           }
         }}
         selectedGenre={formData.genre || undefined}

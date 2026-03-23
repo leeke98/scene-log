@@ -1,5 +1,6 @@
 // KOPIS API는 백엔드를 통해 호출
 import { apiGet } from "@/lib/apiClient";
+import { formatDateToKopis } from "@/lib/dateUtils";
 
 export interface KopisPerformance {
   mt20id: string; // 공연 ID
@@ -46,12 +47,7 @@ export async function searchPerformances(
   // startDate가 없으면 사용자가 선택한 날짜로 설정 (없으면 1년 전)
   const oneYearAgo = new Date();
   oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-  const startDateStr =
-    startDate ||
-    `${oneYearAgo.getFullYear()}${String(oneYearAgo.getMonth() + 1).padStart(
-      2,
-      "0"
-    )}${String(oneYearAgo.getDate()).padStart(2, "0")}`;
+  const startDateStr = startDate || formatDateToKopis(oneYearAgo);
 
   // endDate 계산: startDate 기준 최대 31일 후
   let endDateStr: string;
@@ -72,16 +68,11 @@ export async function searchPerformances(
     // startDate + 31일과 오늘 중 더 작은 값 사용
     const finalEndDate = maxEndDate < today ? maxEndDate : today;
 
-    endDateStr = `${finalEndDate.getFullYear()}${String(
-      finalEndDate.getMonth() + 1
-    ).padStart(2, "0")}${String(finalEndDate.getDate()).padStart(2, "0")}`;
+    endDateStr = formatDateToKopis(finalEndDate);
   } else {
     // 둘 다 없으면 오늘 날짜로 설정
     const today = new Date();
-    endDateStr = `${today.getFullYear()}${String(today.getMonth() + 1).padStart(
-      2,
-      "0"
-    )}${String(today.getDate()).padStart(2, "0")}`;
+    endDateStr = formatDateToKopis(today);
   }
 
   // 백엔드 API 호출
@@ -273,17 +264,6 @@ export async function getPerformanceDetail(
 ): Promise<KopisPerformanceDetail> {
   const endpoint = `/kopis/performances/${mt20id}`;
   return apiGet<KopisPerformanceDetail>(endpoint);
-}
-
-/**
- * 날짜를 YYYYMMDD 형식으로 변환
- */
-export function formatDateForKopis(date: Date | string): string {
-  const d = typeof date === "string" ? new Date(date) : date;
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${year}${month}${day}`;
 }
 
 /**

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { type PeriodType } from "../PeriodFilter";
+import { formatYearMonth } from "@/lib/dateUtils";
 import ReportFilterBar from "../ReportFilterBar";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
@@ -14,9 +15,7 @@ export default function ActorReport() {
   const [searchTerm, setSearchTerm] = useState("");
 
   const year = selectedYear.getFullYear().toString();
-  const yearMonth = `${selectedMonth.getFullYear()}-${String(
-    selectedMonth.getMonth() + 1
-  ).padStart(2, "0")}`;
+  const yearMonth = formatYearMonth(selectedMonth);
 
   const searchInput = (
     <div className="relative w-64">

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { type PeriodType } from "../PeriodFilter";
+import { formatYearMonth } from "@/lib/dateUtils";
 import ReportFilterBar from "../ReportFilterBar";
 import AnnualTab from "./AnnualTab";
 import MonthlyTab from "./MonthlyTab";
@@ -11,9 +12,7 @@ export default function OverallReport() {
   const [selectedMonth, setSelectedMonth] = useState<Date>(new Date());
 
   const year = selectedYear.getFullYear().toString();
-  const yearMonth = `${selectedMonth.getFullYear()}-${String(
-    selectedMonth.getMonth() + 1
-  ).padStart(2, "0")}`;
+  const yearMonth = formatYearMonth(selectedMonth);
 
   return (
     <div className="space-y-6">
