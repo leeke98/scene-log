@@ -51,8 +51,15 @@ export default function TicketCard({ ticket }: TicketCardProps) {
               }}
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-              <div className="text-gray-400 text-sm">포스터 없음</div>
+            <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 gap-2">
+              <span className="text-5xl font-bold text-gray-300">
+                {ticket.performanceName.charAt(0)}
+              </span>
+              {ticket.genre && (
+                <span className="text-xs text-gray-400 font-medium tracking-wide uppercase">
+                  {ticket.genre}
+                </span>
+              )}
             </div>
           )}
           {/* 오버레이 그라데이션 */}
