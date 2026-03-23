@@ -38,9 +38,9 @@ export default function TicketFormPage() {
   if (isLoadingTicket) {
     return (
       <Layout>
-        <div className="max-w-7xl mx-auto p-6">
-          <div className="text-center py-12">
-            <p className="text-gray-500">티켓 정보를 불러오는 중...</p>
+        <div className="max-w-4xl mx-auto px-4 py-6">
+          <div className="text-center py-8">
+            <p className="text-gray-500 text-sm">티켓 정보를 불러오는 중...</p>
           </div>
         </div>
       </Layout>
@@ -49,18 +49,18 @@ export default function TicketFormPage() {
 
   return (
     <Layout>
-      <div className="max-w-7xl mx-auto p-6">
+      <div className="max-w-4xl mx-auto px-4 py-6">
         <form onSubmit={handleSubmit}>
           {/* 상단: 공연 날짜 선택 */}
-          <div className="mb-8 p-6 bg-gray-50 rounded-lg border border-gray-200">
+          <div className="mb-6 px-5 py-4 bg-gradient-to-r from-gray-50 to-slate-50 rounded-lg border border-gray-200 shadow-sm">
             <Label
               htmlFor="date"
-              className="text-base font-semibold mb-3 block"
+              className="text-sm font-semibold mb-2.5 block text-gray-700"
             >
               공연 날짜를 먼저 선택해주세요
             </Label>
             <div className="flex gap-3 items-center">
-              <div className="flex-1 max-w-xs">
+              <div className="w-[320px]">
                 <DatePicker
                   value={formData.date}
                   onChange={(date) =>
@@ -77,63 +77,64 @@ export default function TicketFormPage() {
               />
             </div>
             {!formData.date && (
-              <p className="text-sm text-amber-600 mt-2">
+              <p className="text-xs text-amber-600 mt-2">
                 ⚠️ 날짜를 선택하지 않으면 정확한 공연 검색이 어려울 수 있습니다.
               </p>
             )}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-7">
             {/* 좌측: 작품 정보 영역 */}
-            <div className="space-y-4">
-              <div>
-                <Label className="text-base font-semibold mb-2 block">
-                  작품 정보
-                </Label>
-                <p className="text-md text-gray-600 mb-4">
-                  {formData.performanceName || "공연을 검색하여 선택해주세요"}
-                </p>
-                <div
-                  className="relative aspect-[3/4] max-w-lg mx-auto bg-gray-200 rounded-lg flex items-center justify-center cursor-pointer hover:bg-gray-300 transition-colors group"
-                  onClick={() => setShowSearchModal(true)}
-                >
-                  {formData.posterUrl ? (
-                    <>
-                      <img
-                        src={formData.posterUrl}
-                        alt={formData.performanceName || "포스터"}
-                        className="w-full h-full object-cover rounded-lg"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.style.display = "none";
-                        }}
-                      />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 rounded-lg transition-colors flex items-center justify-center">
-                        <span className="opacity-0 group-hover:opacity-100 text-white font-medium">
-                          클릭하여 변경
-                        </span>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center gap-3">
-                      <Plus className="w-16 h-16 text-gray-400" />
-                      <span className="text-gray-500 text-sm font-medium">
-                        {formData.date ? "공연 검색" : "날짜 선택 후 공연 검색"}
+            <div>
+              <Label className="text-sm font-semibold mb-1.5 block text-gray-700">
+                작품 정보
+              </Label>
+              <p className="text-sm text-gray-500 mb-3 truncate">
+                {formData.performanceName || "공연을 검색하여 선택해주세요"}
+              </p>
+              <div
+                className="relative aspect-[3/4] w-full max-w-[300px] mx-auto bg-gradient-to-br from-gray-100 to-gray-50 rounded-lg border-2 border-dashed border-gray-200 flex items-center justify-center cursor-pointer hover:border-gray-300 hover:from-gray-50 hover:to-white transition-all group shadow-sm overflow-hidden"
+                onClick={() => setShowSearchModal(true)}
+              >
+                {formData.posterUrl ? (
+                  <>
+                    <img
+                      src={formData.posterUrl}
+                      alt={formData.performanceName || "포스터"}
+                      className="w-full h-full object-cover rounded-lg border-0"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = "none";
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 rounded-lg transition-all flex items-center justify-center">
+                      <span className="opacity-0 group-hover:opacity-100 text-white text-sm font-medium bg-black/40 px-3 py-1.5 rounded-full transition-opacity">
+                        클릭하여 변경
                       </span>
                     </div>
-                  )}
-                </div>
+                  </>
+                ) : (
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <div className="w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center group-hover:bg-gray-300 transition-colors">
+                      <Plus className="w-7 h-7 text-gray-400" />
+                    </div>
+                    <span className="text-gray-400 text-xs font-medium">
+                      {formData.date ? "공연 검색" : "날짜 선택 후 공연 검색"}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
 
             {/* 우측: 상세 정보 필드 */}
-            <div className="space-y-6">
+            <div className="space-y-4">
               {/* 장르 선택 */}
               <div>
-                <Label>장르</Label>
-                <div className="flex gap-2 mt-2">
+                <Label className="text-sm font-semibold mb-1.5 block text-gray-700">장르</Label>
+                <div className="flex gap-2">
                   <Button
                     type="button"
+                    size="sm"
                     variant={formData.genre === "연극" ? "default" : "outline"}
                     onClick={() =>
                       setFormData((prev) => ({ ...prev, genre: "연극" }))
@@ -144,6 +145,7 @@ export default function TicketFormPage() {
                   </Button>
                   <Button
                     type="button"
+                    size="sm"
                     variant={
                       formData.genre === "뮤지컬" ? "default" : "outline"
                     }
@@ -157,30 +159,30 @@ export default function TicketFormPage() {
                 </div>
               </div>
 
-              {/* 극장 */}
-              <div>
-                <Label htmlFor="theater">극장</Label>
-                <Input
-                  id="theater"
-                  name="theater"
-                  type="text"
-                  value={formData.theater}
-                  onChange={handleChange}
-                  placeholder="극장명"
-                />
-              </div>
-
-              {/* 좌석 */}
-              <div>
-                <Label htmlFor="seat">좌석</Label>
-                <Input
-                  id="seat"
-                  name="seat"
-                  type="text"
-                  value={formData.seat}
-                  onChange={handleChange}
-                  placeholder="좌석 정보"
-                />
+              {/* 극장 & 좌석 */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="theater" className="text-sm font-semibold mb-1.5 block text-gray-700">극장</Label>
+                  <Input
+                    id="theater"
+                    name="theater"
+                    type="text"
+                    value={formData.theater}
+                    onChange={handleChange}
+                    placeholder="극장명"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="seat" className="text-sm font-semibold mb-1.5 block text-gray-700">좌석</Label>
+                  <Input
+                    id="seat"
+                    name="seat"
+                    type="text"
+                    value={formData.seat}
+                    onChange={handleChange}
+                    placeholder="좌석 정보"
+                  />
+                </div>
               </div>
 
               {/* 캐스팅 */}
@@ -194,82 +196,85 @@ export default function TicketFormPage() {
                 onRemoveActor={handleRemoveActor}
               />
 
-              {/* 티켓 가격 */}
-              <div>
-                <Label htmlFor="ticketPrice">티켓 가격</Label>
-                <PriceInput
-                  id="ticketPrice"
-                  name="ticketPrice"
-                  value={formData.ticketPrice}
-                  onChange={handlePriceChange("ticketPrice")}
-                  placeholder="티켓 가격"
-                />
-              </div>
-
-              {/* 동행자 */}
-              <div>
-                <Label htmlFor="companion">동행자</Label>
-                <Input
-                  id="companion"
-                  name="companion"
-                  type="text"
-                  value={formData.companion}
-                  onChange={handleChange}
-                  placeholder="동행자 정보"
-                />
-              </div>
-
-              {/* MD 가격 */}
-              <div>
-                <Label htmlFor="mdPrice">MD 가격</Label>
-                <PriceInput
-                  id="mdPrice"
-                  name="mdPrice"
-                  value={formData.mdPrice}
-                  onChange={handlePriceChange("mdPrice")}
-                  placeholder="MD 가격"
-                />
-              </div>
-
-              {/* 별점 */}
-              <div>
-                <Label>별점</Label>
-                <div className="flex gap-1 mt-2">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      type="button"
-                      onClick={() => handleRatingClick(star)}
-                      className="focus:outline-none"
-                    >
-                      <Star
-                        className={`w-6 h-6 ${
-                          star <= formData.rating
-                            ? "fill-yellow-400 text-yellow-400"
-                            : "text-gray-300"
-                        }`}
-                      />
-                    </button>
-                  ))}
+              {/* 티켓 가격 & 동행자 */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="ticketPrice" className="text-sm font-semibold mb-1.5 block text-gray-700">티켓 가격</Label>
+                  <PriceInput
+                    id="ticketPrice"
+                    name="ticketPrice"
+                    value={formData.ticketPrice}
+                    onChange={handlePriceChange("ticketPrice")}
+                    placeholder="티켓 가격"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="companion" className="text-sm font-semibold mb-1.5 block text-gray-700">동행자</Label>
+                  <Input
+                    id="companion"
+                    name="companion"
+                    type="text"
+                    value={formData.companion}
+                    onChange={handleChange}
+                    placeholder="동행자 정보"
+                  />
                 </div>
               </div>
 
+              {/* MD 가격 & 별점 */}
+              <div className="grid grid-cols-2 gap-3 items-end">
+                <div>
+                  <Label htmlFor="mdPrice" className="text-sm font-semibold mb-1.5 block text-gray-700">MD 가격</Label>
+                  <PriceInput
+                    id="mdPrice"
+                    name="mdPrice"
+                    value={formData.mdPrice}
+                    onChange={handlePriceChange("mdPrice")}
+                    placeholder="MD 가격"
+                  />
+                </div>
+                <div>
+                  <Label className="text-sm font-semibold mb-1.5 block text-gray-700">별점</Label>
+                  <div className="flex gap-1 h-10 items-center">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => handleRatingClick(star)}
+                        className="focus:outline-none hover:scale-110 transition-transform"
+                      >
+                        <Star
+                          className={`w-5 h-5 ${
+                            star <= formData.rating
+                              ? "fill-yellow-400 text-yellow-400"
+                              : "text-gray-300"
+                          }`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* 구분선 */}
+              <div className="border-t border-gray-100" />
+
               {/* 공연 후기 */}
               <div>
-                <Label htmlFor="review">공연 후기</Label>
+                <Label htmlFor="review" className="text-sm font-semibold mb-1.5 block text-gray-700">공연 후기</Label>
                 <textarea
                   id="review"
                   name="review"
                   value={formData.review}
                   onChange={handleChange}
-                  rows={6}
-                  className="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  rows={4}
+                  className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   placeholder="공연 후기를 입력하세요"
                 />
               </div>
 
               {/* 버튼 */}
-              <div className="flex gap-4 pt-4">
+              <div className="flex gap-3 pt-3">
                 <Button
                   type="button"
                   variant="outline"

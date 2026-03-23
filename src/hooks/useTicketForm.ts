@@ -149,7 +149,7 @@ export function useTicketForm() {
   };
 
   const handleRatingClick = (rating: number) => {
-    setFormData((prev) => ({ ...prev, rating }));
+    setFormData((prev) => ({ ...prev, rating: prev.rating === rating ? 0 : rating }));
   };
 
   const handlePerformanceSelect = (performance: {
