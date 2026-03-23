@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from "react";
+import { useSummaryHeight } from "@/hooks/useSummaryHeight";
 import SummaryCards from "@/components/report/SummaryCards";
 import TopPerformancesPoster from "@/components/report/TopPerformancesPoster";
 import GrassField from "@/components/GrassField";
@@ -11,8 +11,7 @@ import {
 } from "@/queries/reports/queries";
 
 export default function OverallCumulativeTab() {
-  const summaryRef = useRef<HTMLDivElement>(null);
-  const [posterHeight, setPosterHeight] = useState<number | null>(null);
+  const { summaryRef, posterHeight } = useSummaryHeight([summary]);
 
   // 전체 요약 데이터 가져오기 (누적 데이터이므로 파라미터 없음)
   const { data: summary } = useSummary();
@@ -25,38 +24,6 @@ export default function OverallCumulativeTab() {
 
   // 잔디밭 데이터 가져오기
   const { data: grassData } = useGrassData();
-
-  // 요약 섹션의 높이를 측정하여 포스터 높이에 반영
-  useEffect(() => {
-    const updateHeight = () => {
-      if (summaryRef.current) {
-        const summaryHeight = summaryRef.current.offsetHeight;
-        // 제목 높이(약 1.5rem + mb-4 = 1rem)를 제외한 높이
-        const titleHeight = 40; // text-lg + mb-4
-        setPosterHeight(summaryHeight - titleHeight);
-      }
-    };
-
-    // 초기 측정
-    const timer = setTimeout(updateHeight, 0);
-
-    // ResizeObserver로 더 정확하게 측정
-    const resizeObserver = new ResizeObserver(() => {
-      updateHeight();
-    });
-
-    if (summaryRef.current) {
-      resizeObserver.observe(summaryRef.current);
-    }
-
-    window.addEventListener("resize", updateHeight);
-
-    return () => {
-      clearTimeout(timer);
-      resizeObserver.disconnect();
-      window.removeEventListener("resize", updateHeight);
-    };
-  }, [summary]);
 
   // SummaryCards에 전달할 데이터 매핑
   const summaryData = summary

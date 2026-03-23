@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useSummaryHeight } from "@/hooks/useSummaryHeight";
 import { type ChartConfig } from "@/components/ui/chart";
 import BarChartCard from "@/components/charts/BarChartCard";
 import PieChartCard from "@/components/charts/PieChartCard";
@@ -16,8 +16,7 @@ interface OverallAnnualTabProps {
 }
 
 export default function OverallAnnualTab({ year }: OverallAnnualTabProps) {
-  const summaryRef = useRef<HTMLDivElement>(null);
-  const [posterHeight, setPosterHeight] = useState<number | null>(null);
+  const { summaryRef, posterHeight } = useSummaryHeight([summary]);
 
   // 전체 요약 데이터 가져오기
   const { data: summary } = useSummary(year);
@@ -30,38 +29,6 @@ export default function OverallAnnualTab({ year }: OverallAnnualTabProps) {
 
   // 가장 많이 본 작품 데이터 가져오기
   const { data: top10Performances } = useMostViewedPerformance(year);
-
-  // 요약 섹션의 높이를 측정하여 포스터 높이에 반영
-  useEffect(() => {
-    const updateHeight = () => {
-      if (summaryRef.current) {
-        const summaryHeight = summaryRef.current.offsetHeight;
-        // 제목 높이(약 1.5rem + mb-4 = 1rem)를 제외한 높이
-        const titleHeight = 40; // text-lg + mb-4
-        setPosterHeight(summaryHeight - titleHeight);
-      }
-    };
-
-    // 초기 측정
-    const timer = setTimeout(updateHeight, 0);
-
-    // ResizeObserver로 더 정확하게 측정
-    const resizeObserver = new ResizeObserver(() => {
-      updateHeight();
-    });
-
-    if (summaryRef.current) {
-      resizeObserver.observe(summaryRef.current);
-    }
-
-    window.addEventListener("resize", updateHeight);
-
-    return () => {
-      clearTimeout(timer);
-      resizeObserver.disconnect();
-      window.removeEventListener("resize", updateHeight);
-    };
-  }, [summary]);
 
   // 월별 관람수 차트 데이터 매핑 (실제 데이터 기반)
   // 1월부터 12월까지 모든 달을 표시하고, 데이터가 없는 달은 0으로 채움
