@@ -67,7 +67,7 @@ export default function TicketDetailPage() {
 
   if (error || !ticket) {
     const errorMessage =
-      (error as ApiError)?.error || "티켓을 불러오는데 실패했습니다.";
+      (error && "error" in error ? (error as ApiError).error : null) || "티켓을 불러오는데 실패했습니다.";
     return (
       <Layout>
         <div className="text-center py-12">

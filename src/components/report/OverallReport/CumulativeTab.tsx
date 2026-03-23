@@ -11,10 +11,10 @@ import {
 } from "@/queries/reports/queries";
 
 export default function OverallCumulativeTab() {
-  const { summaryRef, posterHeight } = useSummaryHeight([summary]);
-
   // 전체 요약 데이터 가져오기 (누적 데이터이므로 파라미터 없음)
   const { data: summary } = useSummary();
+
+  const { summaryRef, posterHeight } = useSummaryHeight([summary]);
 
   // 요일별 통계 데이터 가져오기 (누적 데이터이므로 파라미터 없음)
   const { data: dayOfWeekStats } = useDayOfWeekStats();

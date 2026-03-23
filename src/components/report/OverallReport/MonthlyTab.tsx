@@ -20,13 +20,13 @@ export default function OverallMonthlyTab({
   year,
   month,
 }: OverallMonthlyTabProps) {
-  const { summaryRef, posterHeight } = useSummaryHeight([summary]);
-
   // month가 "YYYY-MM" 형식이므로 "MM" 부분만 추출
   const monthOnly = month.split("-")[1]; // "YYYY-MM" -> "MM"
 
   // 전체 요약 데이터 가져오기
   const { data: summary } = useSummary(year, monthOnly);
+
+  const { summaryRef, posterHeight } = useSummaryHeight([summary]);
 
   // 주별 통계 데이터 가져오기
   const { data: weeklyStats } = useWeeklyStats(month);

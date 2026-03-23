@@ -16,10 +16,10 @@ interface OverallAnnualTabProps {
 }
 
 export default function OverallAnnualTab({ year }: OverallAnnualTabProps) {
-  const { summaryRef, posterHeight } = useSummaryHeight([summary]);
-
   // 전체 요약 데이터 가져오기
   const { data: summary } = useSummary(year);
+
+  const { summaryRef, posterHeight } = useSummaryHeight([summary]);
 
   // 월별 통계 데이터 가져오기
   const { data: monthlyStats } = useMonthlyStats(year);
