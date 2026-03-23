@@ -1,11 +1,17 @@
 /**
  * API 클라이언트 유틸리티
  * 백엔드 API 호출을 위한 공통 함수
+ *
+ * 인증 방식: Access Token (메모리) + Refresh Token (httpOnly 쿠키)
+ * - Access Token은 Zustand store에서 관리
+ * - 401 응답 시 /auth/refresh 호출 후 원래 요청 자동 재시도
  */
 
 // 개발 환경에서는 항상 Vite 프록시 사용 (/api)
 // 프로덕션에서는 환경 변수 또는 기본값 사용
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+import { useAuthStore } from "@/stores/authStore";
 
 export interface ApiError {
   error: string;
@@ -17,6 +23,7 @@ export interface ApiError {
  */
 interface RequestOptions extends RequestInit {
   requireAuth?: boolean;
+  _isRetry?: boolean; // 재시도 여부 (무한 루프 방지)
 }
 
 /**
@@ -24,57 +31,78 @@ interface RequestOptions extends RequestInit {
  */
 type ApiResponse<T> = T;
 
-/**
- * 토큰 가져오기
- */
-function getToken(): string | null {
-  return localStorage.getItem("token");
+// ─────────────────────────────────────────────
+// Access Token 관리 (store 직접 접근 — React 외부)
+// ─────────────────────────────────────────────
+
+function getAccessToken(): string | null {
+  return useAuthStore.getState().accessToken;
 }
 
-/**
- * 토큰 저장
- */
-export function setToken(token: string): void {
-  localStorage.setItem("token", token);
+function setAccessToken(token: string | null): void {
+  useAuthStore.getState().setAccessToken(token);
 }
 
-/**
- * 토큰 제거
- */
-export function removeToken(): void {
-  localStorage.removeItem("token");
+function clearAuth(): void {
+  useAuthStore.getState().clearUser();
 }
 
-/**
- * API 요청 함수
- */
+// ─────────────────────────────────────────────
+// Refresh Token 인터셉터 (뮤텍스로 중복 호출 방지)
+// ─────────────────────────────────────────────
+
+let refreshPromise: Promise<string | null> | null = null;
+
+async function tryRefreshToken(): Promise<string | null> {
+  if (refreshPromise) return refreshPromise;
+
+  refreshPromise = fetch(`${API_BASE_URL}/auth/refresh`, {
+    method: "POST",
+    credentials: "include", // httpOnly refresh token 쿠키 자동 전송
+  })
+    .then(async (res) => {
+      if (!res.ok) return null;
+      const data = await res.json();
+      const token: string = data.access_token;
+      setAccessToken(token);
+      return token;
+    })
+    .catch(() => null)
+    .finally(() => {
+      refreshPromise = null;
+    });
+
+  return refreshPromise;
+}
+
+// ─────────────────────────────────────────────
+// 핵심 요청 함수
+// ─────────────────────────────────────────────
+
 async function apiRequest<T>(
   endpoint: string,
   options: RequestOptions = {}
 ): Promise<ApiResponse<T>> {
-  const { requireAuth = true, ...fetchOptions } = options;
+  const { requireAuth = true, _isRetry = false, ...fetchOptions } = options;
 
   const url = `${API_BASE_URL}${endpoint}`;
-  const headers: HeadersInit = {
+  const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...fetchOptions.headers,
+    ...(fetchOptions.headers as Record<string, string>),
   };
 
-  // 인증이 필요한 경우 토큰 추가
+  // Access Token을 Authorization 헤더에 첨부
   if (requireAuth) {
-    const token = getToken();
+    const token = getAccessToken();
     if (token) {
-      (headers as Record<string, string>)["Authorization"] = `Bearer ${token}`;
+      headers["Authorization"] = `Bearer ${token}`;
     }
   }
 
-  // 디버깅용 로그 (개발 환경에서만)
   if (import.meta.env.DEV) {
     console.log(`[API Request] ${fetchOptions.method || "GET"} ${url}`, {
       headers,
       body: fetchOptions.body,
-      apiBaseUrl: API_BASE_URL,
-      endpoint,
     });
   }
 
@@ -82,25 +110,47 @@ async function apiRequest<T>(
     const response = await fetch(url, {
       ...fetchOptions,
       headers,
+      credentials: "include", // refresh token 쿠키 자동 전송
     });
 
-    // 디버깅용 로그
     if (import.meta.env.DEV) {
       console.log(`[API Response] ${url}`, {
         status: response.status,
-        statusText: response.statusText,
         ok: response.ok,
       });
     }
 
-    // 응답이 비어있는 경우 (204 No Content 등)
+    // 204 No Content
     if (response.status === 204) {
       return {} as T;
     }
 
+    // ── 401: Access Token 만료 → Refresh 시도 후 재시도 ──
+    if (response.status === 401 && requireAuth && !_isRetry) {
+      const newToken = await tryRefreshToken();
+
+      if (newToken) {
+        // 새 토큰으로 원래 요청 1회 재시도
+        return apiRequest<T>(endpoint, {
+          ...fetchOptions,
+          requireAuth,
+          _isRetry: true,
+        });
+      } else {
+        // Refresh 실패 → 로그인 페이지로
+        clearAuth();
+        if (
+          typeof window !== "undefined" &&
+          !window.location.pathname.includes("/login")
+        ) {
+          window.location.href = "/login";
+        }
+        throw { error: "인증이 만료되었습니다. 다시 로그인해주세요.", code: "AUTH_EXPIRED" } as ApiError;
+      }
+    }
+
     const data = await response.json();
 
-    // 디버깅용 로그 (개발 환경에서만)
     if (import.meta.env.DEV) {
       console.log(`[API] ${fetchOptions.method || "GET"} ${endpoint}`, {
         status: response.status,
@@ -108,86 +158,52 @@ async function apiRequest<T>(
       });
     }
 
-    // 에러 응답 처리
     if (!response.ok) {
-      // 401 Unauthorized: 토큰 만료 또는 인증 실패
-      if (response.status === 401) {
-        // 토큰 제거
-        removeToken();
-        // 로그인 페이지로 리다이렉트 (현재 페이지가 로그인 페이지가 아닐 때만)
-        if (
-          typeof window !== "undefined" &&
-          !window.location.pathname.includes("/login")
-        ) {
-          window.location.href = "/login";
-        }
-      }
-
       const error: ApiError = {
         error: data.error || `HTTP ${response.status} 오류가 발생했습니다.`,
         code: data.code,
       };
-      // 디버깅용 로그
       if (import.meta.env.DEV) {
-        console.error(
-          `[API Error] ${fetchOptions.method || "GET"} ${endpoint}`,
-          error
-        );
+        console.error(`[API Error] ${fetchOptions.method || "GET"} ${endpoint}`, error);
       }
       throw error;
     }
 
     return data;
   } catch (error) {
-    // 디버깅용 로그
     if (import.meta.env.DEV) {
       console.error(`[API Error] ${url}`, error);
     }
 
-    // 네트워크 오류 처리
     if (error instanceof TypeError && error.message === "Failed to fetch") {
-      const errorMessage = `서버에 연결할 수 없습니다. 
-서버가 실행 중인지 확인해주세요.
-요청 URL: ${url}
-백엔드 서버: http://localhost:3001`;
       throw {
-        error: errorMessage,
+        error: `서버에 연결할 수 없습니다.\n서버가 실행 중인지 확인해주세요.\n요청 URL: ${url}`,
         code: "NETWORK_ERROR",
       } as ApiError;
     }
 
-    // 이미 ApiError인 경우 그대로 throw
     if (error && typeof error === "object" && "error" in error) {
       throw error;
     }
 
-    // 기타 오류
     throw {
-      error:
-        error instanceof Error
-          ? error.message
-          : "알 수 없는 오류가 발생했습니다.",
+      error: error instanceof Error ? error.message : "알 수 없는 오류가 발생했습니다.",
       code: "UNKNOWN_ERROR",
     } as ApiError;
   }
 }
 
-/**
- * GET 요청
- */
+// ─────────────────────────────────────────────
+// 공개 HTTP 메서드
+// ─────────────────────────────────────────────
+
 export async function apiGet<T>(
   endpoint: string,
   options?: Omit<RequestOptions, "method" | "body">
 ): Promise<ApiResponse<T>> {
-  return apiRequest<T>(endpoint, {
-    ...options,
-    method: "GET",
-  });
+  return apiRequest<T>(endpoint, { ...options, method: "GET" });
 }
 
-/**
- * POST 요청
- */
 export async function apiPost<T>(
   endpoint: string,
   data?: unknown,
@@ -200,9 +216,6 @@ export async function apiPost<T>(
   });
 }
 
-/**
- * PUT 요청
- */
 export async function apiPut<T>(
   endpoint: string,
   data?: unknown,
@@ -215,15 +228,15 @@ export async function apiPut<T>(
   });
 }
 
-/**
- * DELETE 요청
- */
 export async function apiDelete<T>(
   endpoint: string,
   options?: Omit<RequestOptions, "method" | "body">
 ): Promise<ApiResponse<T>> {
-  return apiRequest<T>(endpoint, {
-    ...options,
-    method: "DELETE",
-  });
+  return apiRequest<T>(endpoint, { ...options, method: "DELETE" });
 }
+
+// ─────────────────────────────────────────────
+// Access Token 직접 설정 (로그인 시 authApi에서 사용)
+// ─────────────────────────────────────────────
+
+export { setAccessToken };

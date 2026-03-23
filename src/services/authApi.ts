@@ -1,7 +1,8 @@
 /**
  * 인증 관련 API
  */
-import { apiPost, apiGet, setToken, removeToken } from "@/lib/apiClient";
+import { apiPost, apiGet, setAccessToken } from "@/lib/apiClient";
+import { useAuthStore } from "@/stores/authStore";
 
 export interface User {
   id: string;
@@ -23,7 +24,7 @@ export interface SignupRequest {
 
 export interface AuthResponse {
   message: string;
-  token: string;
+  access_token: string;
   user: User;
 }
 
@@ -32,31 +33,21 @@ export interface AuthResponse {
  * 회원가입 후 자동 로그인하지 않으므로 토큰을 저장하지 않음
  */
 export async function signup(data: SignupRequest): Promise<AuthResponse> {
-  const response = await apiPost<AuthResponse>("/auth/signup", data, {
-    requireAuth: false,
-  });
-
-  // 회원가입 후 자동 로그인하지 않으므로 토큰 저장하지 않음
-
-  return response;
+  return apiPost<AuthResponse>("/auth/signup", data, { requireAuth: false });
 }
 
 /**
- * 토큰 제거 (회원가입 후 사용)
- */
-export { removeToken } from "@/lib/apiClient";
-
-/**
  * 로그인
+ * - access token → 메모리(store)에 저장
+ * - refresh token → 백엔드가 httpOnly 쿠키로 자동 설정
  */
 export async function login(data: LoginRequest): Promise<AuthResponse> {
   const response = await apiPost<AuthResponse>("/auth/login", data, {
     requireAuth: false,
   });
 
-  // 토큰 저장
-  if (response.token) {
-    setToken(response.token);
+  if (response.access_token) {
+    setAccessToken(response.access_token);
   }
 
   return response;
@@ -71,8 +62,9 @@ export async function getCurrentUser(): Promise<User> {
 
 /**
  * 로그아웃
- * JWT 토큰 기반 인증이므로 클라이언트 측에서 토큰만 제거하면 됨
+ * 서버에서 refresh token 삭제 및 쿠키 클리어
  */
 export async function logout(): Promise<void> {
-  removeToken();
+  await apiPost("/auth/logout", undefined, { requireAuth: false });
+  useAuthStore.getState().clearUser();
 }

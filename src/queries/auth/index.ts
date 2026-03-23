@@ -8,30 +8,18 @@ import { useCurrentUser } from "./queries";
 import { useLogin, useSignup, useLogout } from "./mutations";
 
 /**
- * 토큰이 있는지 확인하는 헬퍼 함수
- */
-function hasToken(): boolean {
-  if (typeof window === "undefined") return false;
-  return !!localStorage.getItem("token");
-}
-
-/**
  * 인증 상태 Hook (기존 useAuth와 호환)
  */
 export function useAuth() {
   const { user } = useAuthStore();
-  const tokenExists = hasToken();
   const { data: currentUser, isLoading } = useCurrentUser();
   const loginMutation = useLogin();
   const signupMutation = useSignup();
   const logoutMutation = useLogout();
 
-  // token이 없으면 로딩 상태를 false로 설정 (불필요한 로딩 방지)
-  const finalIsLoading = tokenExists ? isLoading : false;
-
   return {
     user: currentUser || user,
-    isLoading: finalIsLoading,
+    isLoading,
     isAuthenticated: !!currentUser || !!user,
     login: async (id: string, password: string) => {
       // 이미 진행 중이면 중복 호출 방지

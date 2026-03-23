@@ -4,7 +4,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "@/stores/authStore";
 import * as authApi from "@/services/authApi";
-import { removeToken } from "@/lib/apiClient";
 import { toast } from "react-toastify";
 import { queryKeys } from "@/lib/react-query/queryKeys";
 
@@ -45,7 +44,6 @@ export function useSignup() {
     }) => authApi.signup(data),
     onSuccess: () => {
       // 회원가입 후 자동 로그인하지 않음
-      removeToken();
       queryClient.removeQueries({ queryKey: queryKeys.auth.all });
       // toast는 컴포넌트에서 처리하므로 여기서는 제거
       // toast.success("회원가입이 완료되었습니다.");
