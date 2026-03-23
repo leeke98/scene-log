@@ -1,16 +1,9 @@
-import { useState, useEffect, useMemo } from "react";
 import { X, Search, Loader2, Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  cleanTheaterName,
-  normalizePerformanceName,
-  formatDateForKopis,
-  type KopisPerformance,
-} from "@/services/kopisApi";
-import { useSearchPerformances, usePerformanceDetail } from "@/queries/kopis";
 import DatePicker from "@/components/DatePicker";
+import { usePerformanceSearch } from "@/hooks/usePerformanceSearch";
 
 interface PerformanceSearchModalProps {
   isOpen: boolean;
@@ -19,12 +12,12 @@ interface PerformanceSearchModalProps {
     performanceName: string;
     theater: string;
     posterUrl: string;
-    isChild?: boolean; // 어린이 공연 여부
+    isChild?: boolean;
   }) => void;
-  selectedDate?: Date | string; // 검색 시작일로 사용
-  onDateChange?: (date: Date | null) => void; // 날짜 변경 콜백
-  selectedGenre?: "연극" | "뮤지컬"; // 티켓 입력폼에서 선택된 장르
-  onGenreChange?: (genre: "연극" | "뮤지컬") => void; // 장르 변경 콜백
+  selectedDate?: Date | string;
+  onDateChange?: (date: Date | null) => void;
+  selectedGenre?: "연극" | "뮤지컬";
+  onGenreChange?: (genre: "연극" | "뮤지컬") => void;
 }
 
 export default function PerformanceSearchModal({
@@ -36,241 +29,47 @@ export default function PerformanceSearchModal({
   selectedGenre,
   onGenreChange,
 }: PerformanceSearchModalProps) {
-  const tickets: Array<{ performanceName: string }> = [];
-  const [searchTerm, setSearchTerm] = useState("");
-  // selectedGenre가 있으면 그것을 사용하고, 없으면 기본값 "뮤지컬"
-  const [genre, setGenre] = useState<"AAAA" | "GGGA">(
-    selectedGenre === "연극" ? "AAAA" : "GGGA"
-  ); // 연극: AAAA, 뮤지컬: GGGA
-  const [modalDate, setModalDate] = useState<Date | null>(
-    selectedDate
-      ? typeof selectedDate === "string"
-        ? new Date(selectedDate + "T00:00:00")
-        : selectedDate
-      : null
-  );
-
-  // 검색 실행 여부를 제어하는 상태
-  const [shouldSearch, setShouldSearch] = useState(false);
-
-  // 검색 파라미터
-  const startDate = modalDate ? formatDateForKopis(modalDate) : undefined;
-  const canSearch = !!searchTerm.trim() && !!startDate && !!genre;
-
-  // TanStack Query를 사용한 공연 검색
   const {
-    data,
+    searchTerm,
+    setSearchTerm,
+    genre,
+    setGenre,
+    modalDate,
+    canSearch,
     isLoading,
     isFetchingNextPage,
     hasNextPage,
-    fetchNextPage,
-    error: queryError,
-  } = useSearchPerformances({
-    searchTerm: searchTerm.trim(),
-    startDate,
-    genre,
-    rows: 20,
-    enabled: shouldSearch && canSearch, // 검색 버튼을 눌렀을 때만 실행
-  });
-
-  // 모든 페이지의 결과를 하나의 배열로 합치기
-  const performances = useMemo(() => {
-    return data?.pages.flat() || [];
-  }, [data]);
-
-  const [error, setError] = useState<string | null>(null);
-  const [selectedMt20id, setSelectedMt20id] = useState<string | undefined>(
-    undefined
-  );
-
-  // 공연 상세 정보 조회
-  const { data: detailData, error: detailError } =
-    usePerformanceDetail(selectedMt20id);
-
-  // queryError가 있으면 error 상태 업데이트
-  useEffect(() => {
-    if (queryError) {
-      setError(
-        queryError instanceof Error
-          ? queryError.message
-          : "공연 검색에 실패했습니다."
-      );
-    }
-  }, [queryError]);
-
-  // selectedDate가 변경되면 modalDate도 업데이트
-  useEffect(() => {
-    if (selectedDate) {
-      setModalDate(
-        typeof selectedDate === "string"
-          ? new Date(selectedDate + "T00:00:00")
-          : selectedDate
-      );
-    }
-  }, [selectedDate]);
-
-  // selectedGenre가 변경되면 genre도 업데이트
-  useEffect(() => {
-    if (selectedGenre) {
-      setGenre(selectedGenre === "연극" ? "AAAA" : "GGGA");
-    }
-  }, [selectedGenre]);
-
-  // 검색어, 날짜, 장르가 변경되면 검색 상태 리셋
-  useEffect(() => {
-    setShouldSearch(false);
-  }, [searchTerm, modalDate, genre]);
-
-  const handleDateChange = (dateString: string | null) => {
-    const date = dateString
-      ? (() => {
-          const [year, month, day] = dateString.split("-").map(Number);
-          return new Date(year, month - 1, day);
-        })()
-      : null;
-    setModalDate(date);
-    if (onDateChange) {
-      onDateChange(date);
-    }
-  };
-
-  // 무한 스크롤 처리
-  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    const target = e.currentTarget;
-    const scrollTop = target.scrollTop;
-    const scrollHeight = target.scrollHeight;
-    const clientHeight = target.clientHeight;
-
-    // 스크롤이 끝에서 200px 이내에 도달하면 다음 페이지 로드
-    if (
-      scrollHeight - scrollTop - clientHeight < 200 &&
-      !isFetchingNextPage &&
-      !isLoading &&
-      hasNextPage
-    ) {
-      fetchNextPage();
-    }
-  };
-
-  const handleSelectPerformance = (performance: KopisPerformance) => {
-    setError(null);
-    setSelectedMt20id(performance.mt20id);
-  };
-
-  // 상세 정보가 로드되면 처리
-  useEffect(() => {
-    if (detailData && selectedMt20id) {
-      const detail = detailData;
-
-      // 검색 결과에서 대괄호가 없는 작품명 찾기 (진짜 작품명)
-      const performancesWithoutBracket = performances.filter(
-        (p) => !p.prfnm.includes("[")
-      );
-      const referenceName =
-        performancesWithoutBracket.length > 0
-          ? performancesWithoutBracket[0].prfnm
-          : undefined;
-
-      // 기존 티켓에서 대괄호 없는 같은 작품명 찾기 (대괄호 제거 후 비교)
-      const currentWithoutBracket = detail.prfnm
-        .replace(/\s*\[[^\]]+\]\s*/g, "")
-        .trim();
-      const existingTicket = tickets.find((ticket) => {
-        const ticketWithoutBracket = ticket.performanceName
-          .replace(/\s*\[[^\]]+\]\s*/g, "")
-          .trim();
-        // 공백 제거 후 비교
-        return (
-          ticketWithoutBracket.replace(/\s+/g, "").toLowerCase() ===
-          currentWithoutBracket.replace(/\s+/g, "").toLowerCase()
-        );
-      });
-
-      // 참고 작품명: 기존 티켓이 있으면 그것을, 없으면 검색 결과에서 대괄호 없는 것을 사용
-      const finalReferenceName =
-        existingTicket?.performanceName || referenceName;
-
-      // 작품명 정규화: 띄어쓰기 통일, [지역] 제거, 참고 작품명 사용
-      const normalizedPerformanceName = normalizePerformanceName(
-        detail.prfnm,
-        finalReferenceName
-      );
-
-      // 극장명 정제: "(구. ...)" 제거, 맨 뒤 "(...)" 유지, [지역] 제거
-      const cleanedTheater = cleanTheaterName(detail.fcltynm);
-
-      // kidstate 파라미터로 필터링했으므로 상세 조회에서 child 확인 불필요
-      // 검색 시 kidstate=N이므로 성인 공연만 조회됨 (isChild = false)
-      onSelect({
-        performanceName: normalizedPerformanceName,
-        theater: cleanedTheater,
-        posterUrl: detail.poster || "",
-        isChild: false, // kidstate=N이므로 성인 공연
-      });
-
-      // 모달 닫기
-      onClose();
-      setSearchTerm("");
-      setError(null);
-      setSelectedMt20id(undefined);
-    }
-  }, [detailData, selectedMt20id, performances, tickets, onSelect, onClose]);
-
-  // 상세 정보 조회 에러 처리
-  useEffect(() => {
-    if (detailError) {
-      setError(
-        detailError instanceof Error
-          ? detailError.message
-          : "공연 상세 정보를 불러오는데 실패했습니다."
-      );
-
-      // 실패해도 검색 결과의 기본 정보라도 사용
-      if (selectedMt20id) {
-        const performance = performances.find(
-          (p) => p.mt20id === selectedMt20id
-        );
-        if (performance) {
-          // 검색 결과에서 대괄호가 없는 작품명 찾기
-          const performancesWithoutBracket = performances.filter(
-            (p) => !p.prfnm.includes("[")
-          );
-          const referenceName =
-            performancesWithoutBracket.length > 0
-              ? performancesWithoutBracket[0].prfnm
-              : undefined;
-
-          const normalizedPerformanceName = normalizePerformanceName(
-            performance.prfnm,
-            referenceName
-          );
-          const cleanedTheater = cleanTheaterName(performance.fcltynm);
-          onSelect({
-            performanceName: normalizedPerformanceName,
-            theater: cleanedTheater,
-            posterUrl: performance.poster || "",
-          });
-          onClose();
-          setSearchTerm("");
-        }
-      }
-      setSelectedMt20id(undefined);
-    }
-  }, [detailError, selectedMt20id, performances, onSelect, onClose]);
-
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && canSearch && !isLoading) {
-      setShouldSearch(true);
-    }
-  };
-
-  const handleSearchClick = () => {
-    if (canSearch && !isLoading) {
-      setShouldSearch(true);
-    }
-  };
+    performances,
+    error,
+    handleDateChange: handleDateChangeInternal,
+    handleScroll,
+    handleSelectPerformance,
+    handleKeyPress,
+    handleSearchClick,
+  } = usePerformanceSearch({ selectedDate, selectedGenre, onSelect, onClose });
 
   if (!isOpen) return null;
+
+  const handleDateChange = (dateString: string | null) => {
+    handleDateChangeInternal(dateString);
+    if (onDateChange) {
+      onDateChange(
+        dateString
+          ? (() => {
+              const [year, month, day] = dateString.split("-").map(Number);
+              return new Date(year, month - 1, day);
+            })()
+          : null
+      );
+    }
+  };
+
+  const handleGenreChange = (next: "AAAA" | "GGGA") => {
+    setGenre(next);
+    if (onGenreChange) {
+      onGenreChange(next === "AAAA" ? "연극" : "뮤지컬");
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
@@ -307,13 +106,12 @@ export default function PerformanceSearchModal({
                 size="small"
               />
             </div>
-            {modalDate && (
+            {modalDate ? (
               <p className="text-xs text-gray-500 mt-1">
                 선택된 날짜 기준으로 검색됩니다 (
                 {modalDate.toLocaleDateString("ko-KR")})
               </p>
-            )}
-            {!modalDate && (
+            ) : (
               <p className="text-xs text-amber-600 mt-1">
                 ⚠️ 날짜를 선택하지 않으면 검색 결과가 부정확할 수 있습니다.
               </p>
@@ -327,12 +125,7 @@ export default function PerformanceSearchModal({
               <Button
                 type="button"
                 variant={genre === "AAAA" ? "default" : "outline"}
-                onClick={() => {
-                  setGenre("AAAA");
-                  if (onGenreChange) {
-                    onGenreChange("연극");
-                  }
-                }}
+                onClick={() => handleGenreChange("AAAA")}
                 className="flex-1"
               >
                 연극
@@ -340,12 +133,7 @@ export default function PerformanceSearchModal({
               <Button
                 type="button"
                 variant={genre === "GGGA" ? "default" : "outline"}
-                onClick={() => {
-                  setGenre("GGGA");
-                  if (onGenreChange) {
-                    onGenreChange("뮤지컬");
-                  }
-                }}
+                onClick={() => handleGenreChange("GGGA")}
                 className="flex-1"
               >
                 뮤지컬
@@ -402,8 +190,7 @@ export default function PerformanceSearchModal({
                         alt={performance.prfnm}
                         className="w-20 h-28 object-cover rounded"
                         onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.style.display = "none";
+                          (e.target as HTMLImageElement).style.display = "none";
                         }}
                       />
                     )}
@@ -433,6 +220,7 @@ export default function PerformanceSearchModal({
               ))}
             </div>
           ) : null}
+
           {isFetchingNextPage && (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
@@ -441,6 +229,7 @@ export default function PerformanceSearchModal({
               </span>
             </div>
           )}
+
           {!isLoading &&
             !isFetchingNextPage &&
             performances.length > 0 &&
@@ -449,7 +238,8 @@ export default function PerformanceSearchModal({
                 모든 결과를 불러왔습니다.
               </div>
             )}
-          {!isLoading && performances.length === 0 && !error ? (
+
+          {!isLoading && performances.length === 0 && !error && (
             <div className="text-center py-12 text-gray-500">
               {!modalDate ? (
                 <div className="space-y-2">
@@ -459,14 +249,12 @@ export default function PerformanceSearchModal({
                   </p>
                 </div>
               ) : (
-                <div className="space-y-2">
-                  <p className="font-medium">
-                    작품명을 입력하고 검색 버튼을 눌러주세요.
-                  </p>
-                </div>
+                <p className="font-medium">
+                  작품명을 입력하고 검색 버튼을 눌러주세요.
+                </p>
               )}
             </div>
-          ) : null}
+          )}
         </div>
       </div>
     </div>
