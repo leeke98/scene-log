@@ -12,6 +12,7 @@ import {
 } from "@/services/ticketApi";
 import { toast } from "react-toastify";
 import { queryKeys } from "@/lib/react-query/queryKeys";
+import { type ApiError } from "@/lib/apiClient";
 
 /**
  * 티켓 생성 Mutation
@@ -36,8 +37,8 @@ export function useCreateTicket() {
       });
       toast.success("티켓이 생성되었습니다.");
     },
-    onError: (error: any) => {
-      toast.error(error?.error || "티켓 생성에 실패했습니다.");
+    onError: (error: ApiError) => {
+      toast.error(error.error || "티켓 생성에 실패했습니다.");
     },
   });
 }
@@ -83,8 +84,8 @@ export function useUpdateTicket() {
       });
       toast.success("티켓이 수정되었습니다.");
     },
-    onError: (error: any) => {
-      toast.error(error?.error || "티켓 수정에 실패했습니다.");
+    onError: (error: ApiError) => {
+      toast.error(error.error || "티켓 수정에 실패했습니다.");
     },
   });
 }
@@ -120,8 +121,8 @@ export function useDeleteTicket() {
       });
       toast.success("티켓이 삭제되었습니다.");
     },
-    onError: (error: any) => {
-      toast.error(error?.error || "티켓 삭제에 실패했습니다.");
+    onError: (error: ApiError) => {
+      toast.error(error.error || "티켓 삭제에 실패했습니다.");
     },
   });
 }

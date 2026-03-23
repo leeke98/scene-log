@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useTicket, useDeleteTicket } from "@/queries/tickets";
+import { type ApiError } from "@/lib/apiClient";
 import { toast } from "react-toastify";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -32,7 +33,7 @@ export default function TicketDetailPage() {
                 try {
                   await deleteTicketMutation.mutateAsync(id);
                   navigate("/records");
-                } catch (err: any) {
+                } catch (err: unknown) {
                   // 에러는 mutation의 onError에서 처리됨
                   console.error("티켓 삭제 오류:", err);
                 }
@@ -66,7 +67,7 @@ export default function TicketDetailPage() {
 
   if (error || !ticket) {
     const errorMessage =
-      (error as any)?.error || "티켓을 불러오는데 실패했습니다.";
+      (error as ApiError)?.error || "티켓을 불러오는데 실패했습니다.";
     return (
       <Layout>
         <div className="text-center py-12">

@@ -6,6 +6,7 @@
 import { useAuthStore } from "@/stores/authStore";
 import { useCurrentUser } from "./queries";
 import { useLogin, useSignup, useLogout } from "./mutations";
+import { type ApiError } from "@/lib/apiClient";
 
 /**
  * 인증 상태 Hook (기존 useAuth와 호환)
@@ -29,8 +30,8 @@ export function useAuth() {
       try {
         await loginMutation.mutateAsync({ username: id, password });
         return { success: true };
-      } catch (error: any) {
-        return { success: false, error: error?.error };
+      } catch (error: unknown) {
+        return { success: false, error: (error as ApiError)?.error };
       }
     },
     signup: async (id: string, password: string, nickname: string) => {
@@ -45,8 +46,8 @@ export function useAuth() {
           nickname,
         });
         return { success: true };
-      } catch (error: any) {
-        return { success: false, error: error?.error };
+      } catch (error: unknown) {
+        return { success: false, error: (error as ApiError)?.error };
       }
     },
     logout: async () => {

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/queries/auth";
+import { type ApiError } from "@/lib/apiClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,8 +31,8 @@ export default function LoginPage() {
       } else {
         setError(result.error || "아이디 또는 비밀번호가 올바르지 않습니다.");
       }
-    } catch (error: any) {
-      setError(error?.error || "로그인 중 오류가 발생했습니다.");
+    } catch (error: unknown) {
+      setError((error as ApiError)?.error || "로그인 중 오류가 발생했습니다.");
     }
   };
 

@@ -6,6 +6,7 @@ import { useAuthStore } from "@/stores/authStore";
 import * as authApi from "@/services/authApi";
 import { toast } from "react-toastify";
 import { queryKeys } from "@/lib/react-query/queryKeys";
+import { type ApiError } from "@/lib/apiClient";
 
 /**
  * 로그인 Mutation
@@ -24,8 +25,8 @@ export function useLogin() {
       queryClient.setQueryData(queryKeys.auth.currentUser(), response.user);
       toast.success("로그인되었습니다.");
     },
-    onError: (error: any) => {
-      toast.error(error?.error || "로그인에 실패했습니다.");
+    onError: (error: ApiError) => {
+      toast.error(error.error || "로그인에 실패했습니다.");
     },
   });
 }
