@@ -279,11 +279,11 @@ export function useTicketForm() {
         }
 
         await updateTicketMutation.mutateAsync({ id, data: updateData });
+        navigate(`/tickets/${id}`);
       } else {
         await createTicketMutation.mutateAsync(ticketData);
+        navigate("/");
       }
-
-      navigate("/");
     } catch (error: unknown) {
       console.error("티켓 저장 오류:", error);
     }

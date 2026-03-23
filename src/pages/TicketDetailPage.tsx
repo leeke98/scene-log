@@ -4,7 +4,23 @@ import { type ApiError } from "@/lib/apiClient";
 import { toast } from "react-toastify";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowLeft, Pencil, Trash2, MapPin, Armchair, Users, Ticket, ShoppingBag, Calendar, Clock } from "lucide-react";
+
+function StarRating({ rating }: { rating: number }) {
+  return (
+    <div className="flex gap-0.5">
+      {Array.from({ length: 5 }, (_, i) => (
+        <svg
+          key={i}
+          className={`w-5 h-5 ${i < rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300 fill-gray-300"}`}
+          viewBox="0 0 20 20"
+        >
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+        </svg>
+      ))}
+    </div>
+  );
+}
 
 export default function TicketDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -15,7 +31,6 @@ export default function TicketDetailPage() {
   const handleDelete = () => {
     if (!id) return;
 
-    // 커스텀 확인 toast
     toast(
       ({ closeToast }) => (
         <div className="flex flex-col gap-3">
@@ -34,7 +49,6 @@ export default function TicketDetailPage() {
                   await deleteTicketMutation.mutateAsync(id);
                   navigate("/records");
                 } catch (err: unknown) {
-                  // 에러는 mutation의 onError에서 처리됨
                   console.error("티켓 삭제 오류:", err);
                 }
               }}
@@ -71,9 +85,7 @@ export default function TicketDetailPage() {
     return (
       <Layout>
         <div className="text-center py-12">
-          <p className="text-gray-500">
-            {errorMessage || "티켓을 찾을 수 없습니다."}
-          </p>
+          <p className="text-gray-500">{errorMessage || "티켓을 찾을 수 없습니다."}</p>
           <Button onClick={() => navigate("/records")} className="mt-4">
             돌아가기
           </Button>
@@ -82,111 +94,167 @@ export default function TicketDetailPage() {
     );
   }
 
+  const totalSpend = (ticket.ticketPrice ?? 0) + (ticket.mdPrice ?? 0);
+
   return (
     <Layout>
-      <Card className="max-w-2xl mx-auto">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>{ticket.performanceName}</CardTitle>
-            <Button variant="destructive" onClick={handleDelete}>
+      <div className="max-w-3xl mx-auto space-y-4">
+        {/* 상단 액션바 */}
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => navigate("/records")}
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            목록으로
+          </button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate(`/tickets/${ticket.id}/edit`)}
+              className="flex items-center gap-1.5"
+            >
+              <Pencil className="w-3.5 h-3.5" />
+              수정
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleDelete}
+              className="flex items-center gap-1.5 text-muted-foreground hover:text-red-500 hover:bg-red-50"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
               삭제
             </Button>
           </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
+        </div>
+
+        {/* 히어로 섹션 */}
+        <div className="flex gap-6 bg-card rounded-xl border p-6">
+          {/* 포스터 */}
           {ticket.posterUrl && (
-            <div className="flex justify-center">
+            <div className="flex-shrink-0">
               <img
                 src={ticket.posterUrl}
                 alt={ticket.performanceName}
-                className="max-w-xs rounded-md"
+                className="w-52 rounded-lg object-cover shadow-md"
               />
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-sm text-gray-500">관람 일시</p>
-              <p className="font-medium">
-                {ticket.date}
-                {ticket.time && ` ${ticket.time}`}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">별점</p>
-              <p className="font-medium">⭐ {ticket.rating}/5</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">극장</p>
-              <p className="font-medium">{ticket.theater || "-"}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">좌석</p>
-              <p className="font-medium">{ticket.seat || "-"}</p>
-            </div>
-            <div className="col-span-2">
-              <p className="text-sm text-gray-500 mb-2">캐스팅</p>
-              <div className="flex flex-wrap gap-2">
-                {ticket.casting && ticket.casting.length > 0 ? (
-                  ticket.casting.map((actor, index) => (
-                    <span
-                      key={index}
-                      className="inline-flex items-center px-3 py-1 bg-primary/10 text-primary rounded-md text-sm"
-                    >
-                      {actor}
-                    </span>
-                  ))
-                ) : (
-                  <span className="text-gray-400">-</span>
+          {/* 공연 기본 정보 */}
+          <div className="flex-1 min-w-0 space-y-2">
+            {(ticket.genre || ticket.isChild !== undefined) && (
+              <div className="flex gap-2">
+                {ticket.genre && (
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                    {ticket.genre}
+                  </span>
+                )}
+                {ticket.isChild && (
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                    아동
+                  </span>
                 )}
               </div>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">동행자</p>
-              <p className="font-medium">{ticket.companion || "-"}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">티켓 가격</p>
-              <p className="font-medium">
-                {ticket.ticketPrice
-                  ? `₩${ticket.ticketPrice.toLocaleString()}`
-                  : "-"}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">MD 가격</p>
-              <p className="font-medium">
-                {ticket.mdPrice ? `₩${ticket.mdPrice.toLocaleString()}` : "-"}
-              </p>
-            </div>
-          </div>
+            )}
+            <h1 className="text-xl font-bold leading-snug">{ticket.performanceName}</h1>
 
-          {ticket.review && (
-            <div>
-              <p className="text-sm text-gray-500 mb-2">공연 후기</p>
-              <p className="whitespace-pre-wrap bg-gray-50 p-4 rounded-md">
-                {ticket.review}
-              </p>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+              <span className="flex items-center gap-1">
+                <Calendar className="w-3.5 h-3.5" />
+                {ticket.date}
+              </span>
+              {ticket.time && (
+                <span className="flex items-center gap-1">
+                  <Clock className="w-3.5 h-3.5" />
+                  {ticket.time.slice(0, 5)}
+                </span>
+              )}
+              {ticket.theater && (
+                <span className="flex items-center gap-1">
+                  <MapPin className="w-3.5 h-3.5" />
+                  {ticket.theater}
+                </span>
+              )}
             </div>
-          )}
 
-          <div className="flex gap-4 pt-4">
-            <Button
-              variant="outline"
-              onClick={() => navigate("/records")}
-              className="flex-1"
-            >
-              목록으로
-            </Button>
-            <Button
-              onClick={() => navigate(`/tickets/${ticket.id}/edit`)}
-              className="flex-1"
-            >
-              수정
-            </Button>
+            {ticket.rating !== undefined && ticket.rating !== null && (
+              <div className="flex items-center gap-2">
+                <StarRating rating={ticket.rating} />
+                <span className="text-xs text-muted-foreground">{ticket.rating}/5</span>
+              </div>
+            )}
+
+            {/* 캐스팅 */}
+            {ticket.casting && ticket.casting.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {ticket.casting.map((actor, index) => (
+                  <span
+                    key={index}
+                    className="inline-flex items-center px-2.5 py-1 bg-secondary text-secondary-foreground rounded-md text-xs font-medium"
+                  >
+                    {actor}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+
+        {/* 상세 정보 stat 바 */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <StatItem icon={<Armchair className="w-4 h-4" />} label="좌석" value={ticket.seat} />
+          <StatItem icon={<Users className="w-4 h-4" />} label="동행자" value={ticket.companion} />
+          <StatItem
+            icon={<Ticket className="w-4 h-4" />}
+            label="티켓"
+            value={ticket.ticketPrice ? `₩${ticket.ticketPrice.toLocaleString()}` : undefined}
+          />
+          <StatItem
+            icon={<ShoppingBag className="w-4 h-4" />}
+            label="MD"
+            value={ticket.mdPrice ? `₩${ticket.mdPrice.toLocaleString()}` : undefined}
+          />
+        </div>
+
+        {/* 총 지출 (둘 다 있을 때만) */}
+        {ticket.ticketPrice && ticket.mdPrice ? (
+          <div className="flex items-center justify-end gap-2 text-sm px-1">
+            <span className="text-muted-foreground">총 지출</span>
+            <span className="font-semibold">₩{totalSpend.toLocaleString()}</span>
+          </div>
+        ) : null}
+
+        {/* 후기 */}
+        {ticket.review && (
+          <div className="bg-card rounded-xl border p-6 space-y-2">
+            <p className="text-sm font-medium text-muted-foreground">공연 후기</p>
+            <p className="whitespace-pre-wrap text-sm leading-relaxed">{ticket.review}</p>
+          </div>
+        )}
+      </div>
     </Layout>
+  );
+}
+
+function StatItem({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value?: string;
+}) {
+  return (
+    <div className="bg-card rounded-xl border px-4 py-3 flex flex-col gap-1">
+      <div className="flex items-center gap-1.5 text-muted-foreground">
+        {icon}
+        <span className="text-xs">{label}</span>
+      </div>
+      <p className="text-sm font-medium truncate">{value ?? <span className="text-muted-foreground">-</span>}</p>
+    </div>
   );
 }

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import { formatDateToISO } from "@/lib/dateUtils";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -101,6 +102,7 @@ function StepCard({
 }
 
 export default function TicketFormPage() {
+  const { id } = useParams<{ id?: string }>();
   const {
     formData,
     setFormData,
@@ -530,7 +532,7 @@ export default function TicketFormPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => navigate("/")}
+                  onClick={() => isEditMode ? navigate(`/tickets/${id}`) : navigate("/")}
                   className="flex-1"
                   disabled={isPending}
                 >
