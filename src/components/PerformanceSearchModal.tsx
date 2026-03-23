@@ -74,7 +74,7 @@ export default function PerformanceSearchModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-4xl max-h-[90vh] flex flex-col">
+      <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] flex flex-col">
         {/* 헤더 */}
         <div className="flex items-center justify-between p-6 border-b">
           <h2 className="text-xl font-semibold">공연 검색</h2>
@@ -174,36 +174,36 @@ export default function PerformanceSearchModal({
                 <div
                   key={performance.mt20id}
                   onClick={() => handleSelectPerformance(performance)}
-                  className="border rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                  className="border rounded-lg p-3 cursor-pointer hover:bg-gray-50 transition-colors"
                 >
-                  <div className="flex gap-4">
+                  <div className="flex gap-3">
                     {performance.poster && (
                       <img
                         src={performance.poster}
                         alt={performance.prfnm}
-                        className="w-20 h-28 object-cover rounded"
+                        className="w-14 h-20 object-cover rounded flex-shrink-0"
                         onError={(e) => {
                           (e.target as HTMLImageElement).style.display = "none";
                         }}
                       />
                     )}
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-lg mb-2">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-sm mb-1.5 leading-snug">
                         {performance.prfnm}
                       </h3>
-                      <p className="text-sm text-gray-600 mb-1">
+                      <p className="text-xs text-gray-600 mb-0.5">
                         <span className="font-medium">기간:</span>{" "}
                         {performance.prfpdfrom} ~ {performance.prfpdto}
                       </p>
-                      <p className="text-sm text-gray-600 mb-1">
+                      <p className="text-xs text-gray-600 mb-0.5">
                         <span className="font-medium">극장:</span>{" "}
                         {performance.fcltynm}
                       </p>
-                      <p className="text-sm text-gray-600 mb-1">
+                      <p className="text-xs text-gray-600 mb-0.5">
                         <span className="font-medium">지역:</span>{" "}
                         {performance.area}
                       </p>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-xs text-gray-600">
                         <span className="font-medium">장르:</span>{" "}
                         {performance.genrenm}
                       </p>
@@ -235,14 +235,14 @@ export default function PerformanceSearchModal({
           {!isLoading && performances.length === 0 && !error && (
             <div className="text-center py-12 text-gray-500">
               {!modalDate ? (
-                <div className="space-y-2">
-                  <p className="font-medium">공연 날짜를 먼저 선택해주세요.</p>
-                  <p className="text-sm">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium">공연 날짜를 먼저 선택해주세요.</p>
+                  <p className="text-xs">
                     날짜 선택 후 작품명을 입력하고 검색 버튼을 눌러주세요.
                   </p>
                 </div>
               ) : (
-                <p className="font-medium">
+                <p className="text-sm">
                   작품명을 입력하고 검색 버튼을 눌러주세요.
                 </p>
               )}

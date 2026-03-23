@@ -57,7 +57,7 @@ export function useTicketForm() {
   const [formData, setFormData] = useState<TicketFormData>({
     date: isEditMode
       ? ""
-      : dateFromUrl || new Date().toISOString().split("T")[0],
+      : dateFromUrl || formatDateToISO(new Date()),
     time: "20:00",
     performanceName: "",
     genre: "뮤지컬",
