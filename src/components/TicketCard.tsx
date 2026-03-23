@@ -132,21 +132,16 @@ export default function TicketCard({ ticket }: TicketCardProps) {
           )}
 
           {/* 티켓 하단 구분선 효과 */}
-          <div className="pt-3 border-t border-gray-200">
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-500">
-                티켓을 클릭하여 상세보기
-              </span>
-              {ticket.rating && (
-                <div className="flex items-center gap-1">
-                  <span className="text-yellow-500 text-sm">⭐</span>
-                  <span className="text-xs text-gray-600 font-medium">
-                    {ticket.rating}/5
-                  </span>
-                </div>
-              )}
+          {ticket.rating && (
+            <div className="pt-3 border-t border-gray-200">
+              <div className="flex items-center gap-1">
+                <span className="text-yellow-500 text-sm">⭐</span>
+                <span className="text-xs text-gray-600 font-medium">
+                  {ticket.rating}/5
+                </span>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* 티켓 왼쪽 구멍 효과 (비행기표 느낌) */}
