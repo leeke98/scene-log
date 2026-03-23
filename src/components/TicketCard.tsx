@@ -34,10 +34,10 @@ export default function TicketCard({ ticket }: TicketCardProps) {
   return (
     <div
       onClick={handleClick}
-      className="group relative cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-xl"
+      className="group relative cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-xl h-full"
     >
       {/* 티켓 메인 컨테이너 */}
-      <div className="relative bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg overflow-hidden border-2 border-gray-200 hover:border-primary/50 transition-all">
+      <div className="relative bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg overflow-hidden border-2 border-gray-200 hover:border-primary/50 transition-all flex flex-col h-full">
         {/* 티켓 상단 - 포스터 영역 */}
         <div className="relative h-64 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
           {ticket.posterUrl ? (
@@ -72,64 +72,66 @@ export default function TicketCard({ ticket }: TicketCardProps) {
         </div>
 
         {/* 티켓 하단 - 정보 영역 */}
-        <div className="p-5 space-y-3">
-          {/* 날짜와 시간 */}
-          <div className="flex items-center gap-4 text-gray-700">
-            <div className="flex items-center gap-1.5">
-              <Calendar className="w-4 h-4 text-gray-500" />
-              <span className="text-sm font-medium">
-                {formatDate(ticket.date)}
-              </span>
-            </div>
-            {ticket.time && (
+        <div className="p-5 flex flex-col flex-1 justify-between gap-3">
+          <div className="space-y-3">
+            {/* 날짜와 시간 */}
+            <div className="flex items-center gap-4 text-gray-700">
               <div className="flex items-center gap-1.5">
-                <Clock className="w-4 h-4 text-gray-500" />
+                <Calendar className="w-4 h-4 text-gray-500" />
                 <span className="text-sm font-medium">
-                  {formatTime(ticket.time)}
+                  {formatDate(ticket.date)}
+                </span>
+              </div>
+              {ticket.time && (
+                <div className="flex items-center gap-1.5">
+                  <Clock className="w-4 h-4 text-gray-500" />
+                  <span className="text-sm font-medium">
+                    {formatTime(ticket.time)}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* 극장명 */}
+            {ticket.theater && (
+              <div className="flex items-start gap-2">
+                <MapPin className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                <span className="text-sm text-gray-700 line-clamp-1">
+                  {ticket.theater}
                 </span>
               </div>
             )}
-          </div>
 
-          {/* 극장명 */}
-          {ticket.theater && (
-            <div className="flex items-start gap-2">
-              <MapPin className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
-              <span className="text-sm text-gray-700 line-clamp-1">
-                {ticket.theater}
-              </span>
-            </div>
-          )}
-
-          {/* 좌석 */}
-          {ticket.seat && (
-            <div className="flex items-center gap-2">
-              <User className="w-4 h-4 text-gray-500" />
-              <span className="text-sm text-gray-700">{ticket.seat}</span>
-            </div>
-          )}
-
-          {/* 캐스팅 */}
-          {displayCasting.length > 0 && (
-            <div className="flex items-start gap-2">
-              <Users className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
-              <div className="flex flex-wrap gap-1.5 flex-1">
-                {displayCasting.map((actor, index) => (
-                  <span
-                    key={index}
-                    className="inline-flex items-center px-2 py-1 bg-primary/10 text-primary rounded-md text-xs font-medium"
-                  >
-                    {actor}
-                  </span>
-                ))}
-                {ticket.casting && ticket.casting.length > 4 && (
-                  <span className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-600 rounded-md text-xs">
-                    +{ticket.casting.length - 4}
-                  </span>
-                )}
+            {/* 좌석 */}
+            {ticket.seat && (
+              <div className="flex items-center gap-2">
+                <User className="w-4 h-4 text-gray-500" />
+                <span className="text-sm text-gray-700">{ticket.seat}</span>
               </div>
-            </div>
-          )}
+            )}
+
+            {/* 캐스팅 */}
+            {displayCasting.length > 0 && (
+              <div className="flex items-start gap-2">
+                <Users className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                <div className="flex flex-wrap gap-1.5 flex-1">
+                  {displayCasting.map((actor, index) => (
+                    <span
+                      key={index}
+                      className="inline-flex items-center px-2 py-1 bg-primary/10 text-primary rounded-md text-xs font-medium"
+                    >
+                      {actor}
+                    </span>
+                  ))}
+                  {ticket.casting && ticket.casting.length > 4 && (
+                    <span className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-600 rounded-md text-xs">
+                      +{ticket.casting.length - 4}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* 티켓 하단 구분선 효과 */}
           {ticket.rating && (
