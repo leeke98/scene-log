@@ -30,28 +30,8 @@ beforeEach(() => {
 });
 
 describe("ticketApi", () => {
-  describe("createTicket — 필수 필드 검증", () => {
-    it("date가 없으면 에러를 던진다", async () => {
-      const data = { ...validTicket, date: "" };
-      await expect(createTicket(data)).rejects.toThrow("필수 필드");
-    });
-
-    it("time이 없으면 에러를 던진다", async () => {
-      const data = { ...validTicket, time: "" };
-      await expect(createTicket(data)).rejects.toThrow("필수 필드");
-    });
-
-    it("performanceName이 없으면 에러를 던진다", async () => {
-      const data = { ...validTicket, performanceName: "" };
-      await expect(createTicket(data)).rejects.toThrow("필수 필드");
-    });
-
-    it("theater가 없으면 에러를 던진다", async () => {
-      const data = { ...validTicket, theater: "" };
-      await expect(createTicket(data)).rejects.toThrow("필수 필드");
-    });
-
-    it("필수 필드가 모두 있으면 apiPost를 호출한다", async () => {
+  describe("createTicket", () => {
+    it("apiPost를 올바른 경로와 데이터로 호출한다", async () => {
       vi.mocked(apiPost).mockResolvedValue({ message: "created", id: "new-1" });
 
       await createTicket(validTicket);

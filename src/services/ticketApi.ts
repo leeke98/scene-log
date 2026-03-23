@@ -84,13 +84,6 @@ export async function getTicketsByMonth(
 export async function createTicket(
   data: CreateTicketRequest
 ): Promise<CreateTicketResponse> {
-  // 필수 필드 검증
-  if (!data.date || !data.time || !data.performanceName || !data.theater) {
-    throw new Error(
-      "필수 필드(date, time, performanceName, theater)를 모두 입력해주세요."
-    );
-  }
-
   return apiPost<CreateTicketResponse>("/tickets", data);
 }
 
