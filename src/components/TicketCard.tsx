@@ -134,11 +134,15 @@ export default function TicketCard({ ticket }: TicketCardProps) {
           {/* 티켓 하단 구분선 효과 */}
           {ticket.rating && (
             <div className="pt-3 border-t border-gray-200">
-              <div className="flex items-center gap-1">
-                <span className="text-yellow-500 text-sm">⭐</span>
-                <span className="text-xs text-gray-600 font-medium">
-                  {ticket.rating}/5
-                </span>
+              <div className="flex items-center gap-0.5">
+                {Array.from({ length: 5 }, (_, i) => (
+                  <span
+                    key={i}
+                    className={`text-sm ${i < ticket.rating! ? "text-yellow-400" : "text-gray-200"}`}
+                  >
+                    ★
+                  </span>
+                ))}
               </div>
             </div>
           )}
