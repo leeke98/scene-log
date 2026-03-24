@@ -29,6 +29,8 @@ export default function PerformancePoster({
         <img
           src={performance.poster}
           alt={performance.prfnm}
+          loading="lazy"
+          decoding="async"
           className="w-full h-full object-cover group-hover:opacity-80 transition-opacity"
           onError={() => setImageError(true)}
         />

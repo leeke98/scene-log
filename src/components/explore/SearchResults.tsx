@@ -23,11 +23,7 @@ export default function SearchResults({
     hasNextPage,
     fetchNextPage,
     error,
-  } = useSearchPerformances({
-    searchTerm,
-    genre,
-    rows: 20,
-  });
+  } = useSearchPerformances({ searchTerm, genre, rows: 20 });
 
   const performances = data?.pages.flat() ?? [];
 
@@ -35,7 +31,6 @@ export default function SearchResults({
   useEffect(() => {
     const el = loadMoreRef.current;
     if (!el) return;
-
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
@@ -44,7 +39,6 @@ export default function SearchResults({
       },
       { threshold: 0.1 }
     );
-
     observer.observe(el);
     return () => observer.disconnect();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
@@ -53,10 +47,7 @@ export default function SearchResults({
     return (
       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-3">
         {Array.from({ length: 14 }).map((_, i) => (
-          <div
-            key={i}
-            className="aspect-[3/4] bg-muted rounded animate-pulse"
-          />
+          <div key={i} className="aspect-[3/4] bg-muted rounded animate-pulse" />
         ))}
       </div>
     );
@@ -82,8 +73,7 @@ export default function SearchResults({
   return (
     <div>
       <p className="text-sm text-muted-foreground mb-4">
-        검색 결과 {performances.length}건
-        {hasNextPage ? " (더 있음)" : ""}
+        검색 결과 {performances.length}건{hasNextPage ? " (더 있음)" : ""}
       </p>
       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-3">
         {performances.map((performance, index) => (
@@ -104,7 +94,6 @@ export default function SearchResults({
         ))}
       </div>
 
-      {/* 무한 스크롤 sentinel */}
       <div ref={loadMoreRef} className="h-8 mt-4" />
 
       {isFetchingNextPage && (
