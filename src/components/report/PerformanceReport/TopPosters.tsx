@@ -132,25 +132,18 @@ export default function TopPosters({
   const ranks = calculateRanks();
 
   const getRankBadge = (rank: number) => {
-    const badgeClasses = {
-      1: "bg-yellow-500",
-      2: "bg-gray-400",
-      3: "bg-amber-600",
-      4: "bg-gray-500",
-      5: "bg-gray-600",
-      6: "bg-gray-700",
-      7: "bg-gray-800",
-      8: "bg-gray-900",
-      9: "bg-slate-800",
-      10: "bg-slate-900",
-    };
-
     const badgeColor =
-      badgeClasses[rank as keyof typeof badgeClasses] || "bg-gray-800";
+      rank === 1
+        ? "bg-yellow-500"
+        : rank === 2
+          ? "bg-gray-400"
+          : rank === 3
+            ? "bg-amber-600"
+            : "bg-muted text-muted-foreground";
 
     return (
       <div
-        className={`absolute top-2 left-2 z-10 ${badgeColor} text-white text-xs font-bold w-8 h-8 rounded-full flex items-center justify-center shadow-lg`}
+        className={`absolute top-2 left-2 z-10 ${badgeColor} text-white text-xs font-bold w-7 h-7 rounded-full flex items-center justify-center shadow`}
       >
         {rank}
       </div>
@@ -234,8 +227,11 @@ export default function TopPosters({
               </div>
 
               {/* 포스터 아래 작품명 */}
-              <div className="mt-3 text-left">
-                <p className="text-sm font-medium text-gray-900 truncate max-w-[200px]">
+              <div className="mt-2 text-left">
+                <p className="text-sm font-medium truncate max-w-[200px]">
+                  {performance.name}
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
                   {performance.viewCount}회 관람
                 </p>
               </div>

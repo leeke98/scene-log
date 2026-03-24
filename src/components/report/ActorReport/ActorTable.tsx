@@ -88,9 +88,9 @@ export default function ActorTable({
                   <TableCell className="px-6 py-4 whitespace-nowrap">
                     <div className="space-y-1">
                       <div>{actor.totalViewCount}회</div>
-                      <div className="bg-gray-200 rounded-full h-2 w-24">
+                      <div className="bg-muted rounded-full h-2 w-24">
                         <div
-                          className="bg-green-500 h-2 rounded-full transition-all"
+                          className="bg-primary h-2 rounded-full transition-all"
                           style={{
                             width: `${Math.min(
                               (actor.totalViewCount / 30) * 100,
@@ -106,7 +106,7 @@ export default function ActorTable({
                       {actor.watchedPerformances.map((performance, idx) => (
                         <span
                           key={idx}
-                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary"
                         >
                           {performance}
                         </span>
