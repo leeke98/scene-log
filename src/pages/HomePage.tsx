@@ -25,7 +25,7 @@ export default function HomePage() {
 
   return (
     <Layout>
-      <div className="mb-6 flex items-center justify-between max-w-[1200px] mx-auto">
+      <div className="mb-6 flex items-center justify-between max-w-[1200px] mx-auto px-4">
         <div className="flex items-center gap-2">
           <MonthPicker value={currentDate} onChange={handleMonthChange} />
           <Button
