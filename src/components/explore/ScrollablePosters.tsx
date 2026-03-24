@@ -68,7 +68,7 @@ export default function ScrollablePosters({
         {Array.from({ length: 10 }).map((_, index) => (
           <div
             key={index}
-            className="w-48 h-64 bg-gray-200 rounded animate-pulse flex-shrink-0"
+            className="w-36 sm:w-40 md:w-48 flex-shrink-0 aspect-[3/4] bg-gray-200 rounded animate-pulse"
           />
         ))}
       </div>
@@ -113,12 +113,13 @@ export default function ScrollablePosters({
         }}
       >
         {performances.map((performance, index) => (
-          <PerformancePoster
-            key={performance.mt20id || index}
-            performance={performance}
-            rank={index + 1}
-            onClick={() => onPosterClick(performance.mt20id)}
-          />
+          <div key={performance.mt20id || index} className="w-36 sm:w-40 md:w-48 flex-shrink-0">
+            <PerformancePoster
+              performance={performance}
+              rank={index + 1}
+              onClick={() => onPosterClick(performance.mt20id)}
+            />
+          </div>
         ))}
       </div>
 

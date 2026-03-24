@@ -49,7 +49,7 @@ export function useSearchPerformances(params: SearchPerformancesParams) {
       return allPages.length + 1;
     },
     initialPageParam: 1,
-    enabled: enabled !== undefined ? enabled : !!searchTerm && !!startDate,
+    enabled: enabled !== undefined ? enabled : !!searchTerm,
   });
 }
 

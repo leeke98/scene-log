@@ -3,7 +3,7 @@ import { type KopisPerformance } from "@/services/kopisApi";
 
 interface PerformancePosterProps {
   performance: KopisPerformance;
-  rank: number;
+  rank?: number;
   onClick: () => void;
 }
 
@@ -16,13 +16,15 @@ export default function PerformancePoster({
 
   return (
     <div
-      className="w-48 h-64 bg-gray-200 rounded overflow-hidden relative group cursor-pointer flex-shrink-0"
+      className="w-full aspect-[3/4] bg-gray-200 rounded overflow-hidden relative group cursor-pointer"
       onClick={onClick}
     >
       {/* 순위 배지 */}
-      <div className="absolute top-2 left-2 z-10 bg-black/70 text-white text-lg font-bold w-8 h-8 rounded-full flex items-center justify-center">
-        {rank}
-      </div>
+      {rank !== undefined && (
+        <div className="absolute top-2 left-2 z-10 bg-black/70 text-white text-lg font-bold w-8 h-8 rounded-full flex items-center justify-center">
+          {rank}
+        </div>
+      )}
       {performance.poster && !imageError ? (
         <img
           src={performance.poster}
