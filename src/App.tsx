@@ -106,6 +106,22 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/report/actor"
+        element={
+          <PrivateRoute>
+            <ReportPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/report/performance"
+        element={
+          <PrivateRoute>
+            <ReportPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
         path="/explore"
         element={
           <PrivateRoute>
