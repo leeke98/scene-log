@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/logo_new.png";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -41,7 +41,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-md bg-gray-50">
         <CardHeader className="text-center pb-6">
           <div className="flex flex-col items-center gap-4">
-            <img src={logo} alt="SceneLog" className="w-32 h-26" />
+            <img src={logo} alt="SceneLog" className="w-26 h-14" />
             {/* <h1 className="text-2xl font-semibold text-gray-900">SceneLog</h1> */}
           </div>
         </CardHeader>

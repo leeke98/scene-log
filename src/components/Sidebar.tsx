@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/queries/auth";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/logo_new.png";
 import { Home, BookOpen, BarChart2, Compass, LogOut, ChevronDown } from "lucide-react";
 
 const menuItems = [
@@ -40,7 +40,7 @@ export default function Sidebar() {
     <aside className="hidden md:flex flex-col w-56 border-r bg-background sticky top-0 h-screen shrink-0">
       <div className="p-4 border-b">
         <Link to="/">
-          <img src={logo} alt="SceneLog" className="h-12" />
+          <img src={logo} alt="SceneLog" className="h-9" />
         </Link>
       </div>
 

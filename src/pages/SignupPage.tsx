@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/logo_new.png";
 
 // 비밀번호 유효성 검사 함수
 function validatePassword(password: string): {
@@ -97,7 +97,7 @@ export default function SignupPage() {
       <Card className="w-full max-w-md bg-gray-50">
         <CardHeader className="text-center pb-6">
           <div className="flex flex-col items-center gap-4">
-            <img src={logo} alt="SceneLog" className="w-32 h-26" />
+            <img src={logo} alt="SceneLog" className="w-26 h-14" />
           </div>
         </CardHeader>
         <CardContent>
