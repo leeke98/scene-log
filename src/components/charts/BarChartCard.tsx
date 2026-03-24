@@ -42,14 +42,16 @@ export default function BarChartCard({
 
   return (
     <div
-      className={`bg-white rounded-lg p-4 border border-gray-200 min-w-0 ${
+      className={`bg-card rounded-xl p-5 border border-border shadow-sm min-w-0 ${
         className || ""
       }`}
     >
-      <h3 className="text-sm font-medium text-gray-700 mb-2">{title}</h3>
+      <h3 className="text-sm font-semibold text-foreground/70 mb-3 tracking-wide">
+        {title}
+      </h3>
       <ChartContainer config={config} className={`${height} w-full`}>
         <RechartsBarChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" />
+          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
           <XAxis
             dataKey={xAxisKey}
             tickLine={false}
@@ -59,6 +61,7 @@ export default function BarChartCard({
             textAnchor="end"
             height={60}
             interval={0}
+            tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
           />
           <YAxis
             tickLine={false}
@@ -66,12 +69,13 @@ export default function BarChartCard({
             tickMargin={8}
             width={40}
             tickFormatter={yAxisFormatter}
+            tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
           />
           <ChartTooltip
             content={<ChartTooltipContent />}
             formatter={tooltipFormatter}
           />
-          <Bar dataKey={dataKey} fill={fillColor} radius={4} />
+          <Bar dataKey={dataKey} fill={fillColor} radius={[4, 4, 0, 0]} />
         </RechartsBarChart>
       </ChartContainer>
     </div>

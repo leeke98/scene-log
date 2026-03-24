@@ -122,7 +122,10 @@ export default function OverallAnnualTab({ year }: OverallAnnualTabProps) {
 
         {/* 가장 많이 본 작품 섹션 */}
         <div className="col-span-3 flex flex-col">
-          <h2 className="text-lg font-semibold mb-3">가장 많이 본 작품</h2>
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-1 h-5 bg-primary rounded-full" />
+            <h2 className="text-base font-semibold tracking-wide">가장 많이 본 작품</h2>
+          </div>
           <TopPerformancesPoster
             performances={top10Performances || []}
             height={posterHeight}
@@ -132,7 +135,10 @@ export default function OverallAnnualTab({ year }: OverallAnnualTabProps) {
 
       {/* 차트 섹션 */}
       <section>
-        <h2 className="text-xl font-semibold mb-4">차트</h2>
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-1 h-5 bg-primary rounded-full" />
+          <h2 className="text-base font-semibold tracking-wide">차트</h2>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-5 lg:grid-cols-5 gap-4">
           <BarChartCard
             title="월 별 관람수"

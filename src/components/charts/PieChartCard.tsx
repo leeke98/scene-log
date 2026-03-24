@@ -13,15 +13,15 @@ import {
 } from "@/components/ui/chart";
 import type { DayOfWeekStats } from "@/types/report";
 
-// 요일별 색상 맵 (공통 사용)
+// 요일별 색상 맵 (공통 사용) - jewel tone 팔레트
 export const dayOfWeekColorMap: Record<string, string> = {
-  월: "hsl(12, 76%, 61%)", // 주황색
-  화: "hsl(173, 58%, 39%)", // 청록색
-  수: "hsl(197, 37%, 24%)", // 어두운 청록색
-  목: "hsl(43, 74%, 66%)", // 노란색
-  금: "hsl(27, 87%, 67%)", // 주황-빨강
-  토: "hsl(340, 75%, 55%)", // 분홍색
-  일: "hsl(220, 70%, 50%)", // 파란색
+  월: "hsl(213, 78%, 55%)", // 사파이어 블루
+  화: "hsl(258, 72%, 60%)", // 자수정 퍼플
+  수: "hsl(295, 62%, 57%)", // 오키드 바이올렛
+  목: "hsl(328, 74%, 58%)", // 루비 핑크
+  금: "hsl(15, 82%, 58%)",  // 가넷 오렌지
+  토: "hsl(35, 88%, 52%)",  // 토파즈 앰버
+  일: "hsl(162, 66%, 44%)", // 에메랄드 그린
 };
 
 // 요일 순서
@@ -107,11 +107,11 @@ export default function PieChartCard({
 
   return (
     <div
-      className={`bg-white rounded-lg p-4 border border-gray-200 min-w-0 flex flex-col ${
+      className={`bg-card rounded-xl p-5 border border-border shadow-sm min-w-0 flex flex-col ${
         className || ""
       }`}
     >
-      <h3 className="text-sm font-medium text-gray-700 mb-2 flex-shrink-0">
+      <h3 className="text-sm font-semibold text-foreground/70 mb-3 flex-shrink-0 tracking-wide">
         {title}
       </h3>
       <ChartContainer
@@ -157,7 +157,7 @@ export default function PieChartCard({
                               backgroundColor: color,
                             }}
                           />
-                          <span className="text-xs text-gray-700">
+                          <span className="text-xs text-foreground/70">
                             {itemConfig?.label || item.name}
                           </span>
                         </div>

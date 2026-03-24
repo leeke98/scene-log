@@ -63,7 +63,10 @@ export default function OverallCumulativeTab() {
 
         {/* 가장 많이 본 작품 섹션 */}
         <div className="col-span-3 flex flex-col">
-          <h2 className="text-lg font-semibold mb-3">가장 많이 본 작품</h2>
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-1 h-5 bg-primary rounded-full" />
+            <h2 className="text-base font-semibold tracking-wide">가장 많이 본 작품</h2>
+          </div>
           <TopPerformancesPoster
             performances={top10Performances || []}
             height={posterHeight}
@@ -73,10 +76,13 @@ export default function OverallCumulativeTab() {
 
       {/* 잔디밭 및 차트 섹션 */}
       <section>
-        <h2 className="text-xl font-semibold mb-4">관람 내역</h2>
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-1 h-5 bg-primary rounded-full" />
+          <h2 className="text-base font-semibold tracking-wide">관람 내역</h2>
+        </div>
         <div className="grid grid-cols-6 gap-4 items-stretch">
-          {/* 잔디밭 - 3칸 차지 */}
-          <div className="col-span-4 md:col-span-4 bg-white rounded-lg px-8 py-6 border border-gray-200 flex flex-col">
+          {/* 잔디밭 - 4칸 차지 */}
+          <div className="col-span-4 md:col-span-4 bg-card rounded-xl px-8 py-6 border border-border shadow-sm flex flex-col">
             <GrassField data={grassData || []} />
           </div>
           {/* 관극 요일 파이 차트 - 2칸 차지 */}
