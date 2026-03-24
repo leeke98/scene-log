@@ -1,9 +1,10 @@
+import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/queries/auth";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import logo from "@/assets/logo.png";
-import { Home, BookOpen, BarChart2, Compass, LogOut } from "lucide-react";
+import { Home, BookOpen, BarChart2, Compass, LogOut, ChevronDown } from "lucide-react";
 
 const menuItems = [
   { path: "/", label: "홈", icon: Home },
@@ -22,6 +23,8 @@ export default function Sidebar() {
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const isReportSection = location.pathname.startsWith("/report");
+  const [reportOpen, setReportOpen] = useState(isReportSection);
 
   const handleLogout = () => {
     logout();
@@ -32,8 +35,6 @@ export default function Sidebar() {
     if (path === "/") return location.pathname === "/";
     return location.pathname.startsWith(path);
   };
-
-  const isReportSection = location.pathname.startsWith("/report");
 
   return (
     <aside className="hidden md:flex flex-col w-56 border-r bg-background sticky top-0 h-screen shrink-0">
@@ -47,23 +48,42 @@ export default function Sidebar() {
         {menuItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.path);
+          const isReport = item.path === "/report";
           return (
             <div key={item.path}>
-              <Link
-                to={item.path}
+              <div
                 className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors",
+                  "flex items-center rounded-md transition-colors",
                   active
                     ? "bg-accent text-accent-foreground font-bold"
                     : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                 )}
               >
-                <Icon className="w-4 h-4 shrink-0" />
-                {item.label}
-              </Link>
+                <Link
+                  to={item.path}
+                  className="flex flex-1 items-center gap-3 px-3 py-2.5 text-sm font-medium"
+                >
+                  <Icon className="w-4 h-4 shrink-0" />
+                  {item.label}
+                </Link>
+
+                {isReport && (
+                  <button
+                    onClick={() => setReportOpen((prev) => !prev)}
+                    className="pr-2 py-2.5 pl-1"
+                  >
+                    <ChevronDown
+                      className={cn(
+                        "w-4 h-4 transition-transform duration-200",
+                        reportOpen && "rotate-180"
+                      )}
+                    />
+                  </button>
+                )}
+              </div>
 
               {/* 리포트 하위 메뉴 */}
-              {item.path === "/report" && isReportSection && (
+              {isReport && reportOpen && (
                 <div className="mt-1 ml-7 space-y-0.5">
                   {reportSubItems.map((sub) => (
                     <Link
