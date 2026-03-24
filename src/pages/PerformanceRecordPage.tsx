@@ -88,8 +88,6 @@ export default function PerformanceRecordPage() {
       <div className="container mx-auto px-4">
         {/* 헤더 */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">공연기록</h1>
-
           {/* 검색 및 필터 */}
           <div className="flex flex-col sm:flex-row sm:items-center gap-3">
             <div className="flex items-center gap-3 flex-wrap">
@@ -187,7 +185,7 @@ export default function PerformanceRecordPage() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-8">
               {tickets.map((ticket) => (
                 <TicketCard key={ticket.id} ticket={ticket} />
               ))}

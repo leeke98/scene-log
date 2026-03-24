@@ -81,8 +81,9 @@ export default function PerformanceTable({
   };
 
   return (
-    <Card className="shadow-sm border-border rounded-xl overflow-hidden">
+    <Card className="shadow-sm border-border rounded-xl">
       <CardContent className="p-0">
+        <div className="overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/40 hover:bg-muted/40 border-b border-border">
@@ -177,6 +178,7 @@ export default function PerformanceTable({
             )}
           </TableBody>
         </Table>
+        </div>
       </CardContent>
     </Card>
   );
