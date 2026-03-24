@@ -116,7 +116,7 @@ export default function PieChartCard({
       </h3>
       <ChartContainer
         config={config}
-        className={`${heightClass} w-full flex-1`}
+        className={`${heightClass} w-full`}
       >
         <RechartsPieChart>
           <ChartTooltip content={<ChartTooltipContent />} />
