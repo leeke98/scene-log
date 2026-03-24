@@ -21,6 +21,12 @@ interface PerformanceTableProps {
   onPerformanceClick: (performanceName: string) => void;
 }
 
+const rankConfig: Record<number, { bg: string; text: string }> = {
+  1: { bg: "bg-yellow-400", text: "text-yellow-900" },
+  2: { bg: "bg-slate-300", text: "text-slate-700" },
+  3: { bg: "bg-amber-600", text: "text-white" },
+};
+
 export default function PerformanceTable({
   performances,
   isLoading,
@@ -32,28 +38,17 @@ export default function PerformanceTable({
   onPerformanceClick,
 }: PerformanceTableProps) {
   const getRankBadge = (index: number) => {
-    const actualRank = (currentPage - 1) * limit + index + 1 + startRankOffset;
-    if (currentPage === 1) {
-      if (actualRank === 1)
-        return (
-          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-yellow-500 text-white text-xs font-bold mr-2">
-            1
-          </span>
-        );
-      if (actualRank === 2)
-        return (
-          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-400 text-white text-xs font-bold mr-2">
-            2
-          </span>
-        );
-      if (actualRank === 3)
-        return (
-          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-600 text-white text-xs font-bold mr-2">
-            3
-          </span>
-        );
-    }
-    return null;
+    const actualRank =
+      (currentPage - 1) * limit + index + 1 + startRankOffset;
+    if (currentPage !== 1 || actualRank > 3) return null;
+    const { bg, text } = rankConfig[actualRank];
+    return (
+      <span
+        className={`inline-flex items-center justify-center w-5 h-5 rounded-full ${bg} ${text} text-[10px] font-bold mr-2 flex-shrink-0 shadow-sm`}
+      >
+        {actualRank}
+      </span>
+    );
   };
 
   const renderStars = (rating: number | undefined) => {
@@ -65,20 +60,20 @@ export default function PerformanceTable({
     return (
       <div className="flex items-center gap-0.5">
         {Array.from({ length: fullStars }).map((_, i) => (
-          <Star key={`full-${i}`} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+          <Star key={`full-${i}`} className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
         ))}
         {hasHalfStar && (
-          <div className="relative w-4 h-4">
-            <Star className="w-4 h-4 fill-muted text-muted absolute" />
+          <div className="relative w-3.5 h-3.5">
+            <Star className="w-3.5 h-3.5 fill-muted text-muted absolute" />
             <div className="absolute overflow-hidden" style={{ width: "50%" }}>
-              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+              <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
             </div>
           </div>
         )}
         {Array.from({ length: emptyStars }).map((_, i) => (
-          <Star key={`empty-${i}`} className="w-4 h-4 fill-muted text-muted-foreground" />
+          <Star key={`empty-${i}`} className="w-3.5 h-3.5 fill-muted text-muted" />
         ))}
-        <span className="ml-2 text-sm text-muted-foreground">
+        <span className="ml-1.5 text-xs text-muted-foreground tabular-nums">
           {safeRating.toFixed(1)}
         </span>
       </div>
@@ -86,58 +81,84 @@ export default function PerformanceTable({
   };
 
   return (
-    <Card>
+    <Card className="shadow-sm border-border rounded-xl overflow-hidden">
       <CardContent className="p-0">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead className="px-6 py-3">작품명</TableHead>
-              <TableHead className="px-6 py-3">관람 횟수</TableHead>
-              <TableHead className="px-6 py-3">관람 금액</TableHead>
-              <TableHead className="px-6 py-3">후기 별점</TableHead>
+            <TableRow className="bg-muted/40 hover:bg-muted/40 border-b border-border">
+              <TableHead className="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                작품명
+              </TableHead>
+              <TableHead className="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                관람 횟수
+              </TableHead>
+              <TableHead className="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                관람 금액
+              </TableHead>
+              <TableHead className="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                후기 별점
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={4} className="px-6 py-8 text-center text-muted-foreground">
-                  로딩 중...
+                <TableCell colSpan={4} className="px-6 py-16 text-center">
+                  <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                    <span className="text-3xl">🎭</span>
+                    <span className="text-sm">불러오는 중...</span>
+                  </div>
                 </TableCell>
               </TableRow>
             ) : error ? (
               <TableRow>
-                <TableCell colSpan={4} className="px-6 py-8 text-center text-destructive">
-                  데이터를 불러오는 중 오류가 발생했습니다.
+                <TableCell colSpan={4} className="px-6 py-16 text-center">
+                  <div className="flex flex-col items-center gap-2 text-destructive">
+                    <span className="text-3xl">⚠️</span>
+                    <span className="text-sm">데이터를 불러오는 중 오류가 발생했습니다.</span>
+                  </div>
                 </TableCell>
               </TableRow>
             ) : performances.length > 0 ? (
               performances.map((performance, index) => (
                 <TableRow
                   key={performance.name}
-                  className="cursor-pointer"
+                  className="cursor-pointer transition-colors hover:bg-violet-50/60 dark:hover:bg-violet-950/20 border-b border-border/60"
                   onClick={() => onPerformanceClick(performance.name)}
                 >
                   <TableCell className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       {getRankBadge(index)}
-                      <span className="font-medium">{performance.name}</span>
+                      <span className="font-medium text-sm">{performance.name}</span>
                     </div>
                   </TableCell>
                   <TableCell className="px-6 py-4 whitespace-nowrap">
-                    <div className="space-y-1">
-                      <div className="text-sm">{performance.viewCount}회</div>
-                      <div className="bg-muted rounded-full h-2 w-24">
+                    <div className="space-y-1.5">
+                      <div className="text-sm font-semibold">
+                        {performance.viewCount}
+                        <span className="text-xs font-normal text-muted-foreground ml-0.5">
+                          회
+                        </span>
+                      </div>
+                      <div className="bg-muted rounded-full h-1.5 w-24">
                         <div
-                          className="bg-primary h-2 rounded-full transition-all"
+                          className="h-1.5 rounded-full transition-all"
                           style={{
-                            width: `${Math.min((performance.viewCount / total) * 100, 100)}%`,
+                            width: `${Math.min(
+                              (performance.viewCount / (total || 1)) * 100,
+                              100
+                            )}%`,
+                            background: "hsl(var(--chart-1))",
                           }}
                         />
                       </div>
                     </div>
                   </TableCell>
                   <TableCell className="px-6 py-4 whitespace-nowrap text-sm">
-                    {performance.totalTicketPrice.toLocaleString()}원
+                    <span className="font-medium">
+                      {performance.totalTicketPrice.toLocaleString()}
+                    </span>
+                    <span className="text-xs text-muted-foreground ml-0.5">원</span>
                   </TableCell>
                   <TableCell className="px-6 py-4 whitespace-nowrap">
                     {renderStars(performance.avgRating)}
@@ -146,8 +167,11 @@ export default function PerformanceTable({
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={4} className="px-6 py-8 text-center text-muted-foreground">
-                  데이터가 없습니다.
+                <TableCell colSpan={4} className="px-6 py-16 text-center">
+                  <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                    <span className="text-3xl">🎭</span>
+                    <span className="text-sm">데이터가 없습니다.</span>
+                  </div>
                 </TableCell>
               </TableRow>
             )}

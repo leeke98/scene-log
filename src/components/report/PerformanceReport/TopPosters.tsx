@@ -136,10 +136,10 @@ export default function TopPosters({
       rank === 1
         ? "bg-yellow-500"
         : rank === 2
-          ? "bg-gray-400"
+          ? "bg-slate-400"
           : rank === 3
             ? "bg-amber-600"
-            : "bg-muted text-muted-foreground";
+            : "bg-slate-500";
 
     return (
       <div
