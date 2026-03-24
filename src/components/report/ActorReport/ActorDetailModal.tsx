@@ -1,9 +1,16 @@
-import { X } from "lucide-react";
+import { X, ChevronRight, Eye, Wallet } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { useActorDetail } from "@/queries/reports/queries";
+
+// 작품 태그 색상 (jewel tone, 순환)
+const tagColors = [
+  "bg-violet-50 text-violet-700 border-violet-100 dark:bg-violet-950/40 dark:text-violet-300 dark:border-violet-800/40",
+  "bg-sky-50 text-sky-700 border-sky-100 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-800/40",
+  "bg-pink-50 text-pink-700 border-pink-100 dark:bg-pink-950/40 dark:text-pink-300 dark:border-pink-800/40",
+  "bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/40",
+  "bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/40",
+];
 
 interface ActorDetailModalProps {
   isOpen: boolean;
@@ -11,6 +18,49 @@ interface ActorDetailModalProps {
   actorName: string;
   year?: string;
   month?: string;
+}
+
+function Backdrop({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
+      onClick={onClose}
+    >
+      {children}
+    </div>
+  );
+}
+
+function LoadingModal({ onClose }: { onClose: () => void }) {
+  return (
+    <Backdrop onClose={onClose}>
+      <div
+        className="w-full max-w-md bg-card rounded-2xl shadow-xl border border-border overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="h-1.5 bg-gradient-to-r from-violet-400 via-purple-400 to-pink-400" />
+        <div className="p-8 text-center text-muted-foreground text-sm">
+          불러오는 중...
+        </div>
+      </div>
+    </Backdrop>
+  );
+}
+
+function ErrorModal({ onClose }: { onClose: () => void }) {
+  return (
+    <Backdrop onClose={onClose}>
+      <div
+        className="w-full max-w-md bg-card rounded-2xl shadow-xl border border-border overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="h-1.5 bg-gradient-to-r from-violet-400 via-purple-400 to-pink-400" />
+        <div className="p-8 text-center text-muted-foreground text-sm">
+          데이터를 불러올 수 없습니다.
+        </div>
+      </div>
+    </Backdrop>
+  );
 }
 
 export default function ActorDetailModal({
@@ -22,7 +72,6 @@ export default function ActorDetailModal({
 }: ActorDetailModalProps) {
   const navigate = useNavigate();
 
-  // 배우 상세 정보 가져오기
   const { data: actorDetail, isLoading } = useActorDetail({
     actorName,
     year,
@@ -30,160 +79,138 @@ export default function ActorDetailModal({
   });
 
   if (!isOpen) return null;
-
-  // 로딩 중이거나 데이터가 없을 때
-  if (isLoading) {
-    return createPortal(
-      <div
-        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50"
-        onClick={onClose}
-      >
-        <Card
-          className="w-full max-w-lg mx-4 bg-gray-100"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <CardContent className="p-6">
-            <div className="text-center">로딩 중...</div>
-          </CardContent>
-        </Card>
-      </div>,
-      document.body
-    );
-  }
-
-  if (!actorDetail) {
-    return createPortal(
-      <div
-        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50"
-        onClick={onClose}
-      >
-        <Card
-          className="w-full max-w-lg mx-4 bg-gray-100"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <CardContent className="p-6">
-            <div className="text-center">데이터를 불러올 수 없습니다.</div>
-          </CardContent>
-        </Card>
-      </div>,
-      document.body
-    );
-  }
+  if (isLoading) return createPortal(<LoadingModal onClose={onClose} />, document.body);
+  if (!actorDetail) return createPortal(<ErrorModal onClose={onClose} />, document.body);
 
   const actor = actorDetail.actor;
-  const actorData = {
-    name: actor.actorName,
-    totalViewCount: actor.viewCount,
-    watchedPerformances: actor.performanceList,
-    totalAmount: actor.totalTicketPrice,
-    tickets: actorDetail.tickets.map((ticket) => ({
-      id: ticket.id,
-      displayText: `${ticket.date} ${ticket.performanceName}`,
-    })),
-  };
+  const tickets = actorDetail.tickets.map((ticket) => ({
+    id: ticket.id,
+    date: ticket.date,
+    performanceName: ticket.performanceName,
+  }));
 
   const handleTicketClick = (ticketId: string) => {
-    // 나중에 티켓 상세 페이지로 이동
     navigate(`/tickets/${ticketId}`);
-    onClose(); // 모달 닫기
+    onClose();
   };
 
-  const maxViewCount = 30;
-  const percentage = (actorData.totalViewCount / maxViewCount) * 100;
-
   const modalContent = (
-    <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50"
-      onClick={onClose}
-    >
-      <Card
-        className="w-full max-w-lg max-h-[90vh] overflow-y-auto mx-4 bg-gray-100"
+    <Backdrop onClose={onClose}>
+      <div
+        className="w-full max-w-md bg-card rounded-2xl shadow-xl border border-border overflow-hidden flex flex-col max-h-[88vh]"
         onClick={(e) => e.stopPropagation()}
       >
-        <CardContent className="p-6">
-          <div className="space-y-6">
-            {/* 배우명과 닫기 버튼 - 동일 선상 */}
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold">{actorData.name}</h2>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onClose}
-                className="h-8 w-8"
-              >
-                <X className="w-5 h-5" />
-              </Button>
+        {/* 상단 그라데이션 바 */}
+        <div className="h-1.5 bg-gradient-to-r from-violet-400 via-purple-400 to-pink-400 flex-shrink-0" />
+
+        {/* 헤더 */}
+        <div className="flex items-start justify-between px-6 pt-5 pb-4 flex-shrink-0">
+          <div>
+            <p className="text-xs text-muted-foreground mb-0.5 tracking-wide">배우</p>
+            <h2 className="text-2xl font-bold tracking-tight">{actor.actorName}</h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="mt-1 p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            aria-label="닫기"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* 구분선 */}
+        <div className="mx-6 border-t border-border flex-shrink-0" />
+
+        {/* 본문 */}
+        <div className="px-6 py-5 space-y-5">
+
+          {/* 통계 카드 2개 */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-xl border border-border bg-muted/30 p-4 space-y-1">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+                <Eye className="w-3.5 h-3.5" />
+                총 관람 횟수
+              </div>
+              <div className="text-xl font-bold">
+                {actor.viewCount}
+                <span className="text-sm font-normal text-muted-foreground ml-0.5">회</span>
+              </div>
+              <div className="bg-muted rounded-full h-1.5 mt-1">
+                <div
+                  className="h-1.5 rounded-full transition-all"
+                  style={{
+                    width: `${Math.min((actor.viewCount / 30) * 100, 100)}%`,
+                    background: "hsl(var(--chart-1))",
+                  }}
+                />
+              </div>
             </div>
-
-            {/* 배우 상세 정보 - 2컬럼 레이아웃 */}
-            <div className="space-y-5">
-              {/* 총 관람 횟수 */}
-              <div className="flex items-center gap-4">
-                <span className="text-sm font-medium text-gray-700 w-24 flex-shrink-0">
-                  총 관람 횟수
-                </span>
-                <div className="flex items-center gap-3 flex-1">
-                  <span className="text-sm font-medium">
-                    {actorData.totalViewCount}회
-                  </span>
-                  <div className="flex-1 bg-gray-200 rounded-full h-4 max-w-xs">
-                    <div
-                      className="bg-green-500 h-4 rounded-full transition-all"
-                      style={{ width: `${percentage}%` }}
-                    />
-                  </div>
-                </div>
+            <div className="rounded-xl border border-border bg-muted/30 p-4 space-y-1">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+                <Wallet className="w-3.5 h-3.5" />
+                관람 금액
               </div>
-
-              {/* 관람 작품 */}
-              <div className="flex items-start gap-4">
-                <span className="text-sm font-medium text-gray-700 w-24 flex-shrink-0">
-                  관람 작품
-                </span>
-                <div className="flex flex-wrap gap-2 flex-1">
-                  {actorData.watchedPerformances.map((performance, idx) => (
-                    <span
-                      key={idx}
-                      className="inline-flex items-center px-3 py-1 rounded-md text-sm font-medium bg-gray-200 text-gray-800"
-                    >
-                      {performance}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* 관람 금액 */}
-              <div className="flex items-center gap-4">
-                <span className="text-sm font-medium text-gray-700 w-24 flex-shrink-0">
-                  관람 금액
-                </span>
-                <span className="text-sm font-medium">
-                  {actorData.totalAmount.toLocaleString()} 원
-                </span>
-              </div>
-
-              {/* 관람 티켓 */}
-              <div className="flex items-start gap-4">
-                <span className="text-sm font-medium text-gray-700 w-24 flex-shrink-0">
-                  관람 티켓
-                </span>
-                <div className="flex flex-col gap-1 flex-1 max-h-32 overflow-y-auto">
-                  {actorData.tickets.map((ticket) => (
-                    <button
-                      key={ticket.id}
-                      onClick={() => handleTicketClick(ticket.id)}
-                      className="text-sm text-gray-900 hover:text-blue-600 hover:underline text-left transition-colors py-1"
-                    >
-                      {ticket.displayText}
-                    </button>
-                  ))}
-                </div>
+              <div className="text-base font-bold leading-tight mt-1">
+                {actor.totalTicketPrice.toLocaleString()}
+                <span className="text-xs font-normal text-muted-foreground ml-0.5">원</span>
               </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+
+          {/* 관람 작품 */}
+          {actor.performanceList.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                관람 작품
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {actor.performanceList.map((performance, idx) => (
+                  <span
+                    key={idx}
+                    className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium border ${
+                      tagColors[idx % tagColors.length]
+                    }`}
+                  >
+                    {performance}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 관람 티켓 */}
+          {tickets.length > 0 && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  관람 티켓
+                </p>
+                <span className="text-xs text-muted-foreground">{tickets.length}건</span>
+              </div>
+              <div className="rounded-xl border border-border overflow-hidden divide-y divide-border/60 max-h-52 overflow-y-auto">
+                {tickets.map((ticket) => (
+                  <button
+                    key={ticket.id}
+                    onClick={() => handleTicketClick(ticket.id)}
+                    className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-muted/50 transition-colors group"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className="text-xs text-muted-foreground tabular-nums flex-shrink-0">
+                        {ticket.date}
+                      </span>
+                      <span className="text-sm font-medium truncate">
+                        {ticket.performanceName}
+                      </span>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground/50 group-hover:text-muted-foreground flex-shrink-0 transition-colors" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </Backdrop>
   );
 
   return createPortal(modalContent, document.body);
