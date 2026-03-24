@@ -47,7 +47,13 @@ export default function SearchResults({
     return (
       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-3">
         {Array.from({ length: 14 }).map((_, i) => (
-          <div key={i} className="aspect-[3/4] bg-muted rounded animate-pulse" />
+          <div key={i}>
+            <div className="aspect-[3/4] bg-muted rounded-lg animate-pulse" />
+            <div className="mt-2 space-y-1.5">
+              <div className="h-3 bg-muted rounded animate-pulse w-full" />
+              <div className="h-3 bg-muted rounded animate-pulse w-2/3" />
+            </div>
+          </div>
         ))}
       </div>
     );
@@ -77,20 +83,11 @@ export default function SearchResults({
       </p>
       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-3">
         {performances.map((performance, index) => (
-          <div key={performance.mt20id || index} className="space-y-1.5">
-            <PerformancePoster
-              performance={performance}
-              onClick={() => onPosterClick(performance.mt20id)}
-            />
-            <div className="px-0.5">
-              <p className="text-xs font-medium leading-tight line-clamp-2">
-                {performance.prfnm}
-              </p>
-              <p className="text-xs text-muted-foreground truncate mt-0.5">
-                {performance.fcltynm}
-              </p>
-            </div>
-          </div>
+          <PerformancePoster
+            key={performance.mt20id || index}
+            performance={performance}
+            onClick={() => onPosterClick(performance.mt20id)}
+          />
         ))}
       </div>
 

@@ -7,7 +7,8 @@ export interface KopisPerformance {
   prfnm: string; // 공연명
   prfpdfrom: string; // 공연 시작일
   prfpdto: string; // 공연 종료일
-  fcltynm: string; // 시설명(극장)
+  fcltynm: string; // 시설명(극장) - 검색 결과
+  prfplcnm?: string; // 공연장명 - 박스오피스 응답
   poster: string; // 포스터 URL
   area: string; // 지역
   genrenm: string; // 장르명

@@ -66,10 +66,13 @@ export default function ScrollablePosters({
     return (
       <div className="flex gap-4 overflow-x-hidden">
         {Array.from({ length: 10 }).map((_, index) => (
-          <div
-            key={index}
-            className="w-36 sm:w-40 md:w-48 flex-shrink-0 aspect-[3/4] bg-gray-200 rounded animate-pulse"
-          />
+          <div key={index} className="w-36 sm:w-40 md:w-48 flex-shrink-0">
+            <div className="w-full aspect-[3/4] bg-muted rounded-lg animate-pulse" />
+            <div className="mt-2 space-y-1.5">
+              <div className="h-3 bg-muted rounded animate-pulse w-full" />
+              <div className="h-3 bg-muted rounded animate-pulse w-2/3" />
+            </div>
+          </div>
         ))}
       </div>
     );

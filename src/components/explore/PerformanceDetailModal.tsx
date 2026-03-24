@@ -1,6 +1,6 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { useState } from "react";
 import { X } from "lucide-react";
+import { createPortal } from "react-dom";
 import { usePerformanceDetail } from "@/queries/kopis";
 
 interface PerformanceDetailModalProps {
@@ -9,11 +9,38 @@ interface PerformanceDetailModalProps {
   mt20id: string | null;
 }
 
+function formatDate(dateStr: string): string {
+  if (!dateStr) return "-";
+  if (dateStr.length === 8) {
+    return `${dateStr.substring(0, 4)}.${dateStr.substring(4, 6)}.${dateStr.substring(6, 8)}`;
+  }
+  return dateStr;
+}
+
+function Backdrop({
+  children,
+  onClose,
+}: {
+  children: React.ReactNode;
+  onClose: () => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
+      onClick={onClose}
+    >
+      {children}
+    </div>
+  );
+}
+
 export default function PerformanceDetailModal({
   isOpen,
   onClose,
   mt20id,
 }: PerformanceDetailModalProps) {
+  const [imageError, setImageError] = useState(false);
+
   const {
     data: detail,
     isLoading,
@@ -22,138 +49,128 @@ export default function PerformanceDetailModal({
 
   if (!isOpen) return null;
 
-  const formatDate = (dateStr: string) => {
-    if (!dateStr) return "-";
-    // YYYYMMDD 형식을 YYYY.MM.DD로 변환
-    if (dateStr.length === 8) {
-      return `${dateStr.substring(0, 4)}.${dateStr.substring(
-        4,
-        6
-      )}.${dateStr.substring(6, 8)}`;
-    }
-    return dateStr;
-  };
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-      onClick={onClose}
-    >
-      <Card
-        className="w-full max-w-3xl max-h-[90vh] overflow-y-auto mx-4"
+  const modalContent = (
+    <Backdrop onClose={onClose}>
+      <div
+        className="w-full max-w-3xl bg-card rounded-2xl shadow-xl border border-border overflow-hidden flex flex-col max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
-        <CardContent className="p-6">
+        {/* 상단 그라데이션 바 */}
+        <div className="h-1.5 bg-gradient-to-r from-violet-400 via-purple-400 to-pink-400 flex-shrink-0" />
+
+        {/* 헤더 - 항상 표시 */}
+        <div className="flex items-start justify-between px-6 pt-5 pb-4 flex-shrink-0">
+          <div>
+            <p className="text-xs text-muted-foreground mb-0.5 tracking-wide">공연</p>
+            <h2 className="text-2xl font-bold tracking-tight leading-tight">
+              {detail?.prfnm ?? (isLoading ? "" : "-")}
+            </h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="mt-1 p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors flex-shrink-0"
+            aria-label="닫기"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* 구분선 */}
+        <div className="mx-6 border-t border-border flex-shrink-0" />
+
+        {/* 본문 */}
+        <div className="overflow-y-auto">
           {isLoading && (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
-              <p className="mt-4 text-gray-500">정보를 불러오는 중...</p>
+            <div className="px-6 py-8 text-center text-sm text-muted-foreground">
+              불러오는 중...
             </div>
           )}
 
-          {error && (
-            <div className="text-center py-8 text-red-500">
-              {error instanceof Error
-                ? error.message
-                : "상세 정보를 불러오는데 실패했습니다."}
+          {error && !isLoading && (
+            <div className="px-6 py-8 text-center text-sm text-muted-foreground">
+              {error instanceof Error ? error.message : "상세 정보를 불러오는데 실패했습니다."}
             </div>
           )}
 
           {detail && !isLoading && (
-            <div className="space-y-6">
-              {/* 제목과 닫기 버튼 */}
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold">{detail.prfnm}</h2>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={onClose}
-                  className="h-8 w-8"
-                >
-                  <X className="w-4 h-4" />
-                </Button>
+            <div className="flex gap-6 px-6 py-5">
+              {/* 포스터 */}
+              <div className="w-52 flex-shrink-0 self-start">
+                <div className="aspect-[3/4] rounded-xl overflow-hidden shadow-md">
+                  {detail.poster && !imageError ? (
+                    <img
+                      src={detail.poster}
+                      alt={detail.prfnm}
+                      className="w-full h-full object-cover"
+                      onError={() => setImageError(true)}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-violet-400 to-purple-600">
+                      <span className="text-white text-4xl font-bold opacity-90">
+                        {detail.prfnm.charAt(0)}
+                      </span>
+                      <span className="text-white/60 text-xs mt-2">포스터 없음</span>
+                    </div>
+                  )}
+                </div>
               </div>
 
-              {/* 포스터와 모든 정보 */}
-              <div className="flex gap-6 mb-6">
-                {detail.poster && (
-                  <img
-                    src={detail.poster}
-                    alt={detail.prfnm}
-                    className="w-64 h-80 object-cover rounded flex-shrink-0"
-                  />
+              {/* 정보 패널 */}
+              <div className="flex-1 space-y-3 text-sm">
+                <InfoRow label="공연 기간">
+                  {formatDate(detail.prfpdfrom)} ~ {formatDate(detail.prfpdto)}
+                </InfoRow>
+                <InfoRow label="공연장">{detail.fcltynm || "-"}</InfoRow>
+                <InfoRow label="공연 상태">
+                  <span
+                    className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border ${
+                      detail.prfstate === "공연중"
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/40"
+                        : "bg-muted text-muted-foreground border-border"
+                    }`}
+                  >
+                    {detail.prfstate || "-"}
+                  </span>
+                </InfoRow>
+                {detail.prfcast && (
+                  <InfoRow label="출연진">{detail.prfcast}</InfoRow>
                 )}
-                <div className="flex-1">
-                  <div className="space-y-2 text-sm">
-                    <div>
-                      <span className="font-semibold text-gray-600">
-                        공연 기간:
-                      </span>{" "}
-                      {formatDate(detail.prfpdfrom)} ~{" "}
-                      {formatDate(detail.prfpdto)}
-                    </div>
-                    <div>
-                      <span className="font-semibold text-gray-600">
-                        공연장:
-                      </span>{" "}
-                      {detail.fcltynm || "-"}
-                    </div>
-                    <div>
-                      <span className="font-semibold text-gray-600">
-                        공연 상태:
-                      </span>{" "}
-                      {detail.prfstate || "-"}
-                    </div>
-                    {detail.prfcast && (
-                      <div>
-                        <span className="font-semibold text-gray-600">
-                          출연진:
-                        </span>{" "}
-                        {detail.prfcast}
-                      </div>
-                    )}
-                    {detail.prfruntime && (
-                      <div>
-                        <span className="font-semibold text-gray-600">
-                          런타임:
-                        </span>{" "}
-                        {detail.prfruntime}
-                      </div>
-                    )}
-                    {detail.prfage && (
-                      <div>
-                        <span className="font-semibold text-gray-600">
-                          관람 연령:
-                        </span>{" "}
-                        {detail.prfage}
-                      </div>
-                    )}
-                    {detail.pcseguidance && (
-                      <div>
-                        <span className="font-semibold text-gray-600">
-                          티켓 가격:
-                        </span>{" "}
-                        {detail.pcseguidance}
-                      </div>
-                    )}
-                    {detail.dtguidance && (
-                      <div>
-                        <span className="font-semibold text-gray-600">
-                          공연 시간:
-                        </span>{" "}
-                        <p className="text-sm whitespace-pre-line inline">
-                          {detail.dtguidance}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                {detail.prfruntime && (
+                  <InfoRow label="런타임">{detail.prfruntime}</InfoRow>
+                )}
+                {detail.prfage && (
+                  <InfoRow label="관람 연령">{detail.prfage}</InfoRow>
+                )}
+                {detail.pcseguidance && (
+                  <InfoRow label="티켓 가격">{detail.pcseguidance}</InfoRow>
+                )}
+                {detail.dtguidance && (
+                  <InfoRow label="공연 시간">
+                    <span className="whitespace-pre-line">{detail.dtguidance}</span>
+                  </InfoRow>
+                )}
               </div>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
+    </Backdrop>
+  );
+
+  return createPortal(modalContent, document.body);
+}
+
+function InfoRow({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex gap-2">
+      <span className="font-semibold text-muted-foreground w-20 flex-shrink-0">{label}</span>
+      <span className="flex-1">{children}</span>
     </div>
   );
 }
-
