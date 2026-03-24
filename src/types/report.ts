@@ -112,6 +112,7 @@ export interface PerformanceDetail {
     seat: string;
     rating: number;
     review?: string;
+    casting?: string[];
   }>;
 }
 
