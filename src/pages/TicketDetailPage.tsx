@@ -5,7 +5,7 @@ import { type ApiError } from "@/lib/apiClient";
 import { toast } from "react-toastify";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Pencil, Trash2, MapPin, Armchair, Users, Ticket, ShoppingBag, Calendar, Clock, Copy, Check } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2, MapPin, Armchair, Users, Ticket, ShoppingBag, Calendar, Clock, Copy, Check, MessageSquareText } from "lucide-react";
 
 function StarRating({ rating }: { rating: number }) {
   return (
@@ -107,7 +107,7 @@ export default function TicketDetailPage() {
 
   return (
     <Layout>
-      <div className="max-w-3xl mx-auto space-y-4">
+      <div className="max-w-3xl mx-auto space-y-4 px-4 sm:px-0">
         {/* 상단 액션바 */}
         <div className="flex items-center justify-between">
           <button
@@ -140,10 +140,10 @@ export default function TicketDetailPage() {
         </div>
 
         {/* 히어로 섹션 */}
-        <div className="flex gap-6 bg-card rounded-xl border p-6">
+        <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 bg-card rounded-xl border p-4 sm:p-6">
           {/* 포스터 */}
           {ticket.posterUrl && (
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 flex justify-center sm:justify-start">
               <img
                 src={ticket.posterUrl}
                 alt={ticket.performanceName}
@@ -172,18 +172,18 @@ export default function TicketDetailPage() {
 
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
               <span className="flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5" />
+                <Calendar className="w-3.5 h-3.5 shrink-0" />
                 {ticket.date}
               </span>
               {ticket.time && (
                 <span className="flex items-center gap-1">
-                  <Clock className="w-3.5 h-3.5" />
+                  <Clock className="w-3.5 h-3.5 shrink-0" />
                   {ticket.time.slice(0, 5)}
                 </span>
               )}
               {ticket.theater && (
-                <span className="flex items-center gap-1">
-                  <MapPin className="w-3.5 h-3.5" />
+                <span className="flex items-start gap-1">
+                  <MapPin className="w-3.5 h-3.5 shrink-0 mt-0.5" />
                   {ticket.theater}
                 </span>
               )}
@@ -238,9 +238,12 @@ export default function TicketDetailPage() {
 
         {/* 후기 */}
         {ticket.review && (
-          <div className="bg-card rounded-xl border p-6 space-y-2">
+          <div className="bg-card rounded-xl border px-4 py-3 space-y-2">
             <div className="flex items-center justify-between">
-              <p className="text-sm font-medium text-muted-foreground">공연 후기</p>
+              <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <MessageSquareText className="w-4 h-4" />
+                공연 후기
+              </p>
               <div className="relative">
                 <button
                   onClick={() => handleCopyReview(ticket.review!)}
