@@ -51,21 +51,23 @@ export default function DatePicker({
         <Button
           variant="outline"
           className={cn(
-            "w-full justify-start text-left font-normal h-10",
+            "w-full justify-start text-left font-normal h-10 overflow-hidden",
             !value && "text-muted-foreground",
             className
           )}
         >
-          <CalendarIcon className="mr-2 h-4 w-4" />
+          <CalendarIcon className="mr-2 h-4 w-4 flex-shrink-0" />
           {value ? (
-            format(
-              (() => {
-                const [year, month, day] = value.split("-").map(Number);
-                return new Date(year, month - 1, day);
-              })(),
-              "yyyy년 MM월 dd일 EEEE",
-              { locale: ko }
-            )
+            <span className="truncate">
+              {format(
+                (() => {
+                  const [year, month, day] = value.split("-").map(Number);
+                  return new Date(year, month - 1, day);
+                })(),
+                "yyyy년 MM월 dd일 EEEE",
+                { locale: ko }
+              )}
+            </span>
           ) : (
             <span>{placeholder}</span>
           )}

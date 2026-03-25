@@ -11,7 +11,7 @@ import DatePicker from "@/components/DatePicker";
 import CastingField from "@/components/ticket-form/CastingField";
 import PriceInput from "@/components/ticket-form/PriceInput";
 import { useTicketForm } from "@/hooks/useTicketForm";
-import { Star, Plus, Loader2, Pencil, Check } from "lucide-react";
+import { Star, Plus, Loader2, Pencil, Check, ArrowLeft } from "lucide-react";
 
 type StepStatus = "active" | "completed" | "locked";
 
@@ -33,7 +33,7 @@ function StepCard({
   isLast: boolean;
 }) {
   return (
-    <div className="relative flex gap-5">
+    <div className="relative flex gap-3 sm:gap-5">
       {/* 왼쪽: 스텝 원형 + 연결선 */}
       <div className="flex flex-col items-center flex-shrink-0">
         <div
@@ -58,7 +58,7 @@ function StepCard({
       </div>
 
       {/* 오른쪽: 콘텐츠 */}
-      <div className={`flex-1 ${isLast ? "pb-0" : "pb-7"}`}>
+      <div className={`flex-1 min-w-0 ${isLast ? "pb-0" : "pb-7"}`}>
         {/* 스텝 헤더 */}
         <div className="flex items-center justify-between h-8 mb-3">
           <h3
@@ -87,7 +87,7 @@ function StepCard({
 
         {/* 활성 입력 영역 */}
         {status === "active" && (
-          <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
+          <div className="bg-white border border-gray-100 rounded-xl p-3 sm:p-5 shadow-sm">
             {children}
           </div>
         )}
@@ -217,7 +217,20 @@ export default function TicketFormPage() {
 
   return (
     <Layout>
-      <div className="max-w-2xl mx-auto px-4 py-8">
+      <div className="max-w-2xl mx-auto px-4 pt-0 sm:pt-8 pb-2 sm:pb-8">
+        {/* 페이지 헤더 */}
+        <div className="relative flex items-center justify-center mb-3">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="absolute left-0 p-1 -ml-1 text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <ArrowLeft className="w-4.5 h-4.5" />
+          </button>
+          <h1 className="text-bold text-base">
+            {isEditMode ? "기록 수정" : "기록 추가"}
+          </h1>
+        </div>
         <form onSubmit={handleSubmit}>
           {/* === STEP 1: 공연 선택 === */}
           <StepCard
@@ -230,8 +243,8 @@ export default function TicketFormPage() {
           >
             <div className="space-y-4">
               {/* 날짜 & 시간 */}
-              <div className="flex gap-3 items-end">
-                <div className="flex-1">
+              <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 items-end">
+                <div className="min-w-0">
                   <Label className="text-xs font-semibold text-gray-600 mb-1.5 block">
                     공연 날짜
                   </Label>
@@ -257,9 +270,9 @@ export default function TicketFormPage() {
               </div>
 
               {/* 포스터 + 공연 정보 */}
-              <div className="flex gap-4 items-start">
+              <div className="flex gap-3 sm:gap-4 items-start">
                 <div
-                  className="relative w-[150px] flex-shrink-0 aspect-[3/4] bg-gradient-to-br from-gray-100 to-gray-50 rounded-lg border-2 border-dashed border-gray-200 flex items-center justify-center cursor-pointer hover:border-gray-300 transition-all group overflow-hidden"
+                  className="relative w-[100px] sm:w-[150px] flex-shrink-0 aspect-[3/4] bg-gradient-to-br from-gray-100 to-gray-50 rounded-lg border-2 border-dashed border-gray-200 flex items-center justify-center cursor-pointer hover:border-gray-300 transition-all group overflow-hidden"
                   onClick={() => setShowSearchModal(true)}
                 >
                   {formData.posterUrl ? (
@@ -366,7 +379,7 @@ export default function TicketFormPage() {
               </div>
 
               {/* 극장 & 좌석 */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Label
                     htmlFor="theater"
@@ -411,7 +424,7 @@ export default function TicketFormPage() {
               />
 
               {/* 티켓 가격 & 동행자 */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Label
                     htmlFor="ticketPrice"
@@ -445,7 +458,7 @@ export default function TicketFormPage() {
               </div>
 
               {/* MD 가격 */}
-              <div className="w-1/2 pr-1.5">
+              <div className="w-full sm:w-1/2 sm:pr-1.5">
                 <Label
                   htmlFor="mdPrice"
                   className="text-xs font-semibold text-gray-600 mb-1.5 block"
