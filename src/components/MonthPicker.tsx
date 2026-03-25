@@ -1,11 +1,7 @@
 "use client";
 
 import * as React from "react";
-import {
-  Calendar as CalendarIcon,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 
@@ -23,34 +19,16 @@ interface MonthPickerProps {
   className?: string;
 }
 
-export default function MonthPicker({
-  value,
-  onChange,
-  className,
-}: MonthPickerProps) {
-  const [isOpen, setIsOpen] = React.useState(false);
+const MONTHS = ["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
 
-  const months = [
-    "1월",
-    "2월",
-    "3월",
-    "4월",
-    "5월",
-    "6월",
-    "7월",
-    "8월",
-    "9월",
-    "10월",
-    "11월",
-    "12월",
-  ];
+export default function MonthPicker({ value, onChange, className }: MonthPickerProps) {
+  const [isOpen, setIsOpen] = React.useState(false);
 
   const currentYear = value.getFullYear();
   const currentMonth = value.getMonth();
 
   const handleMonthSelect = (monthIndex: number) => {
-    const newDate = new Date(currentYear, monthIndex, 1);
-    onChange(newDate);
+    onChange(new Date(currentYear, monthIndex, 1));
     setIsOpen(false);
   };
 
@@ -73,74 +51,75 @@ export default function MonthPicker({
   };
 
   return (
-    <div className={cn("flex items-center gap-2", className)}>
-      <Button
-        variant="outline"
-        size="icon"
-        onClick={handlePrevious}
-        className="h-8 w-8 md:h-10 md:w-10"
-      >
-        <ChevronLeft className="w-4 h-4" />
-      </Button>
-      <Popover open={isOpen} onOpenChange={setIsOpen}>
-        <PopoverTrigger asChild>
-          <Button variant="outline" className="h-8 md:h-10 flex items-center gap-2">
-            <CalendarIcon className="w-4 h-4" />
-            {format(value, "yyyy년 MM월", { locale: ko })}
-          </Button>
-        </PopoverTrigger>
-      <PopoverContent className="w-auto p-4" align="start">
-        <div className="space-y-4">
-          {/* 연도 네비게이션 */}
-          <div className="flex items-center justify-between">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => handleYearChange(-1)}
-            >
-              <ChevronLeft className="h-4 w-4" />
-              <span className="sr-only">이전 연도</span>
-            </Button>
-            <span className="text-sm font-medium">{currentYear}년</span>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => handleYearChange(1)}
-            >
-              <ChevronRight className="h-4 w-4" />
-              <span className="sr-only">다음 연도</span>
-            </Button>
-          </div>
+    <div className={cn("flex items-center", className)}>
+      {/* Pill 컨테이너 */}
+      <div className="flex items-center rounded-lg border border-input bg-background shadow-sm overflow-hidden">
+        <button
+          onClick={handlePrevious}
+          className="h-8 w-8 md:h-10 md:w-10 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+          aria-label="이전 달"
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </button>
 
-          {/* 월 그리드 */}
-          <div className="grid grid-cols-3 gap-2">
-            {months.map((month, index) => (
-              <Button
-                key={index}
-                variant={index === currentMonth ? "default" : "outline"}
-                className={cn(
-                  "h-10 w-14 text-sm",
-                  index === currentMonth && "bg-primary text-primary-foreground"
-                )}
-                onClick={() => handleMonthSelect(index)}
+        <div className="w-px h-5 bg-border" />
+
+        <Popover open={isOpen} onOpenChange={setIsOpen}>
+          <PopoverTrigger asChild>
+            <button className="h-8 md:h-10 px-3 text-sm font-medium hover:bg-accent transition-colors min-w-[96px] text-center">
+              {format(value, "yyyy년 MM월", { locale: ko })}
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-56 p-3" align="center" collisionPadding={16}>
+            {/* 연도 선택 */}
+            <div className="flex items-center justify-between mb-3 pb-3 border-b border-border">
+              <button
+                onClick={() => handleYearChange(-1)}
+                className="h-7 w-7 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                aria-label="이전 연도"
               >
-                {month}
-              </Button>
-            ))}
-          </div>
-        </div>
-      </PopoverContent>
-    </Popover>
-      <Button
-        variant="outline"
-        size="icon"
-        onClick={handleNext}
-        className="h-8 w-8 md:h-10 md:w-10"
-      >
-        <ChevronRight className="w-4 h-4" />
-      </Button>
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <span className="text-sm font-semibold">{currentYear}년</span>
+              <button
+                onClick={() => handleYearChange(1)}
+                className="h-7 w-7 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                aria-label="다음 연도"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* 월 그리드 */}
+            <div className="grid grid-cols-3 gap-1.5">
+              {MONTHS.map((month, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleMonthSelect(index)}
+                  className={cn(
+                    "h-9 rounded-md text-sm font-medium transition-colors",
+                    index === currentMonth
+                      ? "bg-primary text-primary-foreground"
+                      : "text-foreground hover:bg-accent"
+                  )}
+                >
+                  {month}
+                </button>
+              ))}
+            </div>
+          </PopoverContent>
+        </Popover>
+
+        <div className="w-px h-5 bg-border" />
+
+        <button
+          onClick={handleNext}
+          className="h-8 w-8 md:h-10 md:w-10 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+          aria-label="다음 달"
+        >
+          <ChevronRight className="w-4 h-4" />
+        </button>
+      </div>
     </div>
   );
 }
