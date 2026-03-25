@@ -82,7 +82,7 @@ export default function SummaryCards({ data, className }: SummaryCardsProps) {
         <div className="w-1 h-5 bg-primary rounded-full" />
         <h2 className="text-base font-semibold tracking-wide">요약</h2>
       </div>
-      <div className="grid grid-cols-3 grid-rows-2 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         {cardItems.map(({ key, label, icon: Icon, iconColor, iconBg, formatValue }) => (
           <Card key={key} className="shadow-sm border-border rounded-xl overflow-hidden">
             <CardContent className="p-4">

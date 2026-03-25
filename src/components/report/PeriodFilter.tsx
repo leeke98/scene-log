@@ -16,10 +16,10 @@ export default function PeriodFilter({
       value={activePeriod}
       onValueChange={(value) => onPeriodChange(value as PeriodType)}
     >
-      <TabsList>
-        <TabsTrigger value="연간">연간</TabsTrigger>
-        <TabsTrigger value="월">월</TabsTrigger>
-        <TabsTrigger value="누적">누적</TabsTrigger>
+      <TabsList className="h-8 md:h-10">
+        <TabsTrigger value="연간" className="text-xs md:text-sm px-2.5 md:px-3">연간</TabsTrigger>
+        <TabsTrigger value="월" className="text-xs md:text-sm px-2.5 md:px-3">월</TabsTrigger>
+        <TabsTrigger value="누적" className="text-xs md:text-sm px-2.5 md:px-3">누적</TabsTrigger>
       </TabsList>
     </Tabs>
   );

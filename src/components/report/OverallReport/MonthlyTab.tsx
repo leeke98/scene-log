@@ -150,12 +150,12 @@ export default function OverallMonthlyTab({
       };
 
   return (
-    <div className="space-y-6">
-      {/* 요약과 가장 많이 본 작품 동일 선상 */}
-      <div className="grid grid-cols-5 gap-6 items-start">
+    <div className="space-y-8">
+      {/* 요약과 가장 많이 본 작품 */}
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-8 md:gap-6 items-start">
         {/* 요약 섹션 */}
         <div
-          className="col-span-2 flex flex-col"
+          className="md:col-span-2 flex flex-col"
           id="summary-section"
           ref={summaryRef}
         >
@@ -163,7 +163,7 @@ export default function OverallMonthlyTab({
         </div>
 
         {/* 가장 많이 본 작품 섹션 */}
-        <div className="col-span-3 flex flex-col">
+        <div className="md:col-span-3 flex flex-col">
           <div className="flex items-center gap-2 mb-4">
             <div className="w-1 h-5 bg-primary rounded-full" />
             <h2 className="text-base font-semibold tracking-wide">가장 많이 본 작품</h2>
@@ -181,14 +181,14 @@ export default function OverallMonthlyTab({
           <div className="w-1 h-5 bg-primary rounded-full" />
           <h2 className="text-base font-semibold tracking-wide">차트</h2>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-5 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <BarChartCard
             title="주 별 관람수"
             data={weeklyViewCountData}
             dataKey="관람수"
             xAxisKey="week"
             config={weeklyViewCountConfig}
-            className="md:col-span-2 lg:col-span-2"
+            className="md:col-span-2"
           />
           <BarChartCard
             title="주 별 관람 금액"
@@ -198,12 +198,12 @@ export default function OverallMonthlyTab({
             config={weeklyAmountConfig}
             yAxisFormatter={(value) => `${(value / 10000).toLocaleString()}만`}
             tooltipFormatter={(value: number) => `${value.toLocaleString()}원`}
-            className="md:col-span-2 lg:col-span-2"
+            className="md:col-span-2"
           />
           <PieChartCard
             title="관극 요일"
             dayOfWeekStats={dayOfWeekStats}
-            className="md:col-span-1 lg:col-span-1"
+            className="md:col-span-1"
           />
         </div>
       </section>

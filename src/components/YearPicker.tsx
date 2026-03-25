@@ -1,27 +1,21 @@
 "use client";
 
-import {
-  Calendar as CalendarIcon,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import * as React from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface YearPickerProps {
   value: Date;
   onChange: (date: Date) => void;
   className?: string;
-  startYear?: number; // 시작 연도 (기본값: 현재 연도 - 15)
-  endYear?: number; // 종료 연도 (기본값: 현재 연도 + 5)
+  startYear?: number;
+  endYear?: number;
 }
 
 export default function YearPicker({
@@ -31,27 +25,22 @@ export default function YearPicker({
   startYear,
   endYear,
 }: YearPickerProps) {
+  const [isOpen, setIsOpen] = React.useState(false);
   const currentYear = value.getFullYear();
-  const currentDate = new Date();
+  const now = new Date();
 
-  // 연도 범위 생성
-  const generateYears = () => {
-    const start = startYear ?? currentDate.getFullYear() - 10;
-    const end = endYear ?? currentDate.getFullYear() + 5;
-    const years: number[] = [];
-    for (let year = start; year <= end; year++) {
-      years.push(year);
-    }
-    return years;
-  };
+  const start = startYear ?? now.getFullYear() - 10;
+  const end = endYear ?? now.getFullYear() + 5;
+  const years: number[] = [];
+  for (let y = start; y <= end; y++) {
+    years.push(y);
+  }
 
-  const years = generateYears();
-
-  const handleYearChange = (selectedYear: string) => {
-    const year = parseInt(selectedYear, 10);
+  const handleYearSelect = (year: number) => {
     const newDate = new Date(value);
     newDate.setFullYear(year);
     onChange(newDate);
+    setIsOpen(false);
   };
 
   const handlePrevious = () => {
@@ -67,38 +56,54 @@ export default function YearPicker({
   };
 
   return (
-    <div className={cn("flex items-center gap-2", className)}>
-      <Button
-        variant="outline"
-        size="icon"
-        onClick={handlePrevious}
-        className="h-10 w-10"
-      >
-        <ChevronLeft className="w-4 h-4" />
-      </Button>
-      <Select value={currentYear.toString()} onValueChange={handleYearChange}>
-        <SelectTrigger className="w-auto min-w-[100px] justify-center px-2">
-          <div className="flex items-center gap-2">
-            <CalendarIcon className="w-4 h-4" />
-            <SelectValue placeholder="연도 선택" />
-          </div>
-        </SelectTrigger>
-        <SelectContent className="w-auto min-w-[120px]">
-          {years.map((year) => (
-            <SelectItem key={year} value={year.toString()}>
-              {year}년
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      <Button
-        variant="outline"
-        size="icon"
-        onClick={handleNext}
-        className="h-10 w-10"
-      >
-        <ChevronRight className="w-4 h-4" />
-      </Button>
+    <div className={cn("flex items-center", className)}>
+      <div className="flex items-center rounded-lg border border-input bg-background shadow-sm overflow-hidden">
+        <button
+          onClick={handlePrevious}
+          className="h-8 w-8 md:h-10 md:w-10 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+          aria-label="이전 연도"
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </button>
+
+        <div className="w-px h-5 bg-border" />
+
+        <Popover open={isOpen} onOpenChange={setIsOpen}>
+          <PopoverTrigger asChild>
+            <button className="h-8 md:h-10 px-3 text-sm font-medium hover:bg-accent transition-colors min-w-[80px] text-center">
+              {currentYear}년
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-56 p-3" align="center" collisionPadding={16}>
+            <div className="grid grid-cols-4 gap-1.5 max-h-[240px] overflow-y-auto">
+              {years.map((year) => (
+                <button
+                  key={year}
+                  onClick={() => handleYearSelect(year)}
+                  className={cn(
+                    "h-9 rounded-md text-sm font-medium transition-colors",
+                    year === currentYear
+                      ? "bg-primary text-primary-foreground"
+                      : "text-foreground hover:bg-accent"
+                  )}
+                >
+                  {year}
+                </button>
+              ))}
+            </div>
+          </PopoverContent>
+        </Popover>
+
+        <div className="w-px h-5 bg-border" />
+
+        <button
+          onClick={handleNext}
+          className="h-8 w-8 md:h-10 md:w-10 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+          aria-label="다음 연도"
+        >
+          <ChevronRight className="w-4 h-4" />
+        </button>
+      </div>
     </div>
   );
 }

@@ -14,7 +14,7 @@ export default function MobileHeader() {
   };
 
   return (
-    <header className="md:hidden fixed top-0 left-0 right-0 z-40 h-14 border-b bg-background flex items-center justify-between px-4">
+    <header className="md:hidden fixed top-0 left-0 right-0 z-50 h-14 border-b bg-background flex items-center justify-between px-4">
       <Link to="/">
         <img src={logo} alt="SceneLog" className="h-8" />
       </Link>

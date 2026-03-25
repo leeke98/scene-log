@@ -31,9 +31,9 @@ export default function ReportPage() {
 
   return (
     <Layout>
-      <div className="w-full">
+      <div className="w-full overflow-x-hidden">
         {/* 모바일 전용 서브 탭 */}
-        <div className="md:hidden border-b border-border bg-background sticky top-0 z-40">
+        <div className="md:hidden -mt-4 border-b border-border bg-background sticky z-40">
           <div className="flex">
             {[
               { path: "/report", label: "전체" },
@@ -56,10 +56,10 @@ export default function ReportPage() {
           </div>
         </div>
 
-        <div className="border-b border-border bg-background sticky top-[49px] md:top-0 z-40">
-          <div className="container mx-auto px-4 py-4">
+        <div className="border-b border-border bg-background sticky md:top-0 z-40">
+          <div className="container mx-auto px-4 py-3">
             <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center">
                 {activePeriod === "연간" && (
                   <YearPicker value={selectedYear} onChange={setSelectedYear} />
                 )}
@@ -69,6 +69,21 @@ export default function ReportPage() {
                     onChange={setSelectedMonth}
                   />
                 )}
+              </div>
+
+              <div className="flex items-center gap-3">
+                {showSearch && (
+                  <div className="relative hidden md:block w-56">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      type="text"
+                      placeholder="검색어를 입력하세요"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-9 h-8 text-sm"
+                    />
+                  </div>
+                )}
                 <PeriodFilter
                   activePeriod={activePeriod}
                   onPeriodChange={(period) => {
@@ -77,20 +92,20 @@ export default function ReportPage() {
                   }}
                 />
               </div>
-
-              {showSearch && (
-                <div className="relative w-56">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    type="text"
-                    placeholder="검색어를 입력하세요"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-9 h-8 text-sm"
-                  />
-                </div>
-              )}
             </div>
+
+            {showSearch && (
+              <div className="relative mt-3 md:hidden">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="검색어를 입력하세요"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9 h-8 text-sm"
+                />
+              </div>
+            )}
           </div>
         </div>
 

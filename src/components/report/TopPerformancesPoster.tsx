@@ -105,14 +105,13 @@ export default function TopPerformancesPoster({
   }
 
   return (
-    <div
-      className="flex items-center gap-2 relative"
-      style={{ height: height ? `${height}px` : "auto" }}
+    <div className="flex items-center gap-2 relative md:min-h-[160px]"
+      style={height ? { ['--poster-h' as string]: `${height}px` } : undefined}
     >
       {canScrollLeft && (
         <button
           onClick={scrollLeft}
-          className="p-2 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0 z-10 bg-white shadow-md"
+          className="p-2 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0 z-10 bg-white shadow-md hidden md:flex"
           aria-label="이전 작품 보기"
         >
           <ChevronLeft className="w-5 h-5 text-gray-600" />
@@ -120,7 +119,7 @@ export default function TopPerformancesPoster({
       )}
       <div
         ref={scrollContainerRef}
-        className="flex gap-3 overflow-x-auto items-center h-full flex-1 [&::-webkit-scrollbar]:hidden"
+        className="flex gap-3 overflow-x-auto items-start md:items-center md:h-[var(--poster-h)] flex-1 [&::-webkit-scrollbar]:hidden"
         style={{
           scrollbarWidth: "none",
           msOverflowStyle: "none",
@@ -133,38 +132,47 @@ export default function TopPerformancesPoster({
           return (
             <div
               key={`${performance.performanceName}-${index}`}
-              className="bg-gray-200 rounded-lg flex-shrink-0 overflow-hidden relative group"
-              style={{
-                height: "100%",
-                width: "auto",
-                aspectRatio: "3/4",
-              }}
+              className="flex-shrink-0 flex flex-col w-[100px] md:w-auto md:h-full"
             >
-              {showImage ? (
-                <img
-                  src={performance.posterUrl}
-                  alt={performance.performanceName}
-                  className="w-full h-full object-cover"
-                  onError={() => {
-                    setImageErrors((prev) =>
-                      new Set(prev).add(performance.performanceName)
-                    );
-                  }}
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <span className="text-gray-500 text-xs text-center px-2">
+              <div
+                className="bg-gray-200 rounded-lg overflow-hidden relative group w-full md:h-full"
+                style={{ aspectRatio: "3/4" }}
+              >
+                {showImage ? (
+                  <img
+                    src={performance.posterUrl}
+                    alt={performance.performanceName}
+                    className="w-full h-full object-cover"
+                    onError={() => {
+                      setImageErrors((prev) =>
+                        new Set(prev).add(performance.performanceName)
+                      );
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <span className="text-gray-500 text-xs text-center px-2">
+                      {performance.performanceName}
+                    </span>
+                  </div>
+                )}
+                {/* 데스크톱: 호버 시 작품명과 관람수 표시 */}
+                <div className="hidden md:flex absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-60 transition-all duration-200 flex-col items-center justify-center opacity-0 group-hover:opacity-100">
+                  <p className="text-white text-sm font-semibold text-center px-2 mb-1">
                     {performance.performanceName}
-                  </span>
+                  </p>
+                  <p className="text-white text-xs text-center">
+                    {performance.count}회 관람
+                  </p>
                 </div>
-              )}
-              {/* 호버 시 작품명과 관람수 표시 */}
-              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-60 transition-all duration-200 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100">
-                <p className="text-white text-sm font-semibold text-center px-2 mb-1">
+              </div>
+              {/* 모바일: 포스터 아래에 작품명과 관람수 표시 */}
+              <div className="md:hidden mt-1.5 w-full">
+                <p className="text-xs font-medium text-foreground leading-tight line-clamp-2">
                   {performance.performanceName}
                 </p>
-                <p className="text-white text-xs text-center">
-                  {performance.count}회 관람
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  {performance.count}회
                 </p>
               </div>
             </div>
@@ -174,7 +182,7 @@ export default function TopPerformancesPoster({
       {canScrollRight && (
         <button
           onClick={scrollRight}
-          className="p-2 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0 z-10 bg-white shadow-md"
+          className="p-2 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0 z-10 bg-white shadow-md hidden md:flex"
           aria-label="다음 작품 보기"
         >
           <ChevronRight className="w-5 h-5 text-gray-600" />

@@ -49,12 +49,12 @@ export default function OverallCumulativeTab() {
       };
 
   return (
-    <div className="space-y-6">
-      {/* 요약과 가장 많이 본 작품 동일 선상 */}
-      <div className="grid grid-cols-5 gap-6 items-start">
+    <div className="space-y-8">
+      {/* 요약과 가장 많이 본 작품 */}
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-8 md:gap-6 items-start">
         {/* 요약 섹션 */}
         <div
-          className="col-span-2 flex flex-col"
+          className="md:col-span-2 flex flex-col"
           id="summary-section"
           ref={summaryRef}
         >
@@ -62,7 +62,7 @@ export default function OverallCumulativeTab() {
         </div>
 
         {/* 가장 많이 본 작품 섹션 */}
-        <div className="col-span-3 flex flex-col">
+        <div className="md:col-span-3 flex flex-col">
           <div className="flex items-center gap-2 mb-4">
             <div className="w-1 h-5 bg-primary rounded-full" />
             <h2 className="text-base font-semibold tracking-wide">가장 많이 본 작품</h2>
@@ -80,13 +80,13 @@ export default function OverallCumulativeTab() {
           <div className="w-1 h-5 bg-primary rounded-full" />
           <h2 className="text-base font-semibold tracking-wide">관람 내역</h2>
         </div>
-        <div className="grid grid-cols-6 gap-4 items-stretch">
-          {/* 잔디밭 - 4칸 차지 */}
-          <div className="col-span-4 md:col-span-4 bg-card rounded-xl px-8 py-6 border border-border shadow-sm flex flex-col">
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-stretch">
+          {/* 잔디밭 */}
+          <div className="md:col-span-4 bg-card rounded-xl px-4 md:px-8 py-6 border border-border shadow-sm flex flex-col overflow-x-auto">
             <GrassField data={grassData || []} />
           </div>
-          {/* 관극 요일 파이 차트 - 2칸 차지 */}
-          <div className="col-span-2 md:col-span-2 flex">
+          {/* 관극 요일 파이 차트 */}
+          <div className="md:col-span-2 flex">
             <PieChartCard
               title="관극 요일"
               dayOfWeekStats={dayOfWeekStats}
