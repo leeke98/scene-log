@@ -13,7 +13,7 @@ export default function Layout({ children }: LayoutProps) {
       <MobileHeader />
       <div className="flex min-h-screen bg-background">
         <Sidebar />
-        <main className="flex-1 pt-14 md:pt-0 py-8 pb-24 md:pb-8 min-w-0">{children}</main>
+        <main className="flex-1 pt-[72px] md:pt-8 pb-24 md:pb-8 min-w-0">{children}</main>
       </div>
       <BottomTabBar />
     </>

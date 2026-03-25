@@ -268,6 +268,41 @@
   background: hsl(var(--primary) / 0.15);
 }
 
+/* ===== 모바일 반응형 ===== */
+@media (max-width: 767px) {
+  .performance-calendar .react-calendar__tile {
+    height: 120px;
+  }
+
+  /* 세로 배치로 전환 */
+  .calendar-tickets {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  /* 다중 포스터: 높이 균등 분배, 비율 해제 */
+  .calendar-ticket-poster {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    aspect-ratio: unset;
+    max-height: unset;
+  }
+
+  /* 단일 포스터: 비율 유지 */
+  .calendar-ticket-poster.single {
+    flex: none;
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    max-height: unset;
+  }
+
+  /* +N 뱃지 */
+  .calendar-ticket-more {
+    flex: none;
+  }
+}
+
 /* ===== 다크모드 포스터 그림자 보정 ===== */
 .dark .calendar-ticket-poster {
   box-shadow:

@@ -77,3 +77,12 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* 터치 디바이스에서 탭 후 hover 상태가 유지되는 문제 방지 */
+@media (hover: none) {
+  button:hover,
+  a:hover {
+    background-color: inherit;
+    color: inherit;
+  }
+}

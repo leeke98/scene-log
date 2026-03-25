@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Plus } from "lucide-react";
 import { formatDateToISO } from "@/lib/dateUtils";
 import Layout from "@/components/Layout";
 import Calendar from "@/components/Calendar";
@@ -25,23 +26,32 @@ export default function HomePage() {
 
   return (
     <Layout>
-      <div className="mb-6 flex items-center justify-between max-w-[1200px] mx-auto px-4">
-        <div className="flex items-center gap-2">
-          <MonthPicker value={currentDate} onChange={handleMonthChange} />
+      <div className="mb-4 md:mb-6 max-w-[1200px] mx-auto px-4">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <MonthPicker value={currentDate} onChange={handleMonthChange} />
+            <Button
+              variant="outline"
+              className="h-8 text-sm md:h-10 md:text-base"
+              onClick={() => setCurrentDate(new Date())}
+            >
+              오늘
+            </Button>
+          </div>
           <Button
-            variant="outline"
-            className="h-10"
-            onClick={() => setCurrentDate(new Date())}
+            onClick={() => navigate("/tickets/new")}
+            size="icon"
+            className="md:hidden h-8 w-8 bg-primary hover:bg-primary/90 text-white"
           >
-            오늘
+            <Plus className="w-4 h-4" />
+          </Button>
+          <Button
+            onClick={() => navigate("/tickets/new")}
+            className="hidden md:inline-flex h-10 bg-primary hover:bg-primary/90 text-white"
+          >
+            새 기록 추가
           </Button>
         </div>
-        <Button
-          onClick={() => navigate("/tickets/new")}
-          className="bg-primary hover:bg-primary/90 text-white"
-        >
-          새 기록 추가
-        </Button>
       </div>
 
       <Calendar

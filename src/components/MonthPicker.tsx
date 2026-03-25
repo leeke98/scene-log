@@ -78,13 +78,13 @@ export default function MonthPicker({
         variant="outline"
         size="icon"
         onClick={handlePrevious}
-        className="h-10 w-10"
+        className="h-8 w-8 md:h-10 md:w-10"
       >
         <ChevronLeft className="w-4 h-4" />
       </Button>
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
-          <Button variant="outline" className="flex items-center gap-2">
+          <Button variant="outline" className="h-8 md:h-10 flex items-center gap-2">
             <CalendarIcon className="w-4 h-4" />
             {format(value, "yyyy년 MM월", { locale: ko })}
           </Button>
@@ -137,7 +137,7 @@ export default function MonthPicker({
         variant="outline"
         size="icon"
         onClick={handleNext}
-        className="h-10 w-10"
+        className="h-8 w-8 md:h-10 md:w-10"
       >
         <ChevronRight className="w-4 h-4" />
       </Button>
