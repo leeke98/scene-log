@@ -36,10 +36,10 @@ export default function TicketCard({ ticket }: TicketCardProps) {
       onClick={handleClick}
       className="group relative cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-xl h-full"
     >
-      {/* 티켓 메인 컨테이너 */}
-      <div className="relative bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg overflow-hidden border-2 border-gray-200 hover:border-primary/50 transition-all flex flex-col h-full">
-        {/* 티켓 상단 - 포스터 영역 */}
-        <div className="relative h-64 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+      {/* 티켓 메인 컨테이너 - 모바일: 가로형, sm 이상: 세로형 */}
+      <div className="relative bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg overflow-hidden border-2 border-gray-200 hover:border-primary/50 transition-all flex flex-row sm:flex-col h-full">
+        {/* 티켓 포스터 영역 - 모바일: 왼쪽 고정폭, sm 이상: 상단 */}
+        <div className="relative w-28 shrink-0 sm:w-full sm:h-64 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
           {ticket.posterUrl ? (
             <img
               src={ticket.posterUrl}
@@ -62,11 +62,11 @@ export default function TicketCard({ ticket }: TicketCardProps) {
               )}
             </div>
           )}
-          {/* 오버레이 그라데이션 */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+          {/* 오버레이 그라데이션 - sm 이상만 */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent hidden sm:block" />
 
-          {/* 공연명 */}
-          <div className="absolute bottom-0 left-0 right-0 p-4">
+          {/* 공연명 - sm 이상에서만 포스터 위에 표시 */}
+          <div className="absolute bottom-0 left-0 right-0 p-4 hidden sm:block">
             <h3 className="text-white font-bold text-xl mb-1 line-clamp-2 drop-shadow-lg">
               {ticket.performanceName}
             </h3>
@@ -78,21 +78,33 @@ export default function TicketCard({ ticket }: TicketCardProps) {
           </div>
         </div>
 
-        {/* 티켓 하단 - 정보 영역 */}
-        <div className="p-5 flex flex-col flex-1 justify-between gap-3">
-          <div className="space-y-3">
+        {/* 티켓 정보 영역 */}
+        <div className="p-4 sm:p-5 flex flex-col flex-1 justify-between gap-2 sm:gap-3 min-w-0">
+          {/* 모바일에서만 공연명 표시 */}
+          <div className="sm:hidden mb-1">
+            <h3 className="font-bold text-base line-clamp-2 text-gray-900">
+              {ticket.performanceName}
+            </h3>
+            {ticket.genre && (
+              <span className="inline-block mt-1 px-2 py-0.5 bg-primary/10 text-primary text-xs rounded-md font-medium">
+                {ticket.genre}
+              </span>
+            )}
+          </div>
+
+          <div className="space-y-2 sm:space-y-3">
             {/* 날짜와 시간 */}
-            <div className="flex items-center gap-4 text-gray-700">
+            <div className="flex items-center gap-3 sm:gap-4 text-gray-700">
               <div className="flex items-center gap-1.5">
-                <Calendar className="w-4 h-4 text-gray-500" />
-                <span className="text-sm font-medium">
+                <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-500" />
+                <span className="text-xs sm:text-sm font-medium">
                   {formatDate(ticket.date)}
                 </span>
               </div>
               {ticket.time && (
                 <div className="flex items-center gap-1.5">
-                  <Clock className="w-4 h-4 text-gray-500" />
-                  <span className="text-sm font-medium">
+                  <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-500" />
+                  <span className="text-xs sm:text-sm font-medium">
                     {formatTime(ticket.time)}
                   </span>
                 </div>
@@ -102,8 +114,8 @@ export default function TicketCard({ ticket }: TicketCardProps) {
             {/* 극장명 */}
             {ticket.theater && (
               <div className="flex items-start gap-2">
-                <MapPin className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
-                <span className="text-sm text-gray-700 line-clamp-1">
+                <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                <span className="text-xs sm:text-sm text-gray-700 line-clamp-1">
                   {ticket.theater}
                 </span>
               </div>
@@ -112,26 +124,26 @@ export default function TicketCard({ ticket }: TicketCardProps) {
             {/* 좌석 */}
             {ticket.seat && (
               <div className="flex items-center gap-2">
-                <User className="w-4 h-4 text-gray-500" />
-                <span className="text-sm text-gray-700">{ticket.seat}</span>
+                <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-500" />
+                <span className="text-xs sm:text-sm text-gray-700">{ticket.seat}</span>
               </div>
             )}
 
             {/* 캐스팅 */}
             {displayCasting.length > 0 && (
               <div className="flex items-start gap-2">
-                <Users className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
-                <div className="flex flex-wrap gap-1.5 flex-1">
+                <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                <div className="flex flex-wrap gap-1 sm:gap-1.5 flex-1">
                   {displayCasting.map((actor, index) => (
                     <span
                       key={index}
-                      className="inline-flex items-center px-2 py-1 bg-primary/10 text-primary rounded-md text-xs font-medium"
+                      className="inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 bg-primary/10 text-primary rounded-md text-xs font-medium"
                     >
                       {actor}
                     </span>
                   ))}
                   {ticket.casting && ticket.casting.length > 4 && (
-                    <span className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-600 rounded-md text-xs">
+                    <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 bg-gray-100 text-gray-600 rounded-md text-xs">
                       +{ticket.casting.length - 4}
                     </span>
                   )}
@@ -140,14 +152,14 @@ export default function TicketCard({ ticket }: TicketCardProps) {
             )}
           </div>
 
-          {/* 티켓 하단 구분선 효과 */}
+          {/* 별점 */}
           {ticket.rating && (
-            <div className="pt-3 border-t border-gray-200">
+            <div className="pt-2 sm:pt-3 border-t border-gray-200">
               <div className="flex items-center gap-0.5">
                 {Array.from({ length: 5 }, (_, i) => (
                   <span
                     key={i}
-                    className={`text-sm ${i < ticket.rating! ? "text-yellow-400" : "text-gray-200"}`}
+                    className={`text-xs sm:text-sm ${i < ticket.rating! ? "text-yellow-400" : "text-gray-200"}`}
                   >
                     ★
                   </span>
@@ -157,9 +169,9 @@ export default function TicketCard({ ticket }: TicketCardProps) {
           )}
         </div>
 
-        {/* 티켓 왼쪽 구멍 효과 (비행기표 느낌) */}
-        <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-3 h-3 bg-gray-100 rounded-full border-2 border-gray-300" />
-        <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-3 h-3 bg-gray-100 rounded-full border-2 border-gray-300" />
+        {/* 티켓 구멍 효과 - 모바일: 상하, sm 이상: 좌우 */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-gray-100 rounded-full border-2 border-gray-300 sm:left-0 sm:top-1/2 sm:-translate-y-1/2 sm:translate-x-0 sm:-translate-x-1/2" />
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-3 h-3 bg-gray-100 rounded-full border-2 border-gray-300 sm:left-auto sm:right-0 sm:top-1/2 sm:bottom-auto sm:-translate-y-1/2 sm:translate-x-1/2 sm:translate-y-0" />
       </div>
     </div>
   );

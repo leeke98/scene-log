@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import TicketCard from "@/components/TicketCard";
@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useTicketsList } from "@/queries/tickets/queries";
-import { Loader2, Search, X } from "lucide-react";
+import { ArrowUp, Loader2, Search, X } from "lucide-react";
 
 export default function PerformanceRecordPage() {
   const navigate = useNavigate();
@@ -21,6 +21,8 @@ export default function PerformanceRecordPage() {
   const [selectedGenre, setSelectedGenre] = useState<
     "전체" | "뮤지컬" | "연극"
   >("전체");
+
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   const genreValue: "연극" | "뮤지컬" | undefined =
     selectedGenre === "전체" ? undefined : selectedGenre;
@@ -77,6 +79,19 @@ export default function PerformanceRecordPage() {
       }
     };
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  // 스크롤 위치 감지 (맨 위로 버튼 표시 여부)
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 400);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const scrollToTop = useCallback(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
 
   // 모든 티켓 데이터를 평탄화
   const tickets = data?.pages.flatMap((page) => page.data) || [];
@@ -185,7 +200,7 @@ export default function PerformanceRecordPage() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-8">
               {tickets.map((ticket) => (
                 <TicketCard key={ticket.id} ticket={ticket} />
               ))}
@@ -211,6 +226,19 @@ export default function PerformanceRecordPage() {
           </>
         )}
       </div>
+
+      {/* 맨 위로 이동 버튼 */}
+      <button
+        onClick={scrollToTop}
+        className={`fixed bottom-24 md:bottom-8 right-6 z-30 p-3 rounded-full bg-primary text-white shadow-lg transition-all duration-300 hover:bg-primary/90 hover:shadow-xl ${
+          showScrollTop
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 translate-y-4 pointer-events-none"
+        }`}
+        aria-label="맨 위로 이동"
+      >
+        <ArrowUp className="w-5 h-5" />
+      </button>
     </Layout>
   );
 }
