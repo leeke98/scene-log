@@ -1,10 +1,11 @@
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTicket, useDeleteTicket } from "@/queries/tickets";
 import { type ApiError } from "@/lib/apiClient";
 import { toast } from "react-toastify";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Pencil, Trash2, MapPin, Armchair, Users, Ticket, ShoppingBag, Calendar, Clock } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2, MapPin, Armchair, Users, Ticket, ShoppingBag, Calendar, Clock, Copy, Check } from "lucide-react";
 
 function StarRating({ rating }: { rating: number }) {
   return (
@@ -27,6 +28,14 @@ export default function TicketDetailPage() {
   const navigate = useNavigate();
   const { data: ticket, isLoading, error } = useTicket(id);
   const deleteTicketMutation = useDeleteTicket();
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyReview = (text: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
 
   const handleDelete = () => {
     if (!id) return;
@@ -230,7 +239,22 @@ export default function TicketDetailPage() {
         {/* 후기 */}
         {ticket.review && (
           <div className="bg-card rounded-xl border p-6 space-y-2">
-            <p className="text-sm font-medium text-muted-foreground">공연 후기</p>
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-medium text-muted-foreground">공연 후기</p>
+              <div className="relative">
+                <button
+                  onClick={() => handleCopyReview(ticket.review!)}
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+                </button>
+                {copied && (
+                  <span className="absolute -top-8 right-0 whitespace-nowrap rounded-md bg-foreground px-2 py-1 text-xs text-background shadow-md">
+                    복사되었습니다
+                  </span>
+                )}
+              </div>
+            </div>
             <p className="whitespace-pre-wrap text-sm leading-relaxed">{ticket.review}</p>
           </div>
         )}
