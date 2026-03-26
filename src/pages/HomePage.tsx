@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useMemo, useCallback } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Plus } from "lucide-react";
 import { formatDateToISO } from "@/lib/dateUtils";
 import Layout from "@/components/Layout";
@@ -9,7 +9,28 @@ import { Button } from "@/components/ui/button";
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const currentDate = useMemo(() => {
+    const month = searchParams.get("month");
+    if (month) {
+      const [y, m] = month.split("-").map(Number);
+      return new Date(y, m - 1, 1);
+    }
+    return new Date();
+  }, [searchParams]);
+
+  const setCurrentDate = useCallback(
+    (date: Date) => {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, "0");
+      setSearchParams((prev) => {
+        prev.set("month", `${y}-${m}`);
+        return prev;
+      });
+    },
+    [setSearchParams]
+  );
 
   const handleTicketClick = (ticketId: string) => {
     navigate(`/tickets/${ticketId}`);
@@ -33,7 +54,12 @@ export default function HomePage() {
             <Button
               variant="outline"
               className="h-8 text-sm md:h-10 md:text-base"
-              onClick={() => setCurrentDate(new Date())}
+              onClick={() => {
+                setSearchParams((prev) => {
+                  prev.delete("month");
+                  return prev;
+                });
+              }}
             >
               오늘
             </Button>

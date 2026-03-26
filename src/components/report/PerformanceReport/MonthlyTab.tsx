@@ -1,4 +1,5 @@
-import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { useMemo, useEffect, useRef, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Eye, Theater, Wallet } from "lucide-react";
 import PerformanceDetailModal from "./PerformanceDetailModal";
 import PerformanceTable from "./PerformanceTable";
@@ -16,9 +17,9 @@ export default function PerformanceMonthlyTab({
   year,
   month,
 }: PerformanceMonthlyTabProps) {
-  const [selectedPerformance, setSelectedPerformance] =
-    useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedPerformance = searchParams.get("performance");
+  const isModalOpen = !!selectedPerformance;
   const limit = 20;
 
   const monthOnly = month.split("-")[1];
@@ -76,13 +77,17 @@ export default function PerformanceMonthlyTab({
     : sortedPerformances;
 
   const handlePerformanceClick = (performanceName: string) => {
-    setSelectedPerformance(performanceName);
-    setIsModalOpen(true);
+    setSearchParams((prev) => {
+      prev.set("performance", performanceName);
+      return prev;
+    });
   };
 
   const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedPerformance(null);
+    setSearchParams((prev) => {
+      prev.delete("performance");
+      return prev;
+    });
   };
 
   return (

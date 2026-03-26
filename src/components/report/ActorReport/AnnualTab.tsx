@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import ActorDetailModal from "./ActorDetailModal";
 import ActorCardList from "./ActorTable";
 import { useInfiniteActorStats } from "@/queries/reports/queries";
@@ -12,8 +13,9 @@ export default function ActorAnnualTab({
   searchTerm,
   year,
 }: ActorAnnualTabProps) {
-  const [selectedActor, setSelectedActor] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedActor = searchParams.get("actor");
+  const isModalOpen = !!selectedActor;
 
   const {
     data,
@@ -45,13 +47,17 @@ export default function ActorAnnualTab({
   }, [data]);
 
   const handleActorClick = (actorName: string) => {
-    setSelectedActor(actorName);
-    setIsModalOpen(true);
+    setSearchParams((prev) => {
+      prev.set("actor", actorName);
+      return prev;
+    });
   };
 
   const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedActor(null);
+    setSearchParams((prev) => {
+      prev.delete("actor");
+      return prev;
+    });
   };
 
   return (

@@ -77,7 +77,6 @@ export default function PerformanceDetailModal({
 
   const handleTicketClick = (ticketId: string) => {
     navigate(`/tickets/${ticketId}`);
-    onClose();
   };
 
   // 로딩/에러 상태

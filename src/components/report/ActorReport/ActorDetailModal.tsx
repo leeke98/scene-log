@@ -91,7 +91,6 @@ export default function ActorDetailModal({
 
   const handleTicketClick = (ticketId: string) => {
     navigate(`/tickets/${ticketId}`);
-    onClose();
   };
 
   const modalContent = (
