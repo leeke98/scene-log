@@ -105,21 +105,13 @@ export default function TopPerformancesPoster({
   }
 
   return (
-    <div className="flex items-center gap-2 relative md:min-h-[160px]"
+    <div
+      className="relative md:min-h-[160px]"
       style={height ? { ['--poster-h' as string]: `${height}px` } : undefined}
     >
-      {canScrollLeft && (
-        <button
-          onClick={scrollLeft}
-          className="p-2 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0 z-10 bg-white shadow-md hidden md:flex"
-          aria-label="이전 작품 보기"
-        >
-          <ChevronLeft className="w-5 h-5 text-gray-600" />
-        </button>
-      )}
       <div
         ref={scrollContainerRef}
-        className="flex gap-3 overflow-x-auto items-start md:items-center md:h-[var(--poster-h)] flex-1 [&::-webkit-scrollbar]:hidden"
+        className="flex gap-3 overflow-x-auto items-start md:items-center md:h-[var(--poster-h)] [&::-webkit-scrollbar]:hidden"
         style={{
           scrollbarWidth: "none",
           msOverflowStyle: "none",
@@ -179,15 +171,26 @@ export default function TopPerformancesPoster({
           );
         })}
       </div>
-      {canScrollRight && (
-        <button
-          onClick={scrollRight}
-          className="p-2 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0 z-10 bg-white shadow-md hidden md:flex"
-          aria-label="다음 작품 보기"
-        >
-          <ChevronRight className="w-5 h-5 text-gray-600" />
-        </button>
-      )}
+
+      {/* 데스크톱: 오버레이 스크롤 버튼 */}
+      <button
+        onClick={scrollLeft}
+        className={`absolute left-0 top-0 bottom-0 w-10 items-center justify-center bg-gradient-to-r from-white/80 to-transparent transition-opacity duration-200 hidden md:flex ${
+          canScrollLeft ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+        aria-label="이전 작품 보기"
+      >
+        <ChevronLeft className="w-5 h-5 text-gray-600" />
+      </button>
+      <button
+        onClick={scrollRight}
+        className={`absolute right-0 top-0 bottom-0 w-10 items-center justify-center bg-gradient-to-l from-white/80 to-transparent transition-opacity duration-200 hidden md:flex ${
+          canScrollRight ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+        aria-label="다음 작품 보기"
+      >
+        <ChevronRight className="w-5 h-5 text-gray-600" />
+      </button>
     </div>
   );
 }
