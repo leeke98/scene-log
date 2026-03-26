@@ -26,7 +26,6 @@ interface BarChartCardProps {
 }
 
 export default function BarChartCard({
-  title,
   data,
   dataKey,
   xAxisKey,

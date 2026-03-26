@@ -83,7 +83,6 @@ interface PieChartCardProps {
 }
 
 export default function PieChartCard({
-  title,
   dayOfWeekStats,
   className,
   height = "h-[240px]",
