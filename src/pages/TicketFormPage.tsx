@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
 import { formatDateToISO } from "@/lib/dateUtils";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -11,98 +10,83 @@ import DatePicker from "@/components/DatePicker";
 import CastingField from "@/components/ticket-form/CastingField";
 import PriceInput from "@/components/ticket-form/PriceInput";
 import { useTicketForm } from "@/hooks/useTicketForm";
-import { Star, Plus, Loader2, Pencil, Check, ArrowLeft } from "lucide-react";
+import {
+  Star,
+  Plus,
+  Loader2,
+  ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
+  Check,
+} from "lucide-react";
 
-type StepStatus = "active" | "completed" | "locked";
+const STEPS = [
+  { number: 1, label: "공연 선택" },
+  { number: 2, label: "관람 정보" },
+  { number: 3, label: "감상 기록" },
+] as const;
 
-function StepCard({
-  step,
-  title,
-  status,
-  onEdit,
-  summary,
-  children,
-  isLast,
+function StepIndicator({
+  currentStep,
+  onStepClick,
 }: {
-  step: number;
-  title: string;
-  status: StepStatus;
-  onEdit?: () => void;
-  summary: React.ReactNode;
-  children: React.ReactNode;
-  isLast: boolean;
+  currentStep: number;
+  onStepClick: (step: number) => void;
 }) {
   return (
-    <div className="relative flex gap-3 sm:gap-5">
-      {/* 왼쪽: 스텝 원형 + 연결선 */}
-      <div className="flex flex-col items-center flex-shrink-0">
-        <div
-          className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold z-10 transition-colors ${
-            status === "completed"
-              ? "bg-gray-900 text-white"
-              : status === "active"
-              ? "bg-gray-900 text-white"
-              : "bg-gray-100 text-gray-400 border border-gray-200"
-          }`}
-        >
-          {status === "completed" ? <Check className="w-4 h-4" /> : step}
-        </div>
-        {!isLast && (
-          <div
-            className={`w-px flex-1 mt-1 ${
-              status === "completed" ? "bg-gray-900" : "bg-gray-200"
-            }`}
-            style={{ minHeight: "24px" }}
-          />
-        )}
-      </div>
-
-      {/* 오른쪽: 콘텐츠 */}
-      <div className={`flex-1 min-w-0 ${isLast ? "pb-0" : "pb-7"}`}>
-        {/* 스텝 헤더 */}
-        <div className="flex items-center justify-between h-8 mb-3">
-          <h3
-            className={`font-semibold text-sm ${
-              status === "locked" ? "text-gray-400" : "text-gray-800"
+    <div className="flex items-center justify-center gap-0 mb-6">
+      {STEPS.map((step, idx) => (
+        <div key={step.number} className="flex items-center">
+          <button
+            type="button"
+            onClick={() => onStepClick(step.number)}
+            className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium transition-colors ${
+              step.number === currentStep
+                ? "text-gray-900"
+                : step.number < currentStep
+                ? "text-gray-500 hover:text-gray-700"
+                : "text-gray-300"
             }`}
           >
-            {title}
-          </h3>
-          {status === "completed" && onEdit && (
-            <button
-              type="button"
-              onClick={onEdit}
-              className="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1 transition-colors"
+            <span
+              className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold transition-colors ${
+                step.number === currentStep
+                  ? "bg-gray-900 text-white"
+                  : step.number < currentStep
+                  ? "bg-gray-400 text-white"
+                  : "bg-gray-200 text-gray-400"
+              }`}
             >
-              <Pencil className="w-3 h-3" />
-              수정
-            </button>
+              {step.number < currentStep ? (
+                <Check className="w-3 h-3" />
+              ) : (
+                step.number
+              )}
+            </span>
+            <span className="text-center sm:text-left leading-tight">
+              {step.label.split(" ").map((word, i) => (
+                <span key={i}>
+                  {i > 0 && <br className="sm:hidden" />}
+                  {i > 0 && <span className="hidden sm:inline"> </span>}
+                  {word}
+                </span>
+              ))}
+            </span>
+          </button>
+          {idx < STEPS.length - 1 && (
+            <div
+              className={`w-6 sm:w-10 h-px mx-1 ${
+                step.number < currentStep ? "bg-gray-400" : "bg-gray-200"
+              }`}
+            />
           )}
         </div>
-
-        {/* 완료 요약 */}
-        {status === "completed" && (
-          <div className="text-sm text-gray-600">{summary}</div>
-        )}
-
-        {/* 활성 입력 영역 */}
-        {status === "active" && (
-          <div className="bg-white border border-gray-100 rounded-xl p-3 sm:p-5 shadow-sm">
-            {children}
-          </div>
-        )}
-
-        {/* 잠김 상태 */}
-        {status === "locked" && (
-          <p className="text-xs text-gray-400">이전 단계를 완료하면 입력할 수 있어요</p>
-        )}
-      </div>
+      ))}
     </div>
   );
 }
 
 export default function TicketFormPage() {
-  const { id } = useParams<{ id?: string }>();
   const {
     formData,
     setFormData,
@@ -126,10 +110,10 @@ export default function TicketFormPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [showSearchModal, setShowSearchModal] = useState(false);
 
-  // 수정 모드: 데이터 로드 후 step 3(감상 기록)에서 시작
+  // 수정 모드: 데이터 로드 후 step 1에서 시작
   useEffect(() => {
     if (isEditMode && formData.performanceName) {
-      setCurrentStep(3);
+      setCurrentStep(1);
     }
   }, [isEditMode, formData.performanceName]);
 
@@ -143,105 +127,36 @@ export default function TicketFormPage() {
     );
   }
 
-  const stepStatus = (step: number): StepStatus => {
-    if (step < currentStep) return "completed";
-    if (step === currentStep) return "active";
-    return "locked";
-  };
-
-  // 스텝 1 요약
-  const step1Summary = (
-    <div className="flex items-center gap-3">
-      {formData.posterUrl && (
-        <img
-          src={formData.posterUrl}
-          alt=""
-          className="w-9 h-[52px] object-cover rounded shadow-sm flex-shrink-0"
-        />
-      )}
-      <div className="min-w-0">
-        <p className="text-sm font-medium text-gray-800 truncate">
-          {formData.performanceName || "공연 미선택"}
-        </p>
-        <p className="text-xs text-gray-500 mt-0.5">
-          {formData.date} · {formData.time}
-        </p>
-      </div>
-    </div>
-  );
-
-  // 스텝 2 요약
-  const theaterSeat = [formData.theater, formData.seat].filter(Boolean).join(" · ");
-  const priceSummary = [
-    formData.ticketPrice && `티켓 ${formData.ticketPrice}원`,
-    formData.mdPrice && `MD ${formData.mdPrice}원`,
-  ]
-    .filter(Boolean)
-    .join(" · ");
-
-  const step2Summary = (
-    <div className="space-y-0.5">
-      {theaterSeat && <p className="text-sm text-gray-700">{theaterSeat}</p>}
-      {formData.casting.length > 0 && (
-        <p className="text-xs text-gray-500">{formData.casting.join(", ")}</p>
-      )}
-      {priceSummary && <p className="text-xs text-gray-500">{priceSummary}</p>}
-      {!theaterSeat && formData.casting.length === 0 && !priceSummary && (
-        <p className="text-xs text-gray-400">입력된 정보 없음</p>
-      )}
-    </div>
-  );
-
-  // 스텝 3 요약
-  const step3Summary = (
-    <div className="flex items-center gap-3">
-      <div className="flex gap-0.5">
-        {[1, 2, 3, 4, 5].map((s) => (
-          <Star
-            key={s}
-            className={`w-3.5 h-3.5 ${
-              s <= formData.rating
-                ? "fill-yellow-400 text-yellow-400"
-                : "text-gray-200"
-            }`}
-          />
-        ))}
-      </div>
-      {formData.review && (
-        <p className="text-xs text-gray-500 truncate max-w-[240px]">
-          {formData.review}
-        </p>
-      )}
-    </div>
-  );
+  const canSave = !!formData.date;
 
   return (
     <Layout>
-      <div className="max-w-2xl mx-auto px-4 pt-0 sm:pt-8 pb-2 sm:pb-8">
-        {/* 페이지 헤더 */}
-        <div className="relative flex items-center justify-center mb-3">
+      <div className="max-w-2xl mx-auto px-4 pt-0 sm:pt-8 pb-8">
+        {/* 상단 헤더: 뒤로가기 / 제목 */}
+        <div className="relative flex items-center justify-center mb-5">
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="absolute left-0 p-1 -ml-1 text-gray-400 hover:text-gray-600 transition-colors"
+            className="absolute left-0 flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 transition-colors"
           >
-            <ArrowLeft className="w-4.5 h-4.5" />
+            <ArrowLeft className="w-4 h-4" />
+            뒤로
           </button>
-          <h1 className="text-bold text-base">
+          <h1 className="text-base sm:text-lg font-bold tracking-tight text-gray-900">
             {isEditMode ? "기록 수정" : "기록 추가"}
           </h1>
         </div>
+
+        {/* 스텝 인디케이터 */}
+        <StepIndicator
+          currentStep={currentStep}
+          onStepClick={setCurrentStep}
+        />
+
         <form onSubmit={handleSubmit}>
           {/* === STEP 1: 공연 선택 === */}
-          <StepCard
-            step={1}
-            title="공연 선택"
-            status={stepStatus(1)}
-            onEdit={() => setCurrentStep(1)}
-            summary={step1Summary}
-            isLast={false}
-          >
-            <div className="space-y-4">
+          {currentStep === 1 && (
+            <div className="bg-white border border-gray-100 rounded-xl p-4 sm:p-6 shadow-sm space-y-4">
               {/* 날짜 & 시간 */}
               <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 items-end">
                 <div className="min-w-0">
@@ -319,34 +234,18 @@ export default function TicketFormPage() {
                       </button>
                     </div>
                   ) : (
-                    <p className="text-sm text-gray-400">포스터를 클릭하여 공연을 검색하세요</p>
+                    <p className="text-sm text-gray-400">
+                      포스터를 클릭하여 공연을 검색하세요
+                    </p>
                   )}
                 </div>
               </div>
-
-              <div className="flex justify-end pt-1">
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={() => setCurrentStep(2)}
-                  disabled={!formData.date}
-                >
-                  다음
-                </Button>
-              </div>
             </div>
-          </StepCard>
+          )}
 
           {/* === STEP 2: 관람 정보 === */}
-          <StepCard
-            step={2}
-            title="관람 정보"
-            status={stepStatus(2)}
-            onEdit={() => setCurrentStep(2)}
-            summary={step2Summary}
-            isLast={false}
-          >
-            <div className="space-y-4">
+          {currentStep === 2 && (
+            <div className="bg-white border border-gray-100 rounded-xl p-4 sm:p-6 shadow-sm space-y-4">
               {/* 장르 */}
               <div>
                 <Label className="text-xs font-semibold text-gray-600 mb-1.5 block">
@@ -473,29 +372,12 @@ export default function TicketFormPage() {
                   placeholder="MD 가격"
                 />
               </div>
-
-              <div className="flex justify-end pt-1">
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={() => setCurrentStep(3)}
-                >
-                  다음
-                </Button>
-              </div>
             </div>
-          </StepCard>
+          )}
 
           {/* === STEP 3: 감상 기록 === */}
-          <StepCard
-            step={3}
-            title="감상 기록"
-            status={stepStatus(3)}
-            onEdit={() => setCurrentStep(3)}
-            summary={step3Summary}
-            isLast={true}
-          >
-            <div className="space-y-4">
+          {currentStep === 3 && (
+            <div className="bg-white border border-gray-100 rounded-xl p-4 sm:p-6 shadow-sm space-y-4">
               {/* 별점 */}
               <div>
                 <Label className="text-xs font-semibold text-gray-600 mb-2 block">
@@ -539,33 +421,50 @@ export default function TicketFormPage() {
                   placeholder="공연 후기를 입력하세요"
                 />
               </div>
-
-              {/* 버튼 */}
-              <div className="flex gap-3 pt-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => isEditMode ? navigate(`/tickets/${id}`) : navigate("/")}
-                  className="flex-1"
-                  disabled={isPending}
-                >
-                  취소
-                </Button>
-                <Button type="submit" className="flex-1" disabled={isPending}>
-                  {isPending ? (
-                    <span className="flex items-center gap-2">
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      처리 중...
-                    </span>
-                  ) : isEditMode ? (
-                    "수정"
-                  ) : (
-                    "저장"
-                  )}
-                </Button>
-              </div>
             </div>
-          </StepCard>
+          )}
+
+          {/* 하단 네비게이션 */}
+          <div className="flex justify-between mt-6">
+            {currentStep > 1 ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentStep((s) => s - 1)}
+              >
+                <ChevronLeft className="w-4 h-4 mr-1" />
+                이전
+              </Button>
+            ) : (
+              <div />
+            )}
+            {currentStep < 3 ? (
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => setCurrentStep((s) => s + 1)}
+              >
+                다음
+                <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
+            ) : (
+              <Button
+                type="submit"
+                size="sm"
+                disabled={!canSave || isPending}
+              >
+                {isPending ? (
+                  <span className="flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    처리 중...
+                  </span>
+                ) : (
+                  "저장"
+                )}
+              </Button>
+            )}
+          </div>
         </form>
       </div>
 

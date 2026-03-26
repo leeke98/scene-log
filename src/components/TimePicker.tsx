@@ -128,7 +128,7 @@ export default function TimePicker({
             </div>
             <div
               ref={hourScrollRef}
-              className="max-h-48 overflow-y-auto scroll-smooth"
+              className="max-h-48 overflow-y-auto overscroll-contain scroll-smooth touch-pan-y"
             >
               {hours.map((h) => (
                 <button
@@ -155,7 +155,7 @@ export default function TimePicker({
             </div>
             <div
               ref={minuteScrollRef}
-              className="max-h-48 overflow-y-auto scroll-smooth"
+              className="max-h-48 overflow-y-auto overscroll-contain scroll-smooth touch-pan-y"
             >
               {minutes.map((m) => (
                 <button
