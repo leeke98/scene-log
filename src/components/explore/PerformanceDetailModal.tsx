@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X } from "lucide-react";
+import { X, Calendar, Clock, MapPin, Users, Ticket, Baby } from "lucide-react";
 import { createPortal } from "react-dom";
 import { usePerformanceDetail } from "@/queries/kopis";
 
@@ -15,23 +15,6 @@ function formatDate(dateStr: string): string {
     return `${dateStr.substring(0, 4)}.${dateStr.substring(4, 6)}.${dateStr.substring(6, 8)}`;
   }
   return dateStr;
-}
-
-function Backdrop({
-  children,
-  onClose,
-}: {
-  children: React.ReactNode;
-  onClose: () => void;
-}) {
-  return (
-    <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
-      onClick={onClose}
-    >
-      {children}
-    </div>
-  );
 }
 
 export default function PerformanceDetailModal({
@@ -50,127 +33,177 @@ export default function PerformanceDetailModal({
   if (!isOpen) return null;
 
   const modalContent = (
-    <Backdrop onClose={onClose}>
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
+      onClick={onClose}
+    >
       <div
-        className="w-full max-w-3xl bg-card rounded-2xl shadow-xl border border-border overflow-hidden flex flex-col max-h-[90vh]"
+        className="w-full max-w-lg bg-card rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* 상단 그라데이션 바 */}
-        <div className="h-1.5 bg-gradient-to-r from-violet-400 via-purple-400 to-pink-400 flex-shrink-0" />
+        {/* 히어로 포스터 배너 */}
+        <div className="relative h-52 sm:h-64 flex-shrink-0 overflow-hidden">
+          {detail?.poster && !imageError ? (
+            <img
+              src={detail.poster}
+              alt={detail.prfnm}
+              className="w-full h-full object-cover"
+              onError={() => setImageError(true)}
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-violet-500 to-purple-700" />
+          )}
 
-        {/* 헤더 - 항상 표시 */}
-        <div className="flex items-start justify-between px-6 pt-5 pb-4 flex-shrink-0">
-          <div>
-            <p className="text-xs text-muted-foreground mb-0.5 tracking-wide">공연</p>
-            <h2 className="text-2xl font-bold tracking-tight leading-tight">
-              {detail?.prfnm ?? (isLoading ? "" : "-")}
-            </h2>
-          </div>
+          {/* 그라데이션 오버레이 */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+
+          {/* 닫기 버튼 */}
           <button
             onClick={onClose}
-            className="mt-1 p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors flex-shrink-0"
+            className="absolute top-3 right-3 p-1.5 rounded-full bg-black/40 text-white/90 hover:bg-black/60 transition-colors"
             aria-label="닫기"
           >
             <X className="w-4 h-4" />
           </button>
+
+          {/* 포스터 위 텍스트 */}
+          {detail && !isLoading && (
+            <div className="absolute bottom-0 left-0 right-0 px-5 pb-4">
+              <span
+                className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold mb-2 ${
+                  detail.prfstate === "공연중"
+                    ? "bg-emerald-500/90 text-white"
+                    : detail.prfstate === "공연예정"
+                      ? "bg-amber-500/90 text-white"
+                      : "bg-white/20 text-white/90"
+                }`}
+              >
+                {detail.prfstate || "-"}
+              </span>
+              <h2 className="text-xl sm:text-2xl font-bold text-white leading-tight break-keep">
+                {detail.prfnm}
+              </h2>
+              {detail.fcltynm && (
+                <p className="text-sm text-white/70 mt-1 flex items-center gap-1">
+                  <MapPin className="w-3.5 h-3.5" />
+                  {detail.fcltynm}
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* 구분선 */}
-        <div className="mx-6 border-t border-border flex-shrink-0" />
-
-        {/* 본문 */}
+        {/* 본문 스크롤 영역 */}
         <div className="overflow-y-auto">
           {isLoading && (
-            <div className="px-6 py-8 text-center text-sm text-muted-foreground">
+            <div className="px-5 py-10 text-center text-sm text-muted-foreground">
               불러오는 중...
             </div>
           )}
 
           {error && !isLoading && (
-            <div className="px-6 py-8 text-center text-sm text-muted-foreground">
-              {error instanceof Error ? error.message : "상세 정보를 불러오는데 실패했습니다."}
+            <div className="px-5 py-10 text-center text-sm text-muted-foreground">
+              {error instanceof Error
+                ? error.message
+                : "상세 정보를 불러오는데 실패했습니다."}
             </div>
           )}
 
           {detail && !isLoading && (
-            <div className="flex gap-6 px-6 py-5">
-              {/* 포스터 */}
-              <div className="w-52 flex-shrink-0 self-start">
-                <div className="aspect-[3/4] rounded-xl overflow-hidden shadow-md">
-                  {detail.poster && !imageError ? (
-                    <img
-                      src={detail.poster}
-                      alt={detail.prfnm}
-                      className="w-full h-full object-cover"
-                      onError={() => setImageError(true)}
-                    />
-                  ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-violet-400 to-purple-600">
-                      <span className="text-white text-4xl font-bold opacity-90">
-                        {detail.prfnm.charAt(0)}
-                      </span>
-                      <span className="text-white/60 text-xs mt-2">포스터 없음</span>
-                    </div>
-                  )}
-                </div>
+            <div className="px-5 py-4 space-y-4">
+              {/* 핵심 정보 카드 그리드 */}
+              <div className="grid grid-cols-2 gap-3">
+                <InfoCard
+                  icon={<Calendar className="w-4 h-4" />}
+                  label="공연 기간"
+                  value={`${formatDate(detail.prfpdfrom)} ~ ${formatDate(detail.prfpdto)}`}
+                />
+                {detail.prfruntime && (
+                  <InfoCard
+                    icon={<Clock className="w-4 h-4" />}
+                    label="런타임"
+                    value={detail.prfruntime}
+                  />
+                )}
               </div>
 
-              {/* 정보 패널 */}
-              <div className="flex-1 space-y-3 text-sm">
-                <InfoRow label="공연 기간">
-                  {formatDate(detail.prfpdfrom)} ~ {formatDate(detail.prfpdto)}
-                </InfoRow>
-                <InfoRow label="공연장">{detail.fcltynm || "-"}</InfoRow>
-                <InfoRow label="공연 상태">
-                  <span
-                    className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border ${
-                      detail.prfstate === "공연중"
-                        ? "bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/40"
-                        : "bg-muted text-muted-foreground border-border"
-                    }`}
-                  >
-                    {detail.prfstate || "-"}
-                  </span>
-                </InfoRow>
+              {/* 상세 정보 리스트 */}
+              <div className="space-y-1">
                 {detail.prfcast && (
-                  <InfoRow label="출연진">{detail.prfcast}</InfoRow>
-                )}
-                {detail.prfruntime && (
-                  <InfoRow label="런타임">{detail.prfruntime}</InfoRow>
+                  <InfoItem
+                    icon={<Users className="w-4 h-4" />}
+                    label="출연진"
+                    value={detail.prfcast}
+                  />
                 )}
                 {detail.prfage && (
-                  <InfoRow label="관람 연령">{detail.prfage}</InfoRow>
+                  <InfoItem
+                    icon={<Baby className="w-4 h-4" />}
+                    label="관람 연령"
+                    value={detail.prfage}
+                  />
                 )}
                 {detail.pcseguidance && (
-                  <InfoRow label="티켓 가격">{detail.pcseguidance}</InfoRow>
+                  <InfoItem
+                    icon={<Ticket className="w-4 h-4" />}
+                    label="티켓 가격"
+                    value={detail.pcseguidance}
+                  />
                 )}
                 {detail.dtguidance && (
-                  <InfoRow label="공연 시간">
-                    <span className="whitespace-pre-line">{detail.dtguidance}</span>
-                  </InfoRow>
+                  <InfoItem
+                    icon={<Clock className="w-4 h-4" />}
+                    label="공연 시간"
+                    value={detail.dtguidance}
+                  />
                 )}
               </div>
             </div>
           )}
         </div>
       </div>
-    </Backdrop>
+    </div>
   );
 
   return createPortal(modalContent, document.body);
 }
 
-function InfoRow({
+function InfoCard({
+  icon,
   label,
-  children,
+  value,
 }: {
+  icon: React.ReactNode;
   label: string;
-  children: React.ReactNode;
+  value: string;
 }) {
   return (
-    <div className="flex gap-2">
-      <span className="font-semibold text-muted-foreground w-20 flex-shrink-0">{label}</span>
-      <span className="flex-1">{children}</span>
+    <div className="rounded-xl bg-muted/50 px-3.5 py-3">
+      <div className="flex items-center gap-1.5 text-muted-foreground mb-1">
+        {icon}
+        <span className="text-xs font-medium">{label}</span>
+      </div>
+      <p className="text-sm font-semibold leading-snug">{value}</p>
+    </div>
+  );
+}
+
+function InfoItem({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="flex gap-3 py-2.5 border-b border-border/50 last:border-b-0">
+      <div className="text-muted-foreground mt-0.5 flex-shrink-0">{icon}</div>
+      <div className="flex-1 min-w-0">
+        <p className="text-xs text-muted-foreground mb-0.5">{label}</p>
+        <p className="text-sm whitespace-pre-line">{value}</p>
+      </div>
     </div>
   );
 }
