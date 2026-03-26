@@ -221,6 +221,7 @@ export default function PerformanceCalendar({
             // 날짜 클릭 시 티켓 생성 페이지로 이동
             if (onDateClick) {
               onDateClick(value);
+              return;
             }
             onDateChange(value);
           }
