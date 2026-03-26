@@ -41,9 +41,11 @@ export default function TimePicker({
   // 24시간 형식 시간 배열 (0-23)
   const hours = Array.from({ length: 24 }, (_, i) => i);
 
-  // 외부 클릭 시 닫기 및 선택된 항목으로 스크롤
+  // 외부 클릭 시 닫기
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    if (!isOpen) return;
+
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
       if (
         containerRef.current &&
         !containerRef.current.contains(event.target as Node)
@@ -52,41 +54,38 @@ export default function TimePicker({
       }
     };
 
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-
-      // 선택된 항목으로 스크롤
-      setTimeout(() => {
-        if (hourScrollRef.current) {
-          const selectedHourElement = hourScrollRef.current.querySelector(
-            `button[data-hour="${hour}"]`
-          );
-          if (selectedHourElement) {
-            selectedHourElement.scrollIntoView({
-              block: "center",
-              behavior: "smooth",
-            });
-          }
-        }
-
-        if (minuteScrollRef.current) {
-          const selectedMinuteElement = minuteScrollRef.current.querySelector(
-            `button[data-minute="${minute}"]`
-          );
-          if (selectedMinuteElement) {
-            selectedMinuteElement.scrollIntoView({
-              block: "center",
-              behavior: "smooth",
-            });
-          }
-        }
-      }, 100);
-    }
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
     };
-  }, [isOpen, hour, minute]);
+  }, [isOpen]);
+
+  // 드롭다운 열릴 때 선택된 항목으로 스크롤
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const scrollToSelected = (
+      container: HTMLDivElement | null,
+      selector: string
+    ) => {
+      if (!container) return;
+      const el = container.querySelector(selector);
+      if (el) {
+        el.scrollIntoView({ block: "center", behavior: "smooth" });
+      }
+    };
+
+    setTimeout(() => {
+      scrollToSelected(hourScrollRef.current, `button[data-hour="${hour}"]`);
+      scrollToSelected(
+        minuteScrollRef.current,
+        `button[data-minute="${minute}"]`
+      );
+    }, 100);
+  }, [isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleHourSelect = (selectedHour: number) => {
     const newTime = `${String(selectedHour).padStart(2, "0")}:${String(
@@ -120,7 +119,7 @@ export default function TimePicker({
 
       {/* 시간 선택 드롭다운 */}
       {isOpen && (
-        <div className="absolute left-0 top-full z-50 mt-1 flex gap-2 rounded-lg border border-border bg-white p-4 shadow-lg">
+        <div className="absolute left-0 top-full z-50 mt-1 flex gap-2 rounded-lg border border-border bg-white p-4 shadow-lg dark:bg-popover">
           {/* 시간 선택 컬럼 */}
           <div className="flex flex-col">
             <div className="mb-2 px-2 text-xs font-semibold text-muted-foreground">
@@ -128,23 +127,32 @@ export default function TimePicker({
             </div>
             <div
               ref={hourScrollRef}
-              className="max-h-48 overflow-y-auto overscroll-contain scroll-smooth touch-pan-y"
+              className="flex h-48 flex-col overflow-x-hidden overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch]"
             >
-              {hours.map((h) => (
-                <button
-                  key={h}
-                  type="button"
-                  data-hour={h}
-                  onClick={() => handleHourSelect(h)}
-                  className={`w-12 rounded px-2 py-1.5 text-sm transition-colors ${
-                    h === hour
-                      ? "bg-primary text-primary-foreground"
-                      : "hover:bg-accent hover:text-accent-foreground"
-                  }`}
-                >
-                  {String(h).padStart(2, "0")}
-                </button>
-              ))}
+              {hours.map((h) => {
+                const selected = h === hour;
+                return (
+                  <button
+                    key={h}
+                    type="button"
+                    data-hour={h}
+                    onClick={() => handleHourSelect(h)}
+                    className={`w-12 shrink-0 rounded px-2 py-1.5 text-sm ${
+                      selected ? "" : "hover:bg-accent hover:text-accent-foreground"
+                    }`}
+                    style={
+                      selected
+                        ? {
+                            backgroundColor: "hsl(var(--primary))",
+                            color: "hsl(var(--primary-foreground))",
+                          }
+                        : undefined
+                    }
+                  >
+                    {String(h).padStart(2, "0")}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -155,23 +163,32 @@ export default function TimePicker({
             </div>
             <div
               ref={minuteScrollRef}
-              className="max-h-48 overflow-y-auto overscroll-contain scroll-smooth touch-pan-y"
+              className="flex h-48 flex-col overflow-x-hidden overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch]"
             >
-              {minutes.map((m) => (
-                <button
-                  key={m}
-                  type="button"
-                  data-minute={m}
-                  onClick={() => handleMinuteSelect(m)}
-                  className={`w-12 rounded px-2 py-1.5 text-sm transition-colors ${
-                    m === minute
-                      ? "bg-primary text-primary-foreground"
-                      : "hover:bg-accent hover:text-accent-foreground"
-                  }`}
-                >
-                  {String(m).padStart(2, "0")}
-                </button>
-              ))}
+              {minutes.map((m) => {
+                const selected = m === minute;
+                return (
+                  <button
+                    key={m}
+                    type="button"
+                    data-minute={m}
+                    onClick={() => handleMinuteSelect(m)}
+                    className={`w-12 shrink-0 rounded px-2 py-1.5 text-sm ${
+                      selected ? "" : "hover:bg-accent hover:text-accent-foreground"
+                    }`}
+                    style={
+                      selected
+                        ? {
+                            backgroundColor: "hsl(var(--primary))",
+                            color: "hsl(var(--primary-foreground))",
+                          }
+                        : undefined
+                    }
+                  >
+                    {String(m).padStart(2, "0")}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
