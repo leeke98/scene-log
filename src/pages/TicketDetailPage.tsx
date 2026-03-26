@@ -111,11 +111,11 @@ export default function TicketDetailPage() {
         {/* 상단 액션바 */}
         <div className="flex items-center justify-between">
           <button
-            onClick={() => navigate("/records")}
+            onClick={() => navigate(-1)}
             className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            목록으로
+            뒤로 가기
           </button>
           <div className="flex items-center gap-2">
             <Button
