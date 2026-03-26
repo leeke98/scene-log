@@ -129,6 +129,37 @@ export function usePerformanceStats(params?: {
   });
 }
 /**
+ * 작품별 통계 무한 스크롤 조회
+ */
+export function useInfinitePerformanceStats(params?: {
+  search?: string;
+  year?: string;
+  month?: string;
+  limit?: number;
+}) {
+  const limit = params?.limit ?? 20;
+  return useInfiniteQuery({
+    queryKey: [
+      ...queryKeys.reports.all,
+      "performances",
+      "infinite",
+      params?.search,
+      params?.year,
+      params?.month,
+      limit,
+    ] as const,
+    queryFn: ({ pageParam = 1 }) =>
+      reportApi.getPerformanceStats({ ...params, page: pageParam, limit }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      if (!lastPage.pagination) return undefined;
+      const { page, totalPages } = lastPage.pagination;
+      return page < totalPages ? page + 1 : undefined;
+    },
+  });
+}
+
+/**
  * 가장 많이 본 작품 Top 10 조회
  */
 export function useMostViewedPerformance(year?: string, month?: string) {

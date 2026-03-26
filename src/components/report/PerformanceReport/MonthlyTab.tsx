@@ -1,9 +1,9 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { Eye, Theater, Wallet } from "lucide-react";
 import PerformanceDetailModal from "./PerformanceDetailModal";
 import PerformanceTable from "./PerformanceTable";
 import TopPosters from "./TopPosters";
-import Pagination from "../Pagination";
-import { usePerformanceStats } from "@/queries/reports/queries";
+import { useInfinitePerformanceStats, useSummary } from "@/queries/reports/queries";
 
 interface PerformanceMonthlyTabProps {
   searchTerm: string;
@@ -19,50 +19,61 @@ export default function PerformanceMonthlyTab({
   const [selectedPerformance, setSelectedPerformance] =
     useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
   const limit = 20;
 
-  // month가 "YYYY-MM" 형식이므로 "MM" 부분만 추출
   const monthOnly = month.split("-")[1];
 
-  // API 호출
-  const { data, isLoading, error } = usePerformanceStats({
+  const { data: summaryData } = useSummary(year, monthOnly);
+
+  const {
+    data,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfinitePerformanceStats({
     search: searchTerm || undefined,
     year,
     month: monthOnly,
-    page: currentPage,
     limit,
   });
 
-  // 검색어나 연도, 월 변경 시 페이지 리셋
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, year, month]);
-
-  // 검색 필터링 및 정렬: 관극 횟수 높은 순 > 별점 높은 순
-  const sortedPerformances = useMemo(() => {
-    if (!data?.data) return [];
-
-    const performances = data.data;
-
-    // 정렬: 관극 횟수 높은 순 > 별점 높은 순
-    return performances.sort((a, b) => {
-      // 1순위: 관극 횟수 높은 순
-      if (b.viewCount !== a.viewCount) {
-        return b.viewCount - a.viewCount;
-      }
-      // 2순위: 별점 높은 순 (undefined는 0으로 처리)
-      const ratingA = a.avgRating ?? 0;
-      const ratingB = b.avgRating ?? 0;
-      return ratingB - ratingA;
-    });
+  const allPerformances = useMemo(() => {
+    if (!data?.pages) return [];
+    return data.pages.flatMap((page) => page.data ?? []);
   }, [data]);
 
-  const pagination = data?.pagination;
+  const sortedPerformances = useMemo(() => {
+    return [...allPerformances].sort((a, b) => {
+      if (b.viewCount !== a.viewCount) return b.viewCount - a.viewCount;
+      return (b.avgRating ?? 0) - (a.avgRating ?? 0);
+    });
+  }, [allPerformances]);
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const sentinelRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (observerRef.current) observerRef.current.disconnect();
+      if (!node) return;
+      observerRef.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      });
+      observerRef.current.observe(node);
+    },
+    [hasNextPage, isFetchingNextPage, fetchNextPage]
+  );
+
+  useEffect(() => {
+    // key 변경 시 자동 리셋
+  }, [searchTerm, year, month]);
+
+  const showTop3 = sortedPerformances.length > 0 && !searchTerm.trim();
+  const tablePerformances = showTop3
+    ? sortedPerformances.slice(3)
+    : sortedPerformances;
 
   const handlePerformanceClick = (performanceName: string) => {
     setSelectedPerformance(performanceName);
@@ -74,50 +85,72 @@ export default function PerformanceMonthlyTab({
     setSelectedPerformance(null);
   };
 
-  // 1페이지일 때는 Top 10 포스터 표시, 테이블은 11위부터
-  // 2페이지 이상일 때는 Top 10 포스터 숨김, 테이블은 전체 표시
-  // 검색어가 있으면 Top 10 포스터 숨김
-  const showTop10 =
-    currentPage === 1 &&
-    sortedPerformances.length > 0 &&
-    !searchTerm.trim();
-  const tablePerformances = showTop10
-    ? sortedPerformances.slice(10)
-    : sortedPerformances;
-
   return (
     <div className="space-y-6">
-      {/* Top 10 포스터 (1페이지일 때만) */}
-      {showTop10 && (
+      {/* Summary Cards */}
+      {summaryData && !searchTerm.trim() && (
+        <div className="grid grid-cols-3 gap-3">
+          <div className="rounded-xl border border-border bg-card p-3.5 sm:p-4 text-center space-y-1">
+            <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground font-medium">
+              <Eye className="w-3.5 h-3.5" />
+              총 관람
+            </div>
+            <div className="text-lg sm:text-xl font-bold">
+              {summaryData.totalCount}
+              <span className="text-xs font-normal text-muted-foreground ml-0.5">
+                회
+              </span>
+            </div>
+          </div>
+          <div className="rounded-xl border border-border bg-card p-3.5 sm:p-4 text-center space-y-1">
+            <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground font-medium">
+              <Theater className="w-3.5 h-3.5" />
+              작품 수
+            </div>
+            <div className="text-lg sm:text-xl font-bold">
+              {summaryData.uniquePerformances}
+              <span className="text-xs font-normal text-muted-foreground ml-0.5">
+                편
+              </span>
+            </div>
+          </div>
+          <div className="rounded-xl border border-border bg-card p-3.5 sm:p-4 text-center space-y-1">
+            <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground font-medium">
+              <Wallet className="w-3.5 h-3.5" />
+              총 금액
+            </div>
+            <div className="text-sm sm:text-base font-bold">
+              {summaryData.totalTicketPrice.toLocaleString()}
+              <span className="text-xs font-normal text-muted-foreground ml-0.5">
+                원
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showTop3 && (
         <TopPosters
-          performances={sortedPerformances.slice(0, 10)}
+          performances={sortedPerformances.slice(0, 3)}
           onPerformanceClick={handlePerformanceClick}
         />
       )}
 
-      {/* 테이블 */}
       <PerformanceTable
         performances={tablePerformances}
         isLoading={isLoading}
         error={error}
-        currentPage={currentPage}
-        limit={limit}
-        total={pagination?.total ?? 0}
-        startRankOffset={showTop10 ? 10 : 0}
+        startRankOffset={showTop3 ? 3 : 0}
         onPerformanceClick={handlePerformanceClick}
       />
 
-      {/* 페이징 */}
-      {pagination && (
-        <Pagination
-          currentPage={currentPage}
-          totalPages={pagination.totalPages}
-          total={pagination.total}
-          onPageChange={handlePageChange}
-        />
+      <div ref={sentinelRef} className="h-4" />
+      {isFetchingNextPage && (
+        <div className="flex justify-center py-4 text-sm text-muted-foreground">
+          불러오는 중...
+        </div>
       )}
 
-      {/* 극 상세 모달 */}
       {selectedPerformance && (
         <PerformanceDetailModal
           isOpen={isModalOpen}

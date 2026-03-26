@@ -1,56 +1,28 @@
 import { Star } from "lucide-react";
 import type { PerformanceStats } from "@/types/report";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 
 interface PerformanceTableProps {
   performances: PerformanceStats[];
   isLoading: boolean;
   error: Error | null;
-  currentPage: number;
-  limit: number;
-  total: number;
   startRankOffset?: number;
   onPerformanceClick: (performanceName: string) => void;
 }
 
-const rankConfig: Record<number, { bg: string; text: string }> = {
-  1: { bg: "bg-yellow-400", text: "text-yellow-900" },
-  2: { bg: "bg-slate-300", text: "text-slate-700" },
-  3: { bg: "bg-amber-600", text: "text-white" },
+const rankBadgeConfig: Record<number, string> = {
+  1: "bg-yellow-400 text-yellow-900",
+  2: "bg-slate-300 text-slate-700",
+  3: "bg-amber-600 text-white",
 };
 
 export default function PerformanceTable({
   performances,
   isLoading,
   error,
-  currentPage,
-  limit,
-  total,
   startRankOffset = 0,
   onPerformanceClick,
 }: PerformanceTableProps) {
-  const getRankBadge = (index: number) => {
-    const actualRank =
-      (currentPage - 1) * limit + index + 1 + startRankOffset;
-    if (currentPage !== 1 || actualRank > 3) return null;
-    const { bg, text } = rankConfig[actualRank];
-    return (
-      <span
-        className={`inline-flex items-center justify-center w-5 h-5 rounded-full ${bg} ${text} text-[10px] font-bold mr-2 flex-shrink-0 shadow-sm`}
-      >
-        {actualRank}
-      </span>
-    );
-  };
-
   const renderStars = (rating: number | undefined) => {
     const safeRating = rating ?? 0;
     const fullStars = Math.floor(safeRating);
@@ -60,126 +32,136 @@ export default function PerformanceTable({
     return (
       <div className="flex items-center gap-0.5">
         {Array.from({ length: fullStars }).map((_, i) => (
-          <Star key={`full-${i}`} className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
+          <Star
+            key={`full-${i}`}
+            className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400"
+          />
         ))}
         {hasHalfStar && (
           <div className="relative w-3.5 h-3.5">
             <Star className="w-3.5 h-3.5 fill-muted text-muted absolute" />
-            <div className="absolute overflow-hidden" style={{ width: "50%" }}>
+            <div
+              className="absolute overflow-hidden"
+              style={{ width: "50%" }}
+            >
               <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
             </div>
           </div>
         )}
         {Array.from({ length: emptyStars }).map((_, i) => (
-          <Star key={`empty-${i}`} className="w-3.5 h-3.5 fill-muted text-muted" />
+          <Star
+            key={`empty-${i}`}
+            className="w-3.5 h-3.5 fill-muted text-muted"
+          />
         ))}
-        <span className="ml-1.5 text-xs text-muted-foreground tabular-nums">
+        <span className="ml-1 text-xs text-muted-foreground tabular-nums">
           {safeRating.toFixed(1)}
         </span>
       </div>
     );
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center gap-2 py-16 text-muted-foreground">
+        <span className="text-3xl">🎭</span>
+        <span className="text-sm">불러오는 중...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center gap-2 py-16 text-destructive">
+        <span className="text-3xl">⚠️</span>
+        <span className="text-sm">데이터를 불러오는 중 오류가 발생했습니다.</span>
+      </div>
+    );
+  }
+
+  if (performances.length === 0) {
+    return (
+      <div className="flex flex-col items-center gap-2 py-16 text-muted-foreground">
+        <span className="text-3xl">🎭</span>
+        <span className="text-sm">데이터가 없습니다.</span>
+      </div>
+    );
+  }
+
   return (
-    <Card className="shadow-sm border-border rounded-xl">
-      <CardContent className="p-0">
-        <div className="overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-muted/40 hover:bg-muted/40 border-b border-border">
-              <TableHead className="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                작품명
-              </TableHead>
-              <TableHead className="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                관람 횟수
-              </TableHead>
-              <TableHead className="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                관람 금액
-              </TableHead>
-              <TableHead className="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                후기 별점
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              <TableRow>
-                <TableCell colSpan={4} className="px-6 py-16 text-center">
-                  <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                    <span className="text-3xl">🎭</span>
-                    <span className="text-sm">불러오는 중...</span>
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+      {performances.map((performance, index) => {
+        const rank = index + 1 + startRankOffset;
+        const badgeStyle = rankBadgeConfig[rank];
+
+        return (
+          <Card
+            key={performance.name}
+            className="cursor-pointer transition-colors hover:bg-violet-50/60 dark:hover:bg-violet-950/20 shadow-sm border-border rounded-xl overflow-hidden"
+            onClick={() => onPerformanceClick(performance.name)}
+          >
+            <div className="flex items-center gap-3 p-3 sm:p-4">
+              {/* 순위 */}
+              <div className="flex-shrink-0 w-8 text-center">
+                {badgeStyle ? (
+                  <span
+                    className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${badgeStyle} text-xs font-bold shadow-sm`}
+                  >
+                    {rank}
+                  </span>
+                ) : (
+                  <span className="text-sm font-medium text-muted-foreground tabular-nums">
+                    {rank}
+                  </span>
+                )}
+              </div>
+
+              {/* 포스터 썸네일 */}
+              <div className="w-11 h-[60px] sm:w-16 sm:h-[88px] rounded-lg overflow-hidden bg-muted flex-shrink-0">
+                {performance.posterUrl ? (
+                  <img
+                    src={performance.posterUrl}
+                    alt={performance.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-violet-400 to-purple-600">
+                    <span className="text-white text-xs font-bold">
+                      {performance.name.charAt(0)}
+                    </span>
                   </div>
-                </TableCell>
-              </TableRow>
-            ) : error ? (
-              <TableRow>
-                <TableCell colSpan={4} className="px-6 py-16 text-center">
-                  <div className="flex flex-col items-center gap-2 text-destructive">
-                    <span className="text-3xl">⚠️</span>
-                    <span className="text-sm">데이터를 불러오는 중 오류가 발생했습니다.</span>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ) : performances.length > 0 ? (
-              performances.map((performance, index) => (
-                <TableRow
-                  key={performance.name}
-                  className="cursor-pointer transition-colors hover:bg-violet-50/60 dark:hover:bg-violet-950/20 border-b border-border/60"
-                  onClick={() => onPerformanceClick(performance.name)}
-                >
-                  <TableCell className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      {getRankBadge(index)}
-                      <span className="font-medium text-sm">{performance.name}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="px-6 py-4 whitespace-nowrap">
-                    <div className="space-y-1.5">
-                      <div className="text-sm font-semibold">
-                        {performance.viewCount}
-                        <span className="text-xs font-normal text-muted-foreground ml-0.5">
-                          회
-                        </span>
-                      </div>
-                      <div className="bg-muted rounded-full h-1.5 w-24">
-                        <div
-                          className="h-1.5 rounded-full transition-all"
-                          style={{
-                            width: `${Math.min(
-                              (performance.viewCount / (total || 1)) * 100,
-                              100
-                            )}%`,
-                            background: "hsl(var(--chart-1))",
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell className="px-6 py-4 whitespace-nowrap text-sm">
-                    <span className="font-medium">
+                )}
+              </div>
+
+              {/* 정보 */}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">
+                  {performance.name}
+                </p>
+                <div className="flex items-center gap-2 mt-1 flex-wrap">
+                  <span className="text-xs text-muted-foreground">
+                    <span className="font-semibold text-foreground">
+                      {performance.viewCount}
+                    </span>
+                    회
+                  </span>
+                  <span className="text-muted-foreground/30">|</span>
+                  <span className="text-xs text-muted-foreground">
+                    <span className="font-medium text-foreground">
                       {performance.totalTicketPrice.toLocaleString()}
                     </span>
-                    <span className="text-xs text-muted-foreground ml-0.5">원</span>
-                  </TableCell>
-                  <TableCell className="px-6 py-4 whitespace-nowrap">
-                    {renderStars(performance.avgRating)}
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={4} className="px-6 py-16 text-center">
-                  <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                    <span className="text-3xl">🎭</span>
-                    <span className="text-sm">데이터가 없습니다.</span>
-                  </div>
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-        </div>
-      </CardContent>
-    </Card>
+                    원
+                  </span>
+                </div>
+                {/* 별점 */}
+                <div className="mt-1">
+                  {renderStars(performance.avgRating)}
+                </div>
+              </div>
+            </div>
+          </Card>
+        );
+      })}
+    </div>
   );
 }
