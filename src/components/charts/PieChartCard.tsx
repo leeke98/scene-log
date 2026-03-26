@@ -107,13 +107,10 @@ export default function PieChartCard({
 
   return (
     <div
-      className={`bg-card rounded-xl p-5 border border-border shadow-sm min-w-0 flex flex-col ${
+      className={`bg-card rounded-xl p-3 border border-border shadow-sm min-w-0 flex flex-col ${
         className || ""
       }`}
     >
-      <h3 className="text-sm font-semibold text-foreground/70 mb-3 flex-shrink-0 tracking-wide">
-        {title}
-      </h3>
       <ChartContainer
         config={config}
         className={`${heightClass} w-full`}

@@ -42,24 +42,21 @@ export default function BarChartCard({
 
   return (
     <div
-      className={`bg-card rounded-xl p-5 border border-border shadow-sm min-w-0 ${
+      className={`bg-card rounded-xl p-3 border border-border shadow-sm min-w-0 ${
         className || ""
       }`}
     >
-      <h3 className="text-sm font-semibold text-foreground/70 mb-3 tracking-wide">
-        {title}
-      </h3>
       <ChartContainer config={config} className={`${height} w-full`}>
-        <RechartsBarChart data={data}>
+        <RechartsBarChart data={data} margin={{ top: 5, right: 5, bottom: 0, left: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
           <XAxis
             dataKey={xAxisKey}
             tickLine={false}
             axisLine={false}
-            tickMargin={8}
+            tickMargin={4}
             angle={-45}
             textAnchor="end"
-            height={60}
+            height={40}
             interval={0}
             tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
           />

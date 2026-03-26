@@ -135,34 +135,45 @@ export default function OverallAnnualTab({ year }: OverallAnnualTabProps) {
 
       {/* 차트 섹션 */}
       <section>
-        <div className="flex items-center gap-2 mb-4">
-          <div className="w-1 h-5 bg-primary rounded-full" />
-          <h2 className="text-base font-semibold tracking-wide">차트</h2>
-        </div>
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          <BarChartCard
-            title="월 별 관람수"
-            data={monthlyViewCountData}
-            dataKey="관람수"
-            xAxisKey="month"
-            config={monthlyViewCountConfig}
-            className="md:col-span-2"
-          />
-          <BarChartCard
-            title="월 별 관람 금액"
-            data={monthlyAmountData}
-            dataKey="금액"
-            xAxisKey="month"
-            config={monthlyAmountConfig}
-            yAxisFormatter={(value) => `${(value / 10000).toLocaleString()}만`}
-            tooltipFormatter={(value: number) => `${value.toLocaleString()}원`}
-            className="md:col-span-2"
-          />
-          <PieChartCard
-            title="관극 요일"
-            dayOfWeekStats={dayOfWeekStats}
-            className="md:col-span-1"
-          />
+          <div className="md:col-span-2">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-1 h-5 bg-primary rounded-full" />
+              <h2 className="text-base font-semibold tracking-wide">월 별 관람수</h2>
+            </div>
+            <BarChartCard
+              title="월 별 관람수"
+              data={monthlyViewCountData}
+              dataKey="관람수"
+              xAxisKey="month"
+              config={monthlyViewCountConfig}
+            />
+          </div>
+          <div className="md:col-span-2">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-1 h-5 bg-primary rounded-full" />
+              <h2 className="text-base font-semibold tracking-wide">월 별 관람 금액</h2>
+            </div>
+            <BarChartCard
+              title="월 별 관람 금액"
+              data={monthlyAmountData}
+              dataKey="금액"
+              xAxisKey="month"
+              config={monthlyAmountConfig}
+              yAxisFormatter={(value) => `${(value / 10000).toLocaleString()}만`}
+              tooltipFormatter={(value: number) => `${value.toLocaleString()}원`}
+            />
+          </div>
+          <div className="md:col-span-1">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-1 h-5 bg-primary rounded-full" />
+              <h2 className="text-base font-semibold tracking-wide">관극 요일</h2>
+            </div>
+            <PieChartCard
+              title="관극 요일"
+              dayOfWeekStats={dayOfWeekStats}
+            />
+          </div>
         </div>
       </section>
     </div>
