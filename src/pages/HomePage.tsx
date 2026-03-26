@@ -1,15 +1,17 @@
-import { useMemo, useCallback } from "react";
+import { useMemo, useCallback, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Plus } from "lucide-react";
+import { Plus, Image } from "lucide-react";
 import { formatDateToISO } from "@/lib/dateUtils";
 import Layout from "@/components/Layout";
 import Calendar from "@/components/Calendar";
+import CalendarExportDialog from "@/components/CalendarExportDialog";
 import MonthPicker from "@/components/MonthPicker";
 import { Button } from "@/components/ui/button";
 
 export default function HomePage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [exportOpen, setExportOpen] = useState(false);
 
   const currentDate = useMemo(() => {
     const month = searchParams.get("month");
@@ -64,19 +66,30 @@ export default function HomePage() {
               오늘
             </Button>
           </div>
-          <Button
-            onClick={() => navigate("/tickets/new")}
-            size="icon"
-            className="md:hidden h-8 w-8 bg-primary hover:bg-primary/90 text-white"
-          >
-            <Plus className="w-4 h-4" />
-          </Button>
-          <Button
-            onClick={() => navigate("/tickets/new")}
-            className="hidden md:inline-flex h-10 bg-primary hover:bg-primary/90 text-white"
-          >
-            새 기록 추가
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={() => setExportOpen(true)}
+              variant="outline"
+              size="icon"
+              className="h-8 w-8 md:h-10 md:w-10"
+              title="달력 이미지 내보내기"
+            >
+              <Image className="w-4 h-4" />
+            </Button>
+            <Button
+              onClick={() => navigate("/tickets/new")}
+              size="icon"
+              className="md:hidden h-8 w-8 bg-primary hover:bg-primary/90 text-white"
+            >
+              <Plus className="w-4 h-4" />
+            </Button>
+            <Button
+              onClick={() => navigate("/tickets/new")}
+              className="hidden md:inline-flex h-10 bg-primary hover:bg-primary/90 text-white"
+            >
+              새 기록 추가
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -85,6 +98,12 @@ export default function HomePage() {
         onDateChange={setCurrentDate}
         onTicketClick={handleTicketClick}
         onDateClick={handleDateClick}
+      />
+
+      <CalendarExportDialog
+        open={exportOpen}
+        onOpenChange={setExportOpen}
+        currentDate={currentDate}
       />
     </Layout>
   );
