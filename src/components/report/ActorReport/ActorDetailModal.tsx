@@ -135,15 +135,6 @@ export default function ActorDetailModal({
                 {actor.viewCount}
                 <span className="text-sm font-normal text-muted-foreground ml-0.5">회</span>
               </div>
-              <div className="bg-muted rounded-full h-1.5 mt-1">
-                <div
-                  className="h-1.5 rounded-full transition-all"
-                  style={{
-                    width: `${Math.min((actor.viewCount / 30) * 100, 100)}%`,
-                    background: "hsl(var(--chart-1))",
-                  }}
-                />
-              </div>
             </div>
             <div className="rounded-xl border border-border bg-muted/30 p-4 space-y-1">
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">

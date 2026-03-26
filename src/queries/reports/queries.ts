@@ -1,7 +1,7 @@
 /**
  * 리포트 관련 Queries
  */
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/react-query/queryKeys";
 import * as reportApi from "@/services/reportApi";
 
@@ -58,6 +58,37 @@ export function useActorStats(params?: {
   return useQuery({
     queryKey: queryKeys.reports.actors(params),
     queryFn: () => reportApi.getActorStats(params),
+  });
+}
+
+/**
+ * 배우별 통계 무한 스크롤 조회
+ */
+export function useInfiniteActorStats(params?: {
+  search?: string;
+  year?: string;
+  month?: string;
+  limit?: number;
+}) {
+  const limit = params?.limit ?? 10;
+  return useInfiniteQuery({
+    queryKey: [
+      ...queryKeys.reports.all,
+      "actors",
+      "infinite",
+      params?.search,
+      params?.year,
+      params?.month,
+      limit,
+    ] as const,
+    queryFn: ({ pageParam = 1 }) =>
+      reportApi.getActorStats({ ...params, page: pageParam, limit }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      if (!lastPage.pagination) return undefined;
+      const { page, totalPages } = lastPage.pagination;
+      return page < totalPages ? page + 1 : undefined;
+    },
   });
 }
 

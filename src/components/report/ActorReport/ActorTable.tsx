@@ -1,12 +1,6 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { useRef, useCallback, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Loader2 } from "lucide-react";
 
 // 작품 태그 색상 (jewel tone, 순환) - 모달과 동일
 const tagColors = [
@@ -24,11 +18,12 @@ export interface ActorData {
   totalAmount: number;
 }
 
-interface ActorTableProps {
+interface ActorCardListProps {
   actors: ActorData[];
   onActorClick: (actorName: string) => void;
-  currentPage?: number;
-  limit?: number;
+  hasNextPage?: boolean;
+  isFetchingNextPage?: boolean;
+  fetchNextPage?: () => void;
 }
 
 const rankConfig: Record<number, { bg: string; text: string }> = {
@@ -37,116 +32,123 @@ const rankConfig: Record<number, { bg: string; text: string }> = {
   3: { bg: "bg-amber-600", text: "text-white" },
 };
 
-export default function ActorTable({
+export default function ActorCardList({
   actors,
   onActorClick,
-  currentPage = 1,
-  limit = 10,
-}: ActorTableProps) {
-  const getRankBadge = (index: number) => {
-    const actualRank = (currentPage - 1) * limit + index + 1;
-    if (currentPage !== 1 || actualRank > 3) return null;
-    const { bg, text } = rankConfig[actualRank];
+  hasNextPage,
+  isFetchingNextPage,
+  fetchNextPage,
+}: ActorCardListProps) {
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const sentinelRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (observerRef.current) observerRef.current.disconnect();
+      if (!node || !hasNextPage || isFetchingNextPage) return;
+      observerRef.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasNextPage) {
+          fetchNextPage?.();
+        }
+      });
+      observerRef.current.observe(node);
+    },
+    [hasNextPage, isFetchingNextPage, fetchNextPage]
+  );
+
+  useEffect(() => {
+    return () => observerRef.current?.disconnect();
+  }, []);
+
+  if (actors.length === 0) {
     return (
-      <span
-        className={`inline-flex items-center justify-center w-5 h-5 rounded-full ${bg} ${text} text-[10px] font-bold mr-2 flex-shrink-0 shadow-sm`}
-      >
-        {actualRank}
-      </span>
+      <Card className="shadow-sm border-border rounded-xl">
+        <CardContent className="px-6 py-16">
+          <div className="flex flex-col items-center gap-2 text-muted-foreground">
+            <span className="text-3xl">🎭</span>
+            <span className="text-sm">검색 결과가 없습니다.</span>
+          </div>
+        </CardContent>
+      </Card>
     );
-  };
+  }
 
   return (
-    <Card className="shadow-sm border-border rounded-xl">
-      <CardContent className="p-0">
-        <div className="overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-muted/40 hover:bg-muted/40 border-b border-border">
-              <TableHead className="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                이름
-              </TableHead>
-              <TableHead className="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                총 관극 횟수
-              </TableHead>
-              <TableHead className="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                관람 작품
-              </TableHead>
-              <TableHead className="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                관람 금액
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {actors.length > 0 ? (
-              actors.map((actor, index) => (
-                <TableRow
-                  key={`${actor.name}-${index}`}
-                  className="cursor-pointer transition-colors hover:bg-violet-50/60 dark:hover:bg-violet-950/20 border-b border-border/60"
-                  onClick={() => onActorClick(actor.name)}
-                >
-                  <TableCell className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      {getRankBadge(index)}
-                      <span className="font-medium text-sm">{actor.name}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="px-6 py-4 whitespace-nowrap">
-                    <div className="space-y-1.5">
-                      <div className="text-sm font-semibold">
-                        {actor.totalViewCount}
-                        <span className="text-xs font-normal text-muted-foreground ml-0.5">
-                          회
-                        </span>
-                      </div>
-                      <div className="bg-muted rounded-full h-1.5 w-24">
-                        <div
-                          className="h-1.5 rounded-full transition-all"
-                          style={{
-                            width: `${Math.min(
-                              (actor.totalViewCount / 30) * 100,
-                              100
-                            )}%`,
-                            background: "hsl(var(--chart-1))",
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell className="px-6 py-4">
-                    <div className="flex flex-wrap gap-1.5">
-                      {actor.watchedPerformances.map((performance, idx) => (
-                        <span
-                          key={idx}
-                          className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border ${tagColors[idx % tagColors.length]}`}
-                        >
-                          {performance}
-                        </span>
-                      ))}
-                    </div>
-                  </TableCell>
-                  <TableCell className="px-6 py-4 whitespace-nowrap text-sm">
-                    <span className="font-medium">
-                      {actor.totalAmount.toLocaleString()}
+    <div className="space-y-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+        {actors.map((actor, index) => {
+          const rank = index + 1;
+          const rankStyle = rankConfig[rank];
+
+          return (
+            <Card
+              key={`${actor.name}-${index}`}
+              className="shadow-sm border-border rounded-xl cursor-pointer transition-colors hover:bg-violet-50/60 dark:hover:bg-violet-950/20"
+              onClick={() => onActorClick(actor.name)}
+            >
+              <CardContent className="p-4">
+                {/* 상단: 랭크뱃지 + 이름 */}
+                <div className="flex items-center gap-2 mb-3">
+                  {rankStyle && (
+                    <span
+                      className={`inline-flex items-center justify-center w-5 h-5 rounded-full ${rankStyle.bg} ${rankStyle.text} text-[10px] font-bold flex-shrink-0 shadow-sm`}
+                    >
+                      {rank}
                     </span>
-                    <span className="text-xs text-muted-foreground ml-0.5">원</span>
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={4} className="px-6 py-16 text-center">
-                  <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                    <span className="text-3xl">🎭</span>
-                    <span className="text-sm">검색 결과가 없습니다.</span>
+                  )}
+                  <span className="font-medium text-sm truncate">
+                    {actor.name}
+                  </span>
+                </div>
+
+                {/* 중단: 관극 횟수 + 관람 금액 (stat card) */}
+                <div className="flex gap-6 mb-3">
+                  <div>
+                    <div className="text-lg font-bold leading-tight">
+                      {actor.totalViewCount}
+                      <span className="text-sm font-normal text-muted-foreground ml-0.5">
+                        회
+                      </span>
+                    </div>
+                    <div className="text-[11px] text-muted-foreground mt-0.5">
+                      관극 횟수
+                    </div>
                   </div>
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+                  <div>
+                    <div className="text-lg font-bold leading-tight">
+                      {actor.totalAmount.toLocaleString()}
+                      <span className="text-sm font-normal text-muted-foreground ml-0.5">
+                        원
+                      </span>
+                    </div>
+                    <div className="text-[11px] text-muted-foreground mt-0.5">
+                      관람 금액
+                    </div>
+                  </div>
+                </div>
+
+                {/* 하단: 관람 작품 태그 */}
+                <div className="flex flex-wrap gap-1.5">
+                  {actor.watchedPerformances.map((performance, idx) => (
+                    <span
+                      key={idx}
+                      className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border ${tagColors[idx % tagColors.length]}`}
+                    >
+                      {performance}
+                    </span>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* 무한 스크롤 센티널 */}
+      <div ref={sentinelRef} className="h-1" />
+      {isFetchingNextPage && (
+        <div className="flex justify-center py-4">
+          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
         </div>
-      </CardContent>
-    </Card>
+      )}
+    </div>
   );
 }
