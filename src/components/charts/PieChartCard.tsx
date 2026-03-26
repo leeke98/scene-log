@@ -91,8 +91,15 @@ export default function PieChartCard({
   label,
   outerRadius = 80,
 }: PieChartCardProps) {
-  // height가 "h-full"인 경우 flex-1 사용
-  const heightClass = height === "h-full" ? "flex-1" : height;
+  // h-full을 flex-1로 변환 (반응형 클래스도 지원)
+  const heightClass = height
+    .split(" ")
+    .map((cls) => {
+      if (cls === "h-full") return "flex-1";
+      if (cls.endsWith(":h-full")) return cls.replace(":h-full", ":flex-1");
+      return cls;
+    })
+    .join(" ");
 
   // 요일별 데이터 변환
   const data = transformDayOfWeekData(dayOfWeekStats);
@@ -113,7 +120,7 @@ export default function PieChartCard({
     >
       <ChartContainer
         config={config}
-        className={`${heightClass} w-full`}
+        className={`${heightClass} w-full [&_.recharts-wrapper]:!flex [&_.recharts-wrapper]:items-center [&_.recharts-wrapper]:justify-center`}
       >
         <RechartsPieChart>
           <ChartTooltip content={<ChartTooltipContent />} />

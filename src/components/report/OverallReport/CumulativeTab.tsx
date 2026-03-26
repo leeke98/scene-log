@@ -76,22 +76,28 @@ export default function OverallCumulativeTab() {
 
       {/* 잔디밭 및 차트 섹션 */}
       <section>
-        <div className="flex items-center gap-2 mb-4">
-          <div className="w-1 h-5 bg-primary rounded-full" />
-          <h2 className="text-base font-semibold tracking-wide">관람 내역</h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-stretch">
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-4 md:items-stretch">
           {/* 잔디밭 */}
-          <div className="md:col-span-4 bg-card rounded-xl px-4 md:px-8 py-6 border border-border shadow-sm flex flex-col overflow-x-auto">
-            <GrassField data={grassData || []} />
+          <div className="md:col-span-4 flex flex-col">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-1 h-5 bg-primary rounded-full" />
+              <h2 className="text-base font-semibold tracking-wide">관람 내역</h2>
+            </div>
+            <div className="bg-card rounded-xl px-4 md:px-8 py-6 border border-border shadow-sm flex flex-col overflow-x-auto md:flex-1">
+              <GrassField data={grassData || []} />
+            </div>
           </div>
           {/* 관극 요일 파이 차트 */}
-          <div className="md:col-span-2 flex">
+          <div className="md:col-span-2 flex flex-col">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-1 h-5 bg-primary rounded-full" />
+              <h2 className="text-base font-semibold tracking-wide">관극 요일</h2>
+            </div>
             <PieChartCard
               title="관극 요일"
               dayOfWeekStats={dayOfWeekStats}
-              className="w-full h-full flex flex-col"
-              height="h-full"
+              className="md:flex-1 justify-center"
+              height="h-[240px] md:h-full"
               showLegend={true}
             />
           </div>
