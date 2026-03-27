@@ -149,7 +149,17 @@ export default function TicketFormPage() {
           onStepClick={setCurrentStep}
         />
 
-        <form onSubmit={handleSubmit}>
+        <form
+          onSubmit={handleSubmit}
+          onKeyDown={(e) => {
+            if (
+              e.key === "Enter" &&
+              (e.target as HTMLElement).tagName !== "TEXTAREA"
+            ) {
+              e.preventDefault();
+            }
+          }}
+        >
           {/* === STEP 1: 공연 선택 === */}
           {currentStep === 1 && (
             <div className="bg-card border border-border rounded-xl p-4 sm:p-6 shadow-sm space-y-4">
@@ -433,6 +443,7 @@ export default function TicketFormPage() {
             )}
             {currentStep < 3 ? (
               <Button
+                key="next"
                 type="button"
                 size="sm"
                 onClick={() => setCurrentStep((s) => s + 1)}
@@ -442,6 +453,7 @@ export default function TicketFormPage() {
               </Button>
             ) : (
               <Button
+                key="submit"
                 type="submit"
                 size="sm"
                 disabled={!canSave || isPending}
