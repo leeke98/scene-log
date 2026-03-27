@@ -158,11 +158,40 @@ export default function CalendarExportDialog({
     return weekdays[date.getDay()];
   };
 
+  const inlineImages = async (container: HTMLElement) => {
+    const imgs = container.querySelectorAll<HTMLImageElement>("img");
+    const originals: { img: HTMLImageElement; src: string }[] = [];
+
+    await Promise.all(
+      Array.from(imgs).map(async (img) => {
+        if (!img.src || img.src.startsWith("data:")) return;
+        try {
+          const res = await fetch(img.src);
+          const blob = await res.blob();
+          const dataUrl = await new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.readAsDataURL(blob);
+          });
+          originals.push({ img, src: img.src });
+          img.src = dataUrl;
+        } catch {
+          // 변환 실패 시 원본 유지
+        }
+      })
+    );
+
+    return originals;
+  };
+
   const handleDownload = useCallback(async () => {
     if (!captureRef.current) return;
 
     setIsExporting(true);
+    let originals: { img: HTMLImageElement; src: string }[] = [];
     try {
+      originals = await inlineImages(captureRef.current);
+
       const bgColor = theme === "dark" ? "#020817" : "#ffffff";
       const dataUrl = await toPng(captureRef.current, {
         pixelRatio: 2,
@@ -176,6 +205,7 @@ export default function CalendarExportDialog({
     } catch {
       alert("이미지 내보내기에 실패했습니다. 다시 시도해주세요.");
     } finally {
+      originals.forEach(({ img, src }) => (img.src = src));
       setIsExporting(false);
     }
   }, [currentYearMonth, theme]);
