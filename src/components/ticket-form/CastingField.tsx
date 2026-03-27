@@ -1,36 +1,17 @@
-import {
-  DndContext,
-  closestCenter,
-  DragOverlay,
-  type DragEndEvent,
-  type DragStartEvent,
-  type SensorDescriptor,
-  type SensorOptions,
-} from "@dnd-kit/core";
-import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { Plus } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { SortableCastingItem, CastingItemPreview } from "./SortableCastingItem";
 
 type CastingFieldProps = {
   casting: string[];
-  activeId: number | null;
-  sensors: SensorDescriptor<SensorOptions>[];
-  onDragStart: (event: DragStartEvent) => void;
-  onDragEnd: (event: DragEndEvent) => void;
   onAddActor: (name: string) => void;
   onRemoveActor: (index: number) => void;
 };
 
 export default function CastingField({
   casting,
-  activeId,
-  sensors,
-  onDragStart,
-  onDragEnd,
   onAddActor,
   onRemoveActor,
 }: CastingFieldProps) {
@@ -51,33 +32,23 @@ export default function CastingField({
       <Label htmlFor="casting">캐스팅</Label>
       <div className="space-y-2">
         {casting.length > 0 && (
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragStart={onDragStart}
-            onDragEnd={onDragEnd}
-          >
-            <SortableContext
-              items={casting.map((_, index) => index)}
-              strategy={verticalListSortingStrategy}
-            >
-              <div className="flex flex-wrap gap-2">
-                {casting.map((actor, index) => (
-                  <SortableCastingItem
-                    key={`${actor}-${index}`}
-                    actor={actor}
-                    index={index}
-                    onRemove={() => onRemoveActor(index)}
-                  />
-                ))}
+          <div className="flex flex-wrap gap-2">
+            {casting.map((actor, index) => (
+              <div
+                key={`${actor}-${index}`}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary rounded-md text-sm"
+              >
+                <span>{actor}</span>
+                <button
+                  type="button"
+                  onClick={() => onRemoveActor(index)}
+                  className="hover:bg-primary/20 rounded-full p-0.5 transition-colors"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
               </div>
-            </SortableContext>
-            <DragOverlay>
-              {activeId !== null ? (
-                <CastingItemPreview actor={casting[activeId]} />
-              ) : null}
-            </DragOverlay>
-          </DndContext>
+            ))}
+          </div>
         )}
         <div className="flex gap-2">
           <Input

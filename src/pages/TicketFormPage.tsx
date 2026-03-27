@@ -93,10 +93,6 @@ export default function TicketFormPage() {
     isEditMode,
     isLoadingTicket,
     isPending,
-    activeId,
-    sensors,
-    handleDragStart,
-    handleDragEnd,
     handleChange,
     handleRatingClick,
     handlePerformanceSelect,
@@ -314,10 +310,6 @@ export default function TicketFormPage() {
               {/* 캐스팅 */}
               <CastingField
                 casting={formData.casting}
-                activeId={activeId}
-                sensors={sensors}
-                onDragStart={handleDragStart}
-                onDragEnd={handleDragEnd}
                 onAddActor={handleAddActor}
                 onRemoveActor={handleRemoveActor}
               />

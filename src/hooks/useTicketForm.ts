@@ -3,15 +3,6 @@ import { formatDateToISO } from "@/lib/dateUtils";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useTicket, useCreateTicket, useUpdateTicket } from "@/queries/tickets";
 import { toast } from "react-toastify";
-import {
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-  type DragStartEvent,
-} from "@dnd-kit/core";
-import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 
 export type TicketFormData = {
   date: string;
@@ -44,14 +35,6 @@ export function useTicketForm() {
   const isPending =
     createTicketMutation.isPending || updateTicketMutation.isPending;
 
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
-
-  const [activeId, setActiveId] = useState<number | null>(null);
   const [initialTicketData, setInitialTicketData] =
     useState<TicketFormData | null>(null);
   const [formData, setFormData] = useState<TicketFormData>({
@@ -115,25 +98,6 @@ export function useTicketForm() {
       setInitialTicketData(loadedData);
     }
   }, [isEditMode, ticket]);
-
-  const handleDragStart = (event: DragStartEvent) => {
-    setActiveId(event.active.id as number);
-  };
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    setActiveId(null);
-    if (over && active.id !== over.id) {
-      setFormData((prev) => ({
-        ...prev,
-        casting: arrayMove(
-          prev.casting,
-          active.id as number,
-          over.id as number
-        ),
-      }));
-    }
-  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -295,10 +259,6 @@ export function useTicketForm() {
     isEditMode,
     isLoadingTicket,
     isPending,
-    activeId,
-    sensors,
-    handleDragStart,
-    handleDragEnd,
     handleChange,
     handleDateChange,
     handleRatingClick,
