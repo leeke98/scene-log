@@ -27,7 +27,7 @@ export default function PriceInput({
         className={value ? "pr-10" : ""}
       />
       {value && (
-        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-600 pointer-events-none">
+        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
           원
         </span>
       )}

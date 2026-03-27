@@ -193,7 +193,7 @@ export default function PerformanceCalendar({
                     }}
                     role="button"
                     tabIndex={0}
-                    className="calendar-ticket-more cursor-pointer hover:bg-gray-100 rounded"
+                    className="calendar-ticket-more cursor-pointer hover:bg-accent rounded"
                     title={`총 ${tickets.length}개의 공연이 있습니다`}
                   >
                     +{tickets.length - 3}

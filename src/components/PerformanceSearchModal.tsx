@@ -74,7 +74,7 @@ export default function PerformanceSearchModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] flex flex-col">
+      <div className="bg-card rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] flex flex-col">
         {/* 헤더 */}
         <div className="flex items-center justify-between p-6 border-b">
           <h2 className="text-xl font-semibold">공연 검색</h2>
@@ -100,7 +100,7 @@ export default function PerformanceSearchModal({
               />
             </div>
             {modalDate ? (
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 선택된 날짜 기준으로 검색됩니다 (
                 {modalDate.toLocaleDateString("ko-KR")})
               </p>
@@ -166,7 +166,7 @@ export default function PerformanceSearchModal({
         <div className="flex-1 overflow-y-auto p-6" onScroll={handleScroll}>
           {isLoading && !performances.length ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+              <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
             </div>
           ) : performances.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -174,7 +174,7 @@ export default function PerformanceSearchModal({
                 <div
                   key={performance.mt20id}
                   onClick={() => handleSelectPerformance(performance)}
-                  className="border rounded-lg p-3 cursor-pointer hover:bg-gray-50 transition-colors"
+                  className="border rounded-lg p-3 cursor-pointer hover:bg-accent transition-colors"
                 >
                   <div className="flex gap-3">
                     {performance.poster && (
@@ -191,19 +191,19 @@ export default function PerformanceSearchModal({
                       <h3 className="font-semibold text-sm mb-1.5 leading-snug">
                         {performance.prfnm}
                       </h3>
-                      <p className="text-xs text-gray-600 mb-0.5">
+                      <p className="text-xs text-muted-foreground mb-0.5">
                         <span className="font-medium">기간:</span>{" "}
                         {performance.prfpdfrom} ~ {performance.prfpdto}
                       </p>
-                      <p className="text-xs text-gray-600 mb-0.5">
+                      <p className="text-xs text-muted-foreground mb-0.5">
                         <span className="font-medium">극장:</span>{" "}
                         {performance.fcltynm}
                       </p>
-                      <p className="text-xs text-gray-600 mb-0.5">
+                      <p className="text-xs text-muted-foreground mb-0.5">
                         <span className="font-medium">지역:</span>{" "}
                         {performance.area}
                       </p>
-                      <p className="text-xs text-gray-600">
+                      <p className="text-xs text-muted-foreground">
                         <span className="font-medium">장르:</span>{" "}
                         {performance.genrenm}
                       </p>
@@ -216,8 +216,8 @@ export default function PerformanceSearchModal({
 
           {isFetchingNextPage && (
             <div className="flex items-center justify-center py-8">
-              <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
-              <span className="ml-2 text-sm text-gray-500">
+              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+              <span className="ml-2 text-sm text-muted-foreground">
                 더 많은 결과를 불러오는 중...
               </span>
             </div>
@@ -227,13 +227,13 @@ export default function PerformanceSearchModal({
             !isFetchingNextPage &&
             performances.length > 0 &&
             !hasNextPage && (
-              <div className="text-center py-4 text-gray-500 text-sm">
+              <div className="text-center py-4 text-muted-foreground text-sm">
                 모든 결과를 불러왔습니다.
               </div>
             )}
 
           {!isLoading && performances.length === 0 && !error && (
-            <div className="text-center py-12 text-gray-500">
+            <div className="text-center py-12 text-muted-foreground">
               {!modalDate ? (
                 <div className="space-y-1">
                   <p className="text-sm font-medium">공연 날짜를 먼저 선택해주세요.</p>

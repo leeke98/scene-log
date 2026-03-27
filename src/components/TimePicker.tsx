@@ -119,7 +119,7 @@ export default function TimePicker({
 
       {/* 시간 선택 드롭다운 */}
       {isOpen && (
-        <div className="absolute left-0 top-full z-50 mt-1 flex gap-2 rounded-lg border border-border bg-white p-4 shadow-lg dark:bg-popover">
+        <div className="absolute left-0 top-full z-50 mt-1 flex gap-2 rounded-lg border border-border bg-popover p-4 shadow-lg">
           {/* 시간 선택 컬럼 */}
           <div className="flex flex-col">
             <div className="mb-2 px-2 text-xs font-semibold text-muted-foreground">

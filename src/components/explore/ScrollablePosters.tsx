@@ -79,12 +79,12 @@ export default function ScrollablePosters({
   }
 
   if (error) {
-    return <div className="text-center text-gray-500 py-8">{error}</div>;
+    return <div className="text-center text-muted-foreground py-8">{error}</div>;
   }
 
   if (performances.length === 0) {
     return (
-      <div className="text-center text-gray-500 py-8">
+      <div className="text-center text-muted-foreground py-8">
         예매 순위 데이터가 없습니다.
       </div>
     );
@@ -97,7 +97,7 @@ export default function ScrollablePosters({
         <Button
           variant="outline"
           size="icon"
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-md"
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-background/90 hover:bg-background shadow-md"
           onClick={scrollLeft}
         >
           <ChevronLeft className="w-5 h-5" />
@@ -131,7 +131,7 @@ export default function ScrollablePosters({
         <Button
           variant="outline"
           size="icon"
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-md"
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-background/90 hover:bg-background shadow-md"
           onClick={scrollRight}
         >
           <ChevronRight className="w-5 h-5" />

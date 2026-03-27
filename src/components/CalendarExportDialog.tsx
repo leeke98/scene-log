@@ -9,6 +9,7 @@ import "@/components/Calendar.css";
 import { useTicketsByMonth } from "@/queries/tickets";
 import type { CalendarTicket } from "@/services/ticketApi";
 import { API_BASE_URL } from "@/lib/apiClient";
+import { useUiStore } from "@/stores/uiStore";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -31,6 +32,7 @@ export default function CalendarExportDialog({
 }: CalendarExportDialogProps) {
   const captureRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
+  const theme = useUiStore((s) => s.theme);
 
   const currentYearMonth = useMemo(() => {
     const year = currentDate.getFullYear();
@@ -161,9 +163,10 @@ export default function CalendarExportDialog({
 
     setIsExporting(true);
     try {
+      const bgColor = theme === "dark" ? "#020817" : "#ffffff";
       const dataUrl = await toPng(captureRef.current, {
         pixelRatio: 2,
-        backgroundColor: "#ffffff",
+        backgroundColor: bgColor,
       });
 
       const link = document.createElement("a");
@@ -175,7 +178,7 @@ export default function CalendarExportDialog({
     } finally {
       setIsExporting(false);
     }
-  }, [currentYearMonth]);
+  }, [currentYearMonth, theme]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -190,11 +193,11 @@ export default function CalendarExportDialog({
         {/* 캡처 영역 */}
         <div
           ref={captureRef}
-          className="bg-white rounded-lg p-4 sm:p-6"
+          className="bg-background rounded-lg p-4 sm:p-6"
         >
           {/* 연/월 헤더 */}
           <div className="text-center mb-4">
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground">
               {format(currentDate, "yyyy년 MM월", { locale: ko })}
             </h2>
           </div>

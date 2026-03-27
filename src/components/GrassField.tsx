@@ -1,10 +1,12 @@
 import { useMemo } from "react";
+import { useUiStore } from "@/stores/uiStore";
 
 interface GrassFieldProps {
   data: Array<{ date: string; count: number }>; // MM-DD 형식, 관람 수
 }
 
 export default function GrassField({ data }: GrassFieldProps) {
+  const theme = useUiStore((s) => s.theme);
   // 5년치 데이터 생성
   const grassData = useMemo(() => {
     const today = new Date();
@@ -54,13 +56,21 @@ export default function GrassField({ data }: GrassFieldProps) {
 
   // 색상 반환 (초록 계열)
   const getColor = (level: number): string => {
-    const colors = [
-      "#ebedf0", // 레벨 0: 없음 (흰색)
-      "#9be9a8", // 레벨 1: 1-2회 (연한 초록)
-      "#40c463", // 레벨 2: 3-5회 (초록)
-      "#30a14e", // 레벨 3: 6-10회 (진한 초록)
-      "#216e39", // 레벨 4: 11회 이상 (더 진한 초록)
-    ];
+    const colors = theme === "dark"
+      ? [
+          "#1e1e2e", // 레벨 0: 없음 (어두운 배경)
+          "#0e4429", // 레벨 1
+          "#006d32", // 레벨 2
+          "#26a641", // 레벨 3
+          "#39d353", // 레벨 4
+        ]
+      : [
+          "#ebedf0", // 레벨 0: 없음 (밝은 배경)
+          "#9be9a8", // 레벨 1
+          "#40c463", // 레벨 2
+          "#30a14e", // 레벨 3
+          "#216e39", // 레벨 4
+        ];
     return colors[level] || colors[0];
   };
 
@@ -180,7 +190,7 @@ export default function GrassField({ data }: GrassFieldProps) {
               {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
                 <div
                   key={day}
-                  className="text-xs text-gray-600 text-center flex-shrink-0"
+                  className="text-xs text-muted-foreground text-center flex-shrink-0"
                   style={{ width: "24px" }}
                 >
                   {day}
@@ -194,7 +204,7 @@ export default function GrassField({ data }: GrassFieldProps) {
             {monthLabels.map((month, monthIndex) => (
               <div key={month} className="flex items-center">
                 {/* 월 레이블 (좌측) */}
-                <div className="w-10 text-xs text-gray-600 text-right pr-2 flex-shrink-0">
+                <div className="w-10 text-xs text-muted-foreground text-right pr-2 flex-shrink-0">
                   {month}
                 </div>
 
@@ -232,7 +242,7 @@ export default function GrassField({ data }: GrassFieldProps) {
 
       {/* 범례 */}
       <div className="flex items-center gap-2 justify-center">
-        <span className="text-xs text-gray-600">Less</span>
+        <span className="text-xs text-muted-foreground">Less</span>
         <div className="flex gap-1">
           {[0, 1, 2, 3, 4].map((level) => (
             <div
@@ -242,7 +252,7 @@ export default function GrassField({ data }: GrassFieldProps) {
             />
           ))}
         </div>
-        <span className="text-xs text-gray-600">More</span>
+        <span className="text-xs text-muted-foreground">More</span>
       </div>
     </div>
   );

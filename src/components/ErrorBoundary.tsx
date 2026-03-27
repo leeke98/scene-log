@@ -27,15 +27,15 @@ export default class ErrorBoundary extends Component<Props, State> {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen gap-6 p-8 text-center">
         <div className="space-y-2">
-          <h1 className="text-2xl font-bold text-gray-800">
+          <h1 className="text-2xl font-bold text-foreground">
             오류가 발생했습니다
           </h1>
-          <p className="text-gray-500 text-sm">
+          <p className="text-muted-foreground text-sm">
             예기치 못한 문제가 생겼어요. 페이지를 새로고침하거나 홈으로
             돌아가주세요.
           </p>
           {import.meta.env.DEV && (
-            <pre className="mt-4 p-4 bg-gray-100 rounded-md text-left text-xs text-red-600 max-w-xl overflow-auto">
+            <pre className="mt-4 p-4 bg-muted rounded-md text-left text-xs text-red-600 max-w-xl overflow-auto">
               {error.message}
             </pre>
           )}

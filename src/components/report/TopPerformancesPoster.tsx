@@ -99,7 +99,7 @@ export default function TopPerformancesPoster({
           height: height ? `${height}px` : "auto",
         }}
       >
-        <span className="text-gray-400 text-sm">데이터가 없습니다</span>
+        <span className="text-muted-foreground text-sm">데이터가 없습니다</span>
       </div>
     );
   }
@@ -127,7 +127,7 @@ export default function TopPerformancesPoster({
               className="flex-shrink-0 flex flex-col w-[100px] md:w-auto md:h-full"
             >
               <div
-                className="bg-gray-200 rounded-lg overflow-hidden relative group w-full md:h-full"
+                className="bg-muted rounded-lg overflow-hidden relative group w-full md:h-full"
                 style={{ aspectRatio: "3/4" }}
               >
                 {showImage ? (
@@ -143,7 +143,7 @@ export default function TopPerformancesPoster({
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <span className="text-gray-500 text-xs text-center px-2">
+                    <span className="text-muted-foreground text-xs text-center px-2">
                       {performance.performanceName}
                     </span>
                   </div>
@@ -175,21 +175,21 @@ export default function TopPerformancesPoster({
       {/* 데스크톱: 오버레이 스크롤 버튼 */}
       <button
         onClick={scrollLeft}
-        className={`absolute left-0 top-0 bottom-0 w-10 items-center justify-center bg-gradient-to-r from-white/80 to-transparent transition-opacity duration-200 hidden md:flex ${
+        className={`absolute left-0 top-0 bottom-0 w-10 items-center justify-center bg-gradient-to-r from-background/80 to-transparent transition-opacity duration-200 hidden md:flex ${
           canScrollLeft ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         aria-label="이전 작품 보기"
       >
-        <ChevronLeft className="w-5 h-5 text-gray-600" />
+        <ChevronLeft className="w-5 h-5 text-muted-foreground" />
       </button>
       <button
         onClick={scrollRight}
-        className={`absolute right-0 top-0 bottom-0 w-10 items-center justify-center bg-gradient-to-l from-white/80 to-transparent transition-opacity duration-200 hidden md:flex ${
+        className={`absolute right-0 top-0 bottom-0 w-10 items-center justify-center bg-gradient-to-l from-background/80 to-transparent transition-opacity duration-200 hidden md:flex ${
           canScrollRight ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         aria-label="다음 작품 보기"
       >
-        <ChevronRight className="w-5 h-5 text-gray-600" />
+        <ChevronRight className="w-5 h-5 text-muted-foreground" />
       </button>
     </div>
   );
