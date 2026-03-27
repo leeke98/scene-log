@@ -42,19 +42,19 @@ function StepIndicator({
             onClick={() => onStepClick(step.number)}
             className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium transition-colors ${
               step.number === currentStep
-                ? "text-gray-900"
+                ? "text-foreground"
                 : step.number < currentStep
-                ? "text-gray-500 hover:text-gray-700"
-                : "text-gray-300"
+                ? "text-muted-foreground hover:text-foreground"
+                : "text-muted-foreground/40"
             }`}
           >
             <span
               className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold transition-colors ${
                 step.number === currentStep
-                  ? "bg-gray-900 text-white"
+                  ? "bg-foreground text-background"
                   : step.number < currentStep
-                  ? "bg-gray-400 text-white"
-                  : "bg-gray-200 text-gray-400"
+                  ? "bg-muted-foreground text-background"
+                  : "bg-muted text-muted-foreground"
               }`}
             >
               {step.number < currentStep ? (
@@ -76,7 +76,7 @@ function StepIndicator({
           {idx < STEPS.length - 1 && (
             <div
               className={`w-6 sm:w-10 h-px mx-1 ${
-                step.number < currentStep ? "bg-gray-400" : "bg-gray-200"
+                step.number < currentStep ? "bg-muted-foreground" : "bg-border"
               }`}
             />
           )}
@@ -117,7 +117,7 @@ export default function TicketFormPage() {
     return (
       <Layout>
         <div className="max-w-2xl mx-auto px-4 py-10 text-center">
-          <p className="text-gray-500 text-sm">티켓 정보를 불러오는 중...</p>
+          <p className="text-muted-foreground text-sm">티켓 정보를 불러오는 중...</p>
         </div>
       </Layout>
     );
@@ -133,12 +133,12 @@ export default function TicketFormPage() {
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="absolute left-0 flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+            className="absolute left-0 flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             뒤로
           </button>
-          <h1 className="text-base sm:text-lg font-bold tracking-tight text-gray-900">
+          <h1 className="text-base sm:text-lg font-bold tracking-tight text-foreground">
             {isEditMode ? "기록 수정" : "기록 추가"}
           </h1>
         </div>
@@ -152,11 +152,11 @@ export default function TicketFormPage() {
         <form onSubmit={handleSubmit}>
           {/* === STEP 1: 공연 선택 === */}
           {currentStep === 1 && (
-            <div className="bg-white border border-gray-100 rounded-xl p-4 sm:p-6 shadow-sm space-y-4">
+            <div className="bg-card border border-border rounded-xl p-4 sm:p-6 shadow-sm space-y-4">
               {/* 날짜 & 시간 */}
               <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 items-end">
                 <div className="min-w-0">
-                  <Label className="text-xs font-semibold text-gray-600 mb-1.5 block">
+                  <Label className="text-xs font-semibold text-muted-foreground mb-1.5 block">
                     공연 날짜
                   </Label>
                   <DatePicker
@@ -168,7 +168,7 @@ export default function TicketFormPage() {
                   />
                 </div>
                 <div>
-                  <Label className="text-xs font-semibold text-gray-600 mb-1.5 block">
+                  <Label className="text-xs font-semibold text-muted-foreground mb-1.5 block">
                     공연 시간
                   </Label>
                   <TimePicker
@@ -183,7 +183,7 @@ export default function TicketFormPage() {
               {/* 포스터 + 공연 정보 */}
               <div className="flex gap-3 sm:gap-4 items-start">
                 <div
-                  className="relative w-[100px] sm:w-[150px] flex-shrink-0 aspect-[3/4] bg-gradient-to-br from-gray-100 to-gray-50 rounded-lg border-2 border-dashed border-gray-200 flex items-center justify-center cursor-pointer hover:border-gray-300 transition-all group overflow-hidden"
+                  className="relative w-[100px] sm:w-[150px] flex-shrink-0 aspect-[3/4] bg-gradient-to-br from-muted to-muted/50 rounded-lg border-2 border-dashed border-border flex items-center justify-center cursor-pointer hover:border-muted-foreground/40 transition-all group overflow-hidden"
                   onClick={() => setShowSearchModal(true)}
                 >
                   {formData.posterUrl ? (
@@ -204,10 +204,10 @@ export default function TicketFormPage() {
                     </>
                   ) : (
                     <div className="flex flex-col items-center gap-1.5">
-                      <div className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center group-hover:bg-gray-300 transition-colors">
-                        <Plus className="w-5 h-5 text-gray-400" />
+                      <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center group-hover:bg-accent transition-colors">
+                        <Plus className="w-5 h-5 text-muted-foreground" />
                       </div>
-                      <span className="text-gray-400 text-[11px] text-center leading-tight">
+                      <span className="text-muted-foreground text-[11px] text-center leading-tight">
                         {formData.date ? "공연 검색" : "날짜 먼저\n선택"}
                       </span>
                     </div>
@@ -217,10 +217,10 @@ export default function TicketFormPage() {
                 <div className="flex-1 pt-1 min-w-0">
                   {formData.performanceName ? (
                     <div className="space-y-1">
-                      <p className="font-semibold text-gray-800 text-sm leading-snug">
+                      <p className="font-semibold text-foreground text-sm leading-snug">
                         {formData.performanceName}
                       </p>
-                      <p className="text-xs text-gray-500">{formData.theater}</p>
+                      <p className="text-xs text-muted-foreground">{formData.theater}</p>
                       <button
                         type="button"
                         onClick={() => setShowSearchModal(true)}
@@ -230,7 +230,7 @@ export default function TicketFormPage() {
                       </button>
                     </div>
                   ) : (
-                    <p className="text-sm text-gray-400">
+                    <p className="text-sm text-muted-foreground">
                       포스터를 클릭하여 공연을 검색하세요
                     </p>
                   )}
@@ -241,10 +241,10 @@ export default function TicketFormPage() {
 
           {/* === STEP 2: 관람 정보 === */}
           {currentStep === 2 && (
-            <div className="bg-white border border-gray-100 rounded-xl p-4 sm:p-6 shadow-sm space-y-4">
+            <div className="bg-card border border-border rounded-xl p-4 sm:p-6 shadow-sm space-y-4">
               {/* 장르 */}
               <div>
-                <Label className="text-xs font-semibold text-gray-600 mb-1.5 block">
+                <Label className="text-xs font-semibold text-muted-foreground mb-1.5 block">
                   장르
                 </Label>
                 <div className="flex gap-2">
@@ -278,7 +278,7 @@ export default function TicketFormPage() {
                 <div>
                   <Label
                     htmlFor="theater"
-                    className="text-xs font-semibold text-gray-600 mb-1.5 block"
+                    className="text-xs font-semibold text-muted-foreground mb-1.5 block"
                   >
                     극장
                   </Label>
@@ -293,7 +293,7 @@ export default function TicketFormPage() {
                 <div>
                   <Label
                     htmlFor="seat"
-                    className="text-xs font-semibold text-gray-600 mb-1.5 block"
+                    className="text-xs font-semibold text-muted-foreground mb-1.5 block"
                   >
                     좌석
                   </Label>
@@ -319,7 +319,7 @@ export default function TicketFormPage() {
                 <div>
                   <Label
                     htmlFor="ticketPrice"
-                    className="text-xs font-semibold text-gray-600 mb-1.5 block"
+                    className="text-xs font-semibold text-muted-foreground mb-1.5 block"
                   >
                     티켓 가격
                   </Label>
@@ -334,7 +334,7 @@ export default function TicketFormPage() {
                 <div>
                   <Label
                     htmlFor="companion"
-                    className="text-xs font-semibold text-gray-600 mb-1.5 block"
+                    className="text-xs font-semibold text-muted-foreground mb-1.5 block"
                   >
                     동행자
                   </Label>
@@ -352,7 +352,7 @@ export default function TicketFormPage() {
               <div className="w-full sm:w-1/2 sm:pr-1.5">
                 <Label
                   htmlFor="mdPrice"
-                  className="text-xs font-semibold text-gray-600 mb-1.5 block"
+                  className="text-xs font-semibold text-muted-foreground mb-1.5 block"
                 >
                   MD 가격
                 </Label>
@@ -369,10 +369,10 @@ export default function TicketFormPage() {
 
           {/* === STEP 3: 감상 기록 === */}
           {currentStep === 3 && (
-            <div className="bg-white border border-gray-100 rounded-xl p-4 sm:p-6 shadow-sm space-y-4">
+            <div className="bg-card border border-border rounded-xl p-4 sm:p-6 shadow-sm space-y-4">
               {/* 별점 */}
               <div>
-                <Label className="text-xs font-semibold text-gray-600 mb-2 block">
+                <Label className="text-xs font-semibold text-muted-foreground mb-2 block">
                   별점
                 </Label>
                 <div className="flex gap-1.5">
@@ -387,7 +387,7 @@ export default function TicketFormPage() {
                         className={`w-7 h-7 ${
                           star <= formData.rating
                             ? "fill-yellow-400 text-yellow-400"
-                            : "text-gray-300"
+                            : "text-muted-foreground/30"
                         }`}
                       />
                     </button>
@@ -399,7 +399,7 @@ export default function TicketFormPage() {
               <div>
                 <Label
                   htmlFor="review"
-                  className="text-xs font-semibold text-gray-600 mb-1.5 block"
+                  className="text-xs font-semibold text-muted-foreground mb-1.5 block"
                 >
                   공연 후기
                 </Label>

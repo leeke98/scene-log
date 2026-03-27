@@ -124,7 +124,7 @@ export default function PerformanceRecordPage() {
               <div className="relative flex-1 sm:flex-none">
                 <button
                   onClick={handleSearchClick}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary transition-colors"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
                 >
                   <Search className="w-4 h-4" />
                 </button>
@@ -142,7 +142,7 @@ export default function PerformanceRecordPage() {
                       setInputValue("");
                       setSearchTerm("");
                     }}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -151,7 +151,7 @@ export default function PerformanceRecordPage() {
             </div>
             <Button
               onClick={() => navigate("/tickets/new")}
-              className="bg-primary hover:bg-primary/90 text-white sm:ml-auto w-full sm:w-auto"
+              className="sm:ml-auto w-full sm:w-auto"
             >
               새 기록 추가
             </Button>
@@ -160,7 +160,7 @@ export default function PerformanceRecordPage() {
 
         {/* 검색 결과 건수 */}
         {!isLoading && !error && (
-          <p className="text-sm text-gray-500 mb-4">
+          <p className="text-sm text-muted-foreground mb-4">
             {searchTerm || selectedGenre !== "전체"
               ? `검색 결과 ${totalCount}개`
               : `총 ${totalCount}개의 공연 기록`}
@@ -172,7 +172,7 @@ export default function PerformanceRecordPage() {
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="flex flex-col items-center gap-4">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
-              <p className="text-gray-500">티켓을 불러오는 중...</p>
+              <p className="text-muted-foreground">티켓을 불러오는 중...</p>
             </div>
           </div>
         ) : error ? (
@@ -184,7 +184,7 @@ export default function PerformanceRecordPage() {
           </div>
         ) : tickets.length === 0 ? (
           <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-            <p className="text-gray-500 text-lg">
+            <p className="text-muted-foreground text-lg">
               {searchTerm || selectedGenre !== "전체"
                 ? "검색 결과가 없습니다."
                 : "아직 기록된 공연이 없습니다."}
@@ -212,13 +212,13 @@ export default function PerformanceRecordPage() {
               className="h-20 flex items-center justify-center"
             >
               {isFetchingNextPage && (
-                <div className="flex items-center gap-2 text-gray-500">
+                <div className="flex items-center gap-2 text-muted-foreground">
                   <Loader2 className="w-5 h-5 animate-spin" />
                   <span className="text-sm">더 많은 티켓을 불러오는 중...</span>
                 </div>
               )}
               {!hasNextPage && tickets.length > 0 && (
-                <p className="text-gray-400 text-sm">
+                <p className="text-muted-foreground text-sm">
                   모든 티켓을 불러왔습니다.
                 </p>
               )}

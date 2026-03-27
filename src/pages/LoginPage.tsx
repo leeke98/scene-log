@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import logo from "@/assets/logo_new.png";
+import logoBlack from "@/assets/logo_black.png";
+import logoWhite from "@/assets/logo_white.png";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -37,11 +38,12 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white p-4">
-      <Card className="w-full max-w-md bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <Card className="w-full max-w-md bg-muted/50">
         <CardHeader className="text-center pb-6">
           <div className="flex flex-col items-center gap-4">
-            <img src={logo} alt="SceneLog" className="w-26 h-14" />
+            <img src={logoBlack} alt="SceneLog" className="w-26 h-14 dark:hidden" />
+            <img src={logoWhite} alt="SceneLog" className="w-26 h-14 hidden dark:block" />
             {/* <h1 className="text-2xl font-semibold text-gray-900">SceneLog</h1> */}
           </div>
         </CardHeader>
@@ -57,7 +59,7 @@ export default function LoginPage() {
                 placeholder="아이디"
                 value={id}
                 onChange={(e) => setId(e.target.value)}
-                className="bg-white"
+                className="bg-background"
               />
             </div>
 
@@ -69,7 +71,7 @@ export default function LoginPage() {
                 placeholder="비밀번호"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="bg-white"
+                className="bg-background"
               />
             </div>
 
@@ -81,7 +83,7 @@ export default function LoginPage() {
 
             <Button
               type="submit"
-              className="w-full bg-gray-800 hover:bg-gray-900"
+              className="w-full bg-primary hover:bg-primary/90"
             >
               Login
             </Button>
@@ -89,7 +91,7 @@ export default function LoginPage() {
             <div className="text-center">
               <Link
                 to="/signup"
-                className="text-sm text-gray-600 hover:text-gray-900 underline"
+                className="text-sm text-muted-foreground hover:text-foreground underline"
               >
                 회원가입
               </Link>

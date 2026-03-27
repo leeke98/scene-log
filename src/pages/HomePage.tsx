@@ -79,13 +79,13 @@ export default function HomePage() {
             <Button
               onClick={() => navigate("/tickets/new")}
               size="icon"
-              className="md:hidden h-8 w-8 bg-primary hover:bg-primary/90 text-white"
+              className="md:hidden h-8 w-8 bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               <Plus className="w-4 h-4" />
             </Button>
             <Button
               onClick={() => navigate("/tickets/new")}
-              className="hidden md:inline-flex h-10 bg-primary hover:bg-primary/90 text-white"
+              className="hidden md:inline-flex h-10 bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               새 기록 추가
             </Button>
