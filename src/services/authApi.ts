@@ -54,6 +54,24 @@ export async function login(data: LoginRequest): Promise<AuthResponse> {
 }
 
 /**
+ * 구글 로그인
+ * Google OAuth credential(ID token)을 백엔드에 전달하여 인증
+ */
+export async function googleLogin(credential: string): Promise<AuthResponse> {
+  const response = await apiPost<AuthResponse>(
+    "/auth/google",
+    { credential },
+    { requireAuth: false }
+  );
+
+  if (response.access_token) {
+    setAccessToken(response.access_token);
+  }
+
+  return response;
+}
+
+/**
  * 현재 사용자 정보 조회
  */
 export async function getCurrentUser(): Promise<User> {

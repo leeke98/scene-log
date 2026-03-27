@@ -5,7 +5,7 @@
  */
 import { useAuthStore } from "@/stores/authStore";
 import { useCurrentUser } from "./queries";
-import { useLogin, useSignup, useLogout } from "./mutations";
+import { useLogin, useGoogleLogin, useSignup, useLogout } from "./mutations";
 import { type ApiError } from "@/lib/apiClient";
 
 /**
@@ -16,6 +16,7 @@ export function useAuth() {
   const { data: currentUser, isLoading } = useCurrentUser();
   const loginMutation = useLogin();
   const signupMutation = useSignup();
+  const googleLoginMutation = useGoogleLogin();
   const logoutMutation = useLogout();
 
   return {
@@ -50,6 +51,17 @@ export function useAuth() {
         return { success: false, error: (error as ApiError)?.error };
       }
     },
+    googleLogin: async (credential: string) => {
+      if (googleLoginMutation.isPending) {
+        return { success: false, error: "이미 로그인 처리 중입니다." };
+      }
+      try {
+        await googleLoginMutation.mutateAsync(credential);
+        return { success: true };
+      } catch (error: unknown) {
+        return { success: false, error: (error as ApiError)?.error };
+      }
+    },
     logout: async () => {
       // 이미 진행 중이면 중복 호출 방지
       if (logoutMutation.isPending) {
@@ -62,4 +74,4 @@ export function useAuth() {
 
 // 개별 hooks도 export
 export { useCurrentUser } from "./queries";
-export { useLogin, useSignup, useLogout } from "./mutations";
+export { useLogin, useGoogleLogin, useSignup, useLogout } from "./mutations";

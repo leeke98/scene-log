@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/queries/auth";
 import { type ApiError } from "@/lib/apiClient";
+import { GoogleLogin, type CredentialResponse } from "@react-oauth/google";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,7 +12,7 @@ import logoWhite from "@/assets/logo_white.png";
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, googleLogin } = useAuth();
   const [id, setId] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -37,6 +38,27 @@ export default function LoginPage() {
     }
   };
 
+  const handleGoogleLogin = async (response: CredentialResponse) => {
+    setError("");
+    if (!response.credential) {
+      setError("구글 인증 정보를 받지 못했습니다.");
+      return;
+    }
+
+    try {
+      const result = await googleLogin(response.credential);
+      if (result.success) {
+        navigate("/");
+      } else {
+        setError(result.error || "구글 로그인에 실패했습니다.");
+      }
+    } catch (error: unknown) {
+      setError(
+        (error as ApiError)?.error || "구글 로그인 중 오류가 발생했습니다."
+      );
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md bg-muted/50">
@@ -44,7 +66,6 @@ export default function LoginPage() {
           <div className="flex flex-col items-center gap-4">
             <img src={logoBlack} alt="SceneLog" className="w-26 h-14 dark:hidden" />
             <img src={logoWhite} alt="SceneLog" className="w-26 h-14 hidden dark:block" />
-            {/* <h1 className="text-2xl font-semibold text-gray-900">SceneLog</h1> */}
           </div>
         </CardHeader>
         <CardContent>
@@ -87,6 +108,23 @@ export default function LoginPage() {
             >
               Login
             </Button>
+
+            <div className="flex items-center gap-3 my-4">
+              <div className="flex-1 border-t border-gray-300" />
+              <span className="text-sm text-gray-300">또는</span>
+              <div className="flex-1 border-t border-gray-300" />
+            </div>
+
+            <div className="flex justify-center">
+              <GoogleLogin
+                onSuccess={handleGoogleLogin}
+                onError={() => setError("구글 로그인에 실패했습니다.")}
+                size="large"
+                width="100%"
+                text="signin_with"
+                shape="rectangular"
+              />
+            </div>
 
             <div className="text-center">
               <Link

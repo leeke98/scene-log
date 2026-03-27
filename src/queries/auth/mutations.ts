@@ -32,6 +32,27 @@ export function useLogin() {
 }
 
 /**
+ * 구글 로그인 Mutation
+ */
+export function useGoogleLogin() {
+  const { setUser } = useAuthStore();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (credential: string) => authApi.googleLogin(credential),
+    onSuccess: (response) => {
+      queryClient.clear();
+      setUser(response.user);
+      queryClient.setQueryData(queryKeys.auth.currentUser(), response.user);
+      toast.success("구글 로그인되었습니다.");
+    },
+    onError: (error: ApiError) => {
+      toast.error(error.error || "구글 로그인에 실패했습니다.");
+    },
+  });
+}
+
+/**
  * 회원가입 Mutation
  */
 export function useSignup() {
