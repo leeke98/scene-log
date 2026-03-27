@@ -8,7 +8,8 @@ import {
   NavigationMenuList,
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
-import logo from "@/assets/logo_new.png";
+import logoBlack from "@/assets/logo_black.png";
+import logoWhite from "@/assets/logo_white.png";
 
 export default function NavigationBar() {
   const { user, logout } = useAuth();
@@ -31,11 +32,12 @@ export default function NavigationBar() {
   ];
 
   return (
-    <header className="border-b bg-white sticky top-0 z-50">
+    <header className="border-b bg-background sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <div className="flex items-center gap-8">
           <Link to="/" className="flex items-center gap-3">
-            <img src={logo} alt="SceneLog" className="w-18 h-14" />
+            <img src={logoBlack} alt="SceneLog" className="w-18 h-14 dark:hidden" />
+            <img src={logoWhite} alt="SceneLog" className="w-18 h-14 hidden dark:block" />
           </Link>
           <NavigationMenu>
             <NavigationMenuList>
@@ -58,8 +60,8 @@ export default function NavigationBar() {
           </NavigationMenu>
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-gray-700 font-medium">{user?.nickname}님</span>
-          <Button variant="outline" onClick={handleLogout} className="bg-white">
+          <span className="text-foreground font-medium">{user?.nickname}님</span>
+          <Button variant="outline" onClick={handleLogout} className="bg-background">
             로그아웃
           </Button>
         </div>

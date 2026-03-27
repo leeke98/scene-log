@@ -4,7 +4,8 @@ import { useAuth } from "@/queries/auth";
 import { useUiStore } from "@/stores/uiStore";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import logo from "@/assets/logo_new.png";
+import logoBlack from "@/assets/logo_black.png";
+import logoWhite from "@/assets/logo_white.png";
 import {
   Home,
   BookOpen,
@@ -14,6 +15,8 @@ import {
   ChevronDown,
   PanelLeftClose,
   PanelLeftOpen,
+  Sun,
+  Moon,
 } from "lucide-react";
 
 const menuItems = [
@@ -33,7 +36,7 @@ export default function Sidebar() {
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  const { sidebarCollapsed, toggleSidebar } = useUiStore();
+  const { sidebarCollapsed, toggleSidebar, theme, toggleTheme } = useUiStore();
   const isReportSection = location.pathname.startsWith("/report");
   const [reportOpen, setReportOpen] = useState(isReportSection);
 
@@ -57,7 +60,8 @@ export default function Sidebar() {
       <div className="flex items-center justify-between p-4 border-b">
         {!sidebarCollapsed && (
           <Link to="/">
-            <img src={logo} alt="SceneLog" className="h-9" />
+            <img src={logoBlack} alt="SceneLog" className="h-9 dark:hidden" />
+            <img src={logoWhite} alt="SceneLog" className="h-9 hidden dark:block" />
           </Link>
         )}
         <Button
@@ -143,7 +147,19 @@ export default function Sidebar() {
 
       <div className="p-4 border-t">
         {sidebarCollapsed ? (
-          <div className="flex justify-center">
+          <div className="flex flex-col items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              title={theme === "light" ? "다크 모드" : "라이트 모드"}
+            >
+              {theme === "light" ? (
+                <Moon className="w-4 h-4" />
+              ) : (
+                <Sun className="w-4 h-4" />
+              )}
+            </Button>
             <Button
               variant="ghost"
               size="icon"
@@ -158,14 +174,28 @@ export default function Sidebar() {
             <span className="text-sm font-medium text-foreground truncate">
               {user?.nickname}님
             </span>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleLogout}
-              title="로그아웃"
-            >
-              <LogOut className="w-4 h-4" />
-            </Button>
+            <div className="flex items-center">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleTheme}
+                title={theme === "light" ? "다크 모드" : "라이트 모드"}
+              >
+                {theme === "light" ? (
+                  <Moon className="w-4 h-4" />
+                ) : (
+                  <Sun className="w-4 h-4" />
+                )}
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleLogout}
+                title="로그아웃"
+              >
+                <LogOut className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
         )}
       </div>
