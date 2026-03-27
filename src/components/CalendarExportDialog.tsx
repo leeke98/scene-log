@@ -1,5 +1,5 @@
 import { useRef, useState, useCallback, useMemo } from "react";
-import html2canvas from "html2canvas";
+import { toPng } from "html-to-image";
 import { Download, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
@@ -161,15 +161,14 @@ export default function CalendarExportDialog({
 
     setIsExporting(true);
     try {
-      const canvas = await html2canvas(captureRef.current, {
-        scale: 2,
-        useCORS: true,
+      const dataUrl = await toPng(captureRef.current, {
+        pixelRatio: 2,
         backgroundColor: "#ffffff",
       });
 
       const link = document.createElement("a");
       link.download = `scene-log-${currentYearMonth}.png`;
-      link.href = canvas.toDataURL("image/png");
+      link.href = dataUrl;
       link.click();
     } catch {
       alert("이미지 내보내기에 실패했습니다. 다시 시도해주세요.");
@@ -181,7 +180,7 @@ export default function CalendarExportDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
-        <DialogHeader>
+        <DialogHeader className="text-left">
           <DialogTitle>달력 이미지 내보내기</DialogTitle>
           <DialogDescription>
             미리보기를 확인하고 다운로드 버튼을 눌러 이미지로 저장하세요.

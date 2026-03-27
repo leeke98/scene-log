@@ -303,28 +303,17 @@
   }
 }
 
-/* ===== 내보내기 모드: 항상 데스크톱 레이아웃 유지 ===== */
+/* ===== 내보내기 모드 ===== */
 .calendar-export-mode .performance-calendar .react-calendar__tile {
   height: 160px;
 }
 
-.calendar-export-mode .calendar-tickets {
-  flex-direction: row;
-  align-items: stretch;
+@media (max-width: 767px) {
+  .calendar-export-mode .performance-calendar .react-calendar__tile {
+    height: 100px;
+  }
 }
 
-.calendar-export-mode .calendar-ticket-poster {
-  aspect-ratio: 3 / 4;
-  max-height: 100%;
-  width: auto;
-  flex: none;
-}
-
-.calendar-export-mode .calendar-ticket-poster.single {
-  aspect-ratio: 3 / 4;
-  max-height: 100%;
-  flex: none;
-}
 
 /* ===== 다크모드 포스터 그림자 보정 ===== */
 .dark .calendar-ticket-poster {
