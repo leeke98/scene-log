@@ -243,7 +243,7 @@ export function useTicketForm() {
         }
 
         await updateTicketMutation.mutateAsync({ id, data: updateData });
-        navigate(`/tickets/${id}`);
+        navigate(`/tickets/${id}`, { replace: true });
       } else {
         await createTicketMutation.mutateAsync(ticketData);
         navigate("/");
