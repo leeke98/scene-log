@@ -7,23 +7,31 @@ import "react-toastify/dist/ReactToastify.css";
 import "./index.css";
 import App from "./App.tsx";
 import { queryClient } from "@/lib/queryClient";
+import { useUiStore } from "@/stores/uiStore";
+
+function ThemedToastContainer() {
+  const theme = useUiStore((s) => s.theme);
+  return (
+    <ToastContainer
+      position="top-center"
+      autoClose={3000}
+      hideProgressBar={false}
+      newestOnTop={false}
+      closeOnClick
+      rtl={false}
+      pauseOnFocusLoss
+      draggable
+      pauseOnHover
+      theme={theme === "dark" ? "dark" : "light"}
+    />
+  );
+}
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <App />
-      <ToastContainer
-        position="top-center"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-      />
+      <ThemedToastContainer />
       {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
     </QueryClientProvider>
   </StrictMode>
