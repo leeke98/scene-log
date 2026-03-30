@@ -11,7 +11,7 @@ vi.mock("@/lib/apiClient", () => ({
 import { apiPost, apiGet, setAccessToken } from "@/lib/apiClient";
 import { login, logout, signup, getCurrentUser } from "@/services/authApi";
 
-const mockUser = { id: "1", username: "testuser", nickname: "테스터" };
+const mockUser = { id: "1", username: "testuser", nickname: "테스터", provider: "local" as const };
 
 beforeEach(() => {
   useAuthStore.setState({ user: null, accessToken: null });

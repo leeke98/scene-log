@@ -5,7 +5,12 @@
  */
 import { useAuthStore } from "@/stores/authStore";
 import { useCurrentUser } from "./queries";
-import { useLogin, useGoogleLogin, useSignup, useLogout } from "./mutations";
+import {
+  useLogin,
+  useGoogleLogin,
+  useSignup,
+  useLogout,
+} from "./mutations";
 import { type ApiError } from "@/lib/apiClient";
 
 /**
@@ -74,4 +79,11 @@ export function useAuth() {
 
 // 개별 hooks도 export
 export { useCurrentUser } from "./queries";
-export { useLogin, useGoogleLogin, useSignup, useLogout } from "./mutations";
+export {
+  useLogin,
+  useGoogleLogin,
+  useSignup,
+  useLogout,
+  useUpdateProfile,
+  useUpdatePassword,
+} from "./mutations";

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { useAuthStore } from "@/stores/authStore";
 
-const mockUser = { id: "1", username: "testuser", nickname: "테스터" };
+const mockUser = { id: "1", username: "testuser", nickname: "테스터", provider: "local" as const };
 
 beforeEach(() => {
   useAuthStore.setState({ user: null, accessToken: null });

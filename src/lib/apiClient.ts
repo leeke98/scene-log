@@ -228,6 +228,18 @@ export async function apiPut<T>(
   });
 }
 
+export async function apiPatch<T>(
+  endpoint: string,
+  data?: unknown,
+  options?: Omit<RequestOptions, "method" | "body">
+): Promise<ApiResponse<T>> {
+  return apiRequest<T>(endpoint, {
+    ...options,
+    method: "PATCH",
+    body: data ? JSON.stringify(data) : undefined,
+  });
+}
+
 export async function apiDelete<T>(
   endpoint: string,
   options?: Omit<RequestOptions, "method" | "body">

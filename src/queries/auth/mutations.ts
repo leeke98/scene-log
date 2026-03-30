@@ -78,6 +78,42 @@ export function useSignup() {
 }
 
 /**
+ * 닉네임 변경 Mutation
+ */
+export function useUpdateProfile() {
+  const { setUser } = useAuthStore();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: { nickname: string }) => authApi.updateProfile(data),
+    onSuccess: (response) => {
+      setUser(response.user);
+      queryClient.setQueryData(queryKeys.auth.currentUser(), response.user);
+      toast.success(response.message);
+    },
+    onError: (error: ApiError) => {
+      toast.error(error.error || "닉네임 변경에 실패했습니다.");
+    },
+  });
+}
+
+/**
+ * 비밀번호 변경 Mutation
+ */
+export function useUpdatePassword() {
+  return useMutation({
+    mutationFn: (data: { currentPassword: string; newPassword: string }) =>
+      authApi.updatePassword(data),
+    onSuccess: (response) => {
+      toast.success(response.message);
+    },
+    onError: (error: ApiError) => {
+      toast.error(error.error || "비밀번호 변경에 실패했습니다.");
+    },
+  });
+}
+
+/**
  * 로그아웃 Mutation
  */
 export function useLogout() {

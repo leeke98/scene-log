@@ -1,13 +1,14 @@
 /**
  * 인증 관련 API
  */
-import { apiPost, apiGet, setAccessToken } from "@/lib/apiClient";
+import { apiPost, apiGet, apiPatch, setAccessToken } from "@/lib/apiClient";
 import { useAuthStore } from "@/stores/authStore";
 
 export interface User {
   id: string;
   username: string;
   nickname: string;
+  provider: "local" | "google";
   createdAt?: string;
 }
 
@@ -85,4 +86,40 @@ export async function getCurrentUser(): Promise<User> {
 export async function logout(): Promise<void> {
   await apiPost("/auth/logout", undefined, { requireAuth: false });
   useAuthStore.getState().clearUser();
+}
+
+/**
+ * 닉네임 변경
+ */
+export interface UpdateProfileRequest {
+  nickname: string;
+}
+
+export interface UpdateProfileResponse {
+  message: string;
+  user: User;
+}
+
+export async function updateProfile(
+  data: UpdateProfileRequest
+): Promise<UpdateProfileResponse> {
+  return apiPatch<UpdateProfileResponse>("/auth/profile", data);
+}
+
+/**
+ * 비밀번호 변경
+ */
+export interface UpdatePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export interface UpdatePasswordResponse {
+  message: string;
+}
+
+export async function updatePassword(
+  data: UpdatePasswordRequest
+): Promise<UpdatePasswordResponse> {
+  return apiPatch<UpdatePasswordResponse>("/auth/password", data);
 }

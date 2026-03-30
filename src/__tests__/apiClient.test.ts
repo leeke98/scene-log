@@ -109,7 +109,7 @@ describe("apiClient", () => {
     });
 
     it("401 → 리프레시 실패 → clearUser 후 AUTH_EXPIRED 에러", async () => {
-      const user = { id: "1", username: "test", nickname: "테스터" };
+      const user = { id: "1", username: "test", nickname: "테스터", provider: "local" as const };
       useAuthStore.setState({ user, accessToken: "expired-token" });
 
       mockFetch
