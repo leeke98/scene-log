@@ -1,18 +1,16 @@
 import { useState, useEffect } from "react";
-import { formatDateToISO } from "@/lib/dateUtils";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import PerformanceSearchModal from "@/components/PerformanceSearchModal";
 import TimePicker from "@/components/TimePicker";
 import DatePicker from "@/components/DatePicker";
 import CastingField from "@/components/ticket-form/CastingField";
 import PriceInput from "@/components/ticket-form/PriceInput";
+import PerformanceSearchInline from "@/components/ticket-form/PerformanceSearchInline";
 import { useTicketForm } from "@/hooks/useTicketForm";
 import {
   Star,
-  Plus,
   Loader2,
   ArrowLeft,
   ChevronLeft,
@@ -104,7 +102,6 @@ export default function TicketFormPage() {
   } = useTicketForm();
 
   const [currentStep, setCurrentStep] = useState(1);
-  const [showSearchModal, setShowSearchModal] = useState(false);
 
   // 수정 모드: 데이터 로드 후 step 1에서 시작
   useEffect(() => {
@@ -190,99 +187,27 @@ export default function TicketFormPage() {
                 </div>
               </div>
 
-              {/* 포스터 + 공연 정보 */}
-              <div className="flex gap-3 sm:gap-4 items-start">
-                <div
-                  className="relative w-[100px] sm:w-[150px] flex-shrink-0 aspect-[3/4] bg-gradient-to-br from-muted to-muted/50 rounded-lg border-2 border-dashed border-border flex items-center justify-center cursor-pointer hover:border-muted-foreground/40 transition-all group overflow-hidden"
-                  onClick={() => setShowSearchModal(true)}
-                >
-                  {formData.posterUrl ? (
-                    <>
-                      <img
-                        src={formData.posterUrl}
-                        alt={formData.performanceName || "포스터"}
-                        className="w-full h-full object-cover rounded-lg"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = "none";
-                        }}
-                      />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 rounded-lg transition-all flex items-center justify-center">
-                        <span className="opacity-0 group-hover:opacity-100 text-white text-xs font-medium bg-black/40 px-2 py-1 rounded-full transition-opacity">
-                          변경
-                        </span>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="flex flex-col items-center gap-1.5">
-                      <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center group-hover:bg-accent transition-colors">
-                        <Plus className="w-5 h-5 text-muted-foreground" />
-                      </div>
-                      <span className="text-muted-foreground text-[11px] text-center leading-tight">
-                        {formData.date ? "공연 검색" : "날짜 먼저\n선택"}
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex-1 pt-1 min-w-0">
-                  {formData.performanceName ? (
-                    <div className="space-y-1">
-                      <p className="font-semibold text-foreground text-sm leading-snug">
-                        {formData.performanceName}
-                      </p>
-                      <p className="text-xs text-muted-foreground">{formData.theater}</p>
-                      <button
-                        type="button"
-                        onClick={() => setShowSearchModal(true)}
-                        className="text-xs text-blue-500 hover:text-blue-600 mt-1 transition-colors"
-                      >
-                        다른 공연 선택
-                      </button>
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">
-                      포스터를 클릭하여 공연을 검색하세요
-                    </p>
-                  )}
-                </div>
-              </div>
+              {/* 인라인 공연 검색 */}
+              <PerformanceSearchInline
+                date={formData.date}
+                genre={formData.genre}
+                onGenreChange={(genre) =>
+                  setFormData((prev) => ({ ...prev, genre }))
+                }
+                performanceName={formData.performanceName}
+                theater={formData.theater}
+                posterUrl={formData.posterUrl}
+                onPerformanceSelect={handlePerformanceSelect}
+                onManualNameChange={(name) =>
+                  setFormData((prev) => ({ ...prev, performanceName: name }))
+                }
+              />
             </div>
           )}
 
           {/* === STEP 2: 관람 정보 === */}
           {currentStep === 2 && (
             <div className="bg-card border border-border rounded-xl p-4 sm:p-6 shadow-sm space-y-4">
-              {/* 장르 */}
-              <div>
-                <Label className="text-xs font-semibold text-muted-foreground mb-1.5 block">
-                  장르
-                </Label>
-                <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant={formData.genre === "연극" ? "default" : "outline"}
-                    onClick={() =>
-                      setFormData((prev) => ({ ...prev, genre: "연극" }))
-                    }
-                    className="flex-1"
-                  >
-                    연극
-                  </Button>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant={formData.genre === "뮤지컬" ? "default" : "outline"}
-                    onClick={() =>
-                      setFormData((prev) => ({ ...prev, genre: "뮤지컬" }))
-                    }
-                    className="flex-1"
-                  >
-                    뮤지컬
-                  </Button>
-                </div>
-              </div>
-
               {/* 극장 & 좌석 */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
@@ -472,29 +397,6 @@ export default function TicketFormPage() {
         </form>
       </div>
 
-      {/* 공연 검색 모달 */}
-      <PerformanceSearchModal
-        isOpen={showSearchModal}
-        onClose={() => setShowSearchModal(false)}
-        onSelect={handlePerformanceSelect}
-        selectedDate={
-          formData.date
-            ? (() => {
-                const [year, month, day] = formData.date.split("-").map(Number);
-                return new Date(year, month - 1, day);
-              })()
-            : undefined
-        }
-        onDateChange={(date) => {
-          if (date) {
-            setFormData((prev) => ({ ...prev, date: formatDateToISO(date) }));
-          }
-        }}
-        selectedGenre={formData.genre || undefined}
-        onGenreChange={(genre) => {
-          setFormData((prev) => ({ ...prev, genre }));
-        }}
-      />
     </Layout>
   );
 }
