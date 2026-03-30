@@ -153,7 +153,7 @@ export default function TicketCard({ ticket }: TicketCardProps) {
           </div>
 
           {/* 별점 */}
-          {ticket.rating && (
+          {ticket.rating != null && ticket.rating > 0 && (
             <div className="pt-2 sm:pt-3 border-t border-border">
               <div className="flex items-center gap-0.5">
                 {Array.from({ length: 5 }, (_, i) => (
