@@ -3,8 +3,8 @@ import { useAuth } from "@/queries/auth";
 import { Button } from "@/components/ui/button";
 import { LogOut, Sun, Moon, Settings } from "lucide-react";
 import { useUiStore } from "@/stores/uiStore";
-import logoBlack from "@/assets/logo_black.png";
-import logoWhite from "@/assets/logo_white.png";
+import faviconBlack from "@/assets/favicon_black.png";
+import faviconWhite from "@/assets/favicon_white.png";
 
 export default function MobileHeader() {
   const { user, logout } = useAuth();
@@ -19,8 +19,8 @@ export default function MobileHeader() {
   return (
     <header className="md:hidden fixed top-0 left-0 right-0 z-50 h-14 border-b bg-background flex items-center justify-between px-4">
       <Link to="/">
-        <img src={logoBlack} alt="SceneLog" className="h-8 dark:hidden" />
-        <img src={logoWhite} alt="SceneLog" className="h-8 hidden dark:block" />
+        <img src={faviconBlack} alt="SceneLog" className="h-8 dark:hidden" />
+        <img src={faviconWhite} alt="SceneLog" className="h-8 hidden dark:block" />
       </Link>
       <div className="flex items-center gap-1">
         <span className="text-sm text-muted-foreground">{user?.nickname}님</span>
