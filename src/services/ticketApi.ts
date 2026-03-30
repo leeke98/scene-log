@@ -129,6 +129,7 @@ export interface TicketsListParams {
   page?: number;
   limit?: number;
   performanceName?: string;
+  actorName?: string;
   genre?: "연극" | "뮤지컬";
 }
 
@@ -140,6 +141,9 @@ export async function getTicketsList(
   if (params?.limit) queryParams.append("limit", params.limit.toString());
   if (params?.performanceName) {
     queryParams.append("performanceName", params.performanceName);
+  }
+  if (params?.actorName) {
+    queryParams.append("actorName", params.actorName);
   }
   if (params?.genre) {
     queryParams.append("genre", params.genre);

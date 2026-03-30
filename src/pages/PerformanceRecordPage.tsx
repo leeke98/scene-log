@@ -18,6 +18,7 @@ export default function PerformanceRecordPage() {
   const navigate = useNavigate();
   const [inputValue, setInputValue] = useState(""); // 입력 중인 검색어
   const [searchTerm, setSearchTerm] = useState(""); // 실제 검색에 사용되는 검색어
+  const [searchMode, setSearchMode] = useState<"작품명" | "배우명">("작품명");
   const [selectedGenre, setSelectedGenre] = useState<
     "전체" | "뮤지컬" | "연극"
   >("전체");
@@ -27,6 +28,11 @@ export default function PerformanceRecordPage() {
   const genreValue: "연극" | "뮤지컬" | undefined =
     selectedGenre === "전체" ? undefined : selectedGenre;
 
+  const performanceNameParam =
+    searchMode === "작품명" ? searchTerm || undefined : undefined;
+  const actorNameParam =
+    searchMode === "배우명" ? searchTerm || undefined : undefined;
+
   const {
     data,
     fetchNextPage,
@@ -34,7 +40,7 @@ export default function PerformanceRecordPage() {
     isFetchingNextPage,
     isLoading,
     error,
-  } = useTicketsList(20, searchTerm || undefined, genreValue);
+  } = useTicketsList(20, performanceNameParam, genreValue, actorNameParam);
 
   // 500ms 디바운스 자동검색
   useEffect(() => {
@@ -121,6 +127,25 @@ export default function PerformanceRecordPage() {
                   <SelectItem value="연극">연극</SelectItem>
                 </SelectContent>
               </Select>
+              <div className="flex items-center gap-1 rounded-md border bg-muted p-0.5 text-sm">
+                {(["작품명", "배우명"] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    onClick={() => {
+                      setSearchMode(mode);
+                      setInputValue("");
+                      setSearchTerm("");
+                    }}
+                    className={`px-3 py-1 rounded transition-colors ${
+                      searchMode === mode
+                        ? "bg-background text-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {mode}
+                  </button>
+                ))}
+              </div>
               <div className="relative flex-1 sm:flex-none">
                 <button
                   onClick={handleSearchClick}
@@ -130,7 +155,7 @@ export default function PerformanceRecordPage() {
                 </button>
                 <Input
                   type="text"
-                  placeholder="작품명 검색"
+                  placeholder={`${searchMode} 검색`}
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyDown={handleSearchKeyDown}

@@ -37,7 +37,8 @@ export function useTicket(id: string | undefined) {
 export function useTicketsList(
   limit: number = 20,
   performanceName?: string,
-  genre?: "연극" | "뮤지컬"
+  genre?: "연극" | "뮤지컬",
+  actorName?: string
 ) {
   return useInfiniteQuery({
     queryKey: [
@@ -45,9 +46,10 @@ export function useTicketsList(
       "infinite",
       performanceName,
       genre,
+      actorName,
     ],
     queryFn: ({ pageParam = 1 }) =>
-      getTicketsList({ page: pageParam, limit, performanceName, genre }),
+      getTicketsList({ page: pageParam, limit, performanceName, genre, actorName }),
     getNextPageParam: (lastPage) => {
       const { pagination } = lastPage;
       // 현재 페이지가 마지막 페이지인지 확인
