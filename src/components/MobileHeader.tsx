@@ -24,13 +24,13 @@ export default function MobileHeader() {
       </Link>
       <div className="flex items-center gap-1">
         <span className="text-sm text-muted-foreground">{user?.nickname}님</span>
-        <Button variant="ghost" size="icon" onClick={() => navigate("/settings")} title="설정">
+        <Button variant="ghost" size="icon" onClick={() => navigate("/settings")} title="설정" className="text-muted-foreground hover:text-foreground">
           <Settings className="w-4 h-4" />
         </Button>
-        <Button variant="ghost" size="icon" onClick={toggleTheme} title={theme === "light" ? "다크 모드" : "라이트 모드"}>
+        <Button variant="ghost" size="icon" onClick={toggleTheme} title={theme === "light" ? "다크 모드" : "라이트 모드"} className="text-muted-foreground hover:text-foreground">
           {theme === "light" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
         </Button>
-        <Button variant="ghost" size="icon" onClick={handleLogout} title="로그아웃">
+        <Button variant="ghost" size="icon" onClick={handleLogout} title="로그아웃" className="text-muted-foreground hover:text-foreground">
           <LogOut className="w-4 h-4" />
         </Button>
       </div>

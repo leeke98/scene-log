@@ -154,6 +154,7 @@ export default function Sidebar() {
               size="icon"
               onClick={() => navigate("/settings")}
               title="설정"
+              className="text-muted-foreground hover:text-foreground"
             >
               <Settings className="w-4 h-4" />
             </Button>
@@ -162,6 +163,7 @@ export default function Sidebar() {
               size="icon"
               onClick={toggleTheme}
               title={theme === "light" ? "다크 모드" : "라이트 모드"}
+              className="text-muted-foreground hover:text-foreground"
             >
               {theme === "light" ? (
                 <Moon className="w-4 h-4" />
@@ -174,6 +176,7 @@ export default function Sidebar() {
               size="icon"
               onClick={handleLogout}
               title="로그아웃"
+              className="text-muted-foreground hover:text-foreground"
             >
               <LogOut className="w-4 h-4" />
             </Button>
@@ -193,6 +196,7 @@ export default function Sidebar() {
                 size="icon"
                 onClick={toggleTheme}
                 title={theme === "light" ? "다크 모드" : "라이트 모드"}
+                className="text-muted-foreground hover:text-foreground"
               >
                 {theme === "light" ? (
                   <Moon className="w-4 h-4" />
@@ -205,6 +209,7 @@ export default function Sidebar() {
                 size="icon"
                 onClick={handleLogout}
                 title="로그아웃"
+                className="text-muted-foreground hover:text-foreground"
               >
                 <LogOut className="w-4 h-4" />
               </Button>

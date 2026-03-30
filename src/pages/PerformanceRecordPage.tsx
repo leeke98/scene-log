@@ -217,7 +217,7 @@ export default function PerformanceRecordPage() {
             {!searchTerm && selectedGenre === "전체" && (
               <Button
                 onClick={() => navigate("/tickets/new")}
-                className="bg-primary hover:bg-primary/90 text-white"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground"
               >
                 첫 공연 기록하기
               </Button>
@@ -255,7 +255,7 @@ export default function PerformanceRecordPage() {
       {/* 맨 위로 이동 버튼 */}
       <button
         onClick={scrollToTop}
-        className={`fixed bottom-24 md:bottom-8 right-6 z-30 p-3 rounded-full bg-primary text-white shadow-lg transition-all duration-300 hover:bg-primary/90 hover:shadow-xl ${
+        className={`fixed bottom-24 md:bottom-8 right-6 z-30 p-3 rounded-full bg-primary text-primary-foreground shadow-lg transition-all duration-300 hover:bg-primary/90 hover:shadow-xl ${
           showScrollTop
             ? "opacity-100 translate-y-0"
             : "opacity-0 translate-y-4 pointer-events-none"
