@@ -26,7 +26,7 @@ export default function PerformanceCalendar({
   }, [currentDate]);
 
   // React Query로 월별 티켓 조회
-  const { data: monthTickets = [] } = useTicketsByMonth(currentYearMonth);
+  const { data: monthTickets = [], isLoading } = useTicketsByMonth(currentYearMonth);
 
   // 날짜별로 티켓 그룹화
   const ticketsByDate = useMemo(() => {
@@ -214,7 +214,10 @@ export default function PerformanceCalendar({
   };
 
   return (
-    <div className="w-full performance-calendar-wrapper">
+    <div className="w-full performance-calendar-wrapper relative">
+      {isLoading && (
+        <div className="absolute inset-0 z-10 bg-background/60 backdrop-blur-[1px] rounded-lg animate-pulse pointer-events-none" />
+      )}
       <Calendar
         onChange={(value) => {
           if (value instanceof Date) {

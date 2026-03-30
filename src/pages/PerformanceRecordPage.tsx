@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import TicketCard from "@/components/TicketCard";
+import TicketCardSkeleton from "@/components/TicketCardSkeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -12,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useTicketsList } from "@/queries/tickets/queries";
-import { ArrowUp, Loader2, Search, X } from "lucide-react";
+import { ArrowUp, Search, X } from "lucide-react";
 
 export default function PerformanceRecordPage() {
   const navigate = useNavigate();
@@ -194,11 +195,10 @@ export default function PerformanceRecordPage() {
 
         {/* 티켓 그리드 */}
         {isLoading ? (
-          <div className="flex items-center justify-center min-h-[400px]">
-            <div className="flex flex-col items-center gap-4">
-              <Loader2 className="w-8 h-8 animate-spin text-primary" />
-              <p className="text-muted-foreground">티켓을 불러오는 중...</p>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-8">
+            {Array.from({ length: 10 }).map((_, i) => (
+              <TicketCardSkeleton key={i} />
+            ))}
           </div>
         ) : error ? (
           <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
@@ -232,22 +232,21 @@ export default function PerformanceRecordPage() {
             </div>
 
             {/* 무한 스크롤 트리거 */}
-            <div
-              ref={observerTarget}
-              className="h-20 flex items-center justify-center"
-            >
-              {isFetchingNextPage && (
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  <span className="text-sm">더 많은 티켓을 불러오는 중...</span>
-                </div>
-              )}
-              {!hasNextPage && tickets.length > 0 && (
-                <p className="text-muted-foreground text-sm">
-                  모든 티켓을 불러왔습니다.
-                </p>
-              )}
-            </div>
+            <div ref={observerTarget} />
+
+            {isFetchingNextPage && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-8">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <TicketCardSkeleton key={i} />
+                ))}
+              </div>
+            )}
+
+            {!hasNextPage && tickets.length > 0 && (
+              <p className="text-center text-muted-foreground text-sm py-4">
+                모든 티켓을 불러왔습니다.
+              </p>
+            )}
           </>
         )}
       </div>
