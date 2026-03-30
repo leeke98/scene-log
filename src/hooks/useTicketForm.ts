@@ -35,6 +35,8 @@ export function useTicketForm() {
   const isPending =
     createTicketMutation.isPending || updateTicketMutation.isPending;
 
+  const [isDirty, setIsDirty] = useState(false);
+
   const [initialTicketData, setInitialTicketData] =
     useState<TicketFormData | null>(null);
   const [formData, setFormData] = useState<TicketFormData>({
@@ -99,21 +101,27 @@ export function useTicketForm() {
     }
   }, [isEditMode, ticket]);
 
+  // 유저 인터랙션용 setFormData — dirty 플래그를 함께 설정
+  const setFormDataDirty: typeof setFormData = (updater) => {
+    setFormData(updater);
+    setIsDirty(true);
+  };
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormDataDirty((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleDateChange = (date: Date | null) => {
     if (date) {
-      setFormData((prev) => ({ ...prev, date: formatDateToISO(date) }));
+      setFormDataDirty((prev) => ({ ...prev, date: formatDateToISO(date) }));
     }
   };
 
   const handleRatingClick = (rating: number) => {
-    setFormData((prev) => ({ ...prev, rating: prev.rating === rating ? 0 : rating }));
+    setFormDataDirty((prev) => ({ ...prev, rating: prev.rating === rating ? 0 : rating }));
   };
 
   const handlePerformanceSelect = (performance: {
@@ -122,7 +130,7 @@ export function useTicketForm() {
     posterUrl: string;
     isChild?: boolean;
   }) => {
-    setFormData((prev) => ({
+    setFormDataDirty((prev) => ({
       ...prev,
       performanceName: performance.performanceName,
       theater: performance.theater,
@@ -133,7 +141,7 @@ export function useTicketForm() {
 
   const handleAddActor = (actorName: string) => {
     if (actorName && !formData.casting.includes(actorName)) {
-      setFormData((prev) => ({
+      setFormDataDirty((prev) => ({
         ...prev,
         casting: [...prev.casting, actorName],
       }));
@@ -141,7 +149,7 @@ export function useTicketForm() {
   };
 
   const handleRemoveActor = (index: number) => {
-    setFormData((prev) => ({
+    setFormDataDirty((prev) => ({
       ...prev,
       casting: prev.casting.filter((_, i) => i !== index),
     }));
@@ -151,7 +159,7 @@ export function useTicketForm() {
     (field: "ticketPrice" | "mdPrice") =>
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value.replace(/[^0-9]/g, "");
-      setFormData((prev) => ({
+      setFormDataDirty((prev) => ({
         ...prev,
         [field]: value ? Number(value).toLocaleString() : "",
       }));
@@ -198,6 +206,8 @@ export function useTicketForm() {
     };
 
     try {
+      setIsDirty(false);
+
       if (isEditMode && id && initialTicketData) {
         const updateData: Record<string, unknown> = {};
 
@@ -255,7 +265,8 @@ export function useTicketForm() {
 
   return {
     formData,
-    setFormData,
+    setFormData: setFormDataDirty,
+    isDirty,
     isEditMode,
     isLoadingTicket,
     isPending,

@@ -1,6 +1,15 @@
 import { useState, useEffect } from "react";
+import { useBlocker } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import TimePicker from "@/components/TimePicker";
@@ -88,6 +97,7 @@ export default function TicketFormPage() {
   const {
     formData,
     setFormData,
+    isDirty,
     isEditMode,
     isLoadingTicket,
     isPending,
@@ -102,6 +112,19 @@ export default function TicketFormPage() {
   } = useTicketForm();
 
   const [currentStep, setCurrentStep] = useState(1);
+
+  // 앱 내 내비게이션 차단 (뒤로가기 버튼, 사이드바 링크 등)
+  const blocker = useBlocker(isDirty && !isPending);
+
+  // 브라우저 탭 닫기 / 새로고침 차단
+  useEffect(() => {
+    if (!isDirty) return;
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isDirty]);
 
   // 수정 모드: 데이터 로드 후 step 1에서 시작
   useEffect(() => {
@@ -397,6 +420,30 @@ export default function TicketFormPage() {
         </form>
       </div>
 
+      {/* 이탈 확인 다이얼로그 */}
+      <Dialog
+        open={blocker.state === "blocked"}
+        onOpenChange={(open) => {
+          if (!open) blocker.reset?.();
+        }}
+      >
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>작성 중인 내용이 있어요</DialogTitle>
+            <DialogDescription>
+              페이지를 벗어나면 입력한 내용이 사라집니다. 정말 나가시겠어요?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => blocker.reset?.()}>
+              계속 작성
+            </Button>
+            <Button variant="destructive" onClick={() => blocker.proceed?.()}>
+              나가기
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 }
