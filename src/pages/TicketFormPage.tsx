@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useBlocker } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import {
@@ -112,9 +111,15 @@ export default function TicketFormPage() {
   } = useTicketForm();
 
   const [currentStep, setCurrentStep] = useState(1);
+  const [showLeaveDialog, setShowLeaveDialog] = useState(false);
 
-  // 앱 내 내비게이션 차단 (뒤로가기 버튼, 사이드바 링크 등)
-  const blocker = useBlocker(isDirty && !isPending);
+  const handleBackClick = () => {
+    if (isDirty && !isPending) {
+      setShowLeaveDialog(true);
+    } else {
+      navigate(-1);
+    }
+  };
 
   // 브라우저 탭 닫기 / 새로고침 차단
   useEffect(() => {
@@ -152,7 +157,7 @@ export default function TicketFormPage() {
         <div className="relative flex items-center justify-center mb-5">
           <button
             type="button"
-            onClick={() => navigate(-1)}
+            onClick={handleBackClick}
             className="absolute left-0 flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -421,12 +426,7 @@ export default function TicketFormPage() {
       </div>
 
       {/* 이탈 확인 다이얼로그 */}
-      <Dialog
-        open={blocker.state === "blocked"}
-        onOpenChange={(open) => {
-          if (!open) blocker.reset?.();
-        }}
-      >
+      <Dialog open={showLeaveDialog} onOpenChange={setShowLeaveDialog}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
             <DialogTitle>작성 중인 내용이 있어요</DialogTitle>
@@ -435,10 +435,16 @@ export default function TicketFormPage() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" onClick={() => blocker.reset?.()}>
+            <Button variant="outline" onClick={() => setShowLeaveDialog(false)}>
               계속 작성
             </Button>
-            <Button variant="destructive" onClick={() => blocker.proceed?.()}>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                setShowLeaveDialog(false);
+                navigate(-1);
+              }}
+            >
               나가기
             </Button>
           </DialogFooter>
