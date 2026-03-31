@@ -16,6 +16,11 @@ export interface KopisPerformance {
   prfstate: string; // 공연 상태
 }
 
+export interface KopisRelate {
+  relatenm: string; // 예매처 이름
+  relateurl: string; // 예매 링크
+}
+
 export interface KopisPerformanceDetail extends KopisPerformance {
   prfcast?: string; // 캐스팅
   prfcrew?: string; // 제작진
@@ -24,8 +29,9 @@ export interface KopisPerformanceDetail extends KopisPerformance {
   pcseguidance?: string; // 가격 안내
   dtguidance?: string; // 시간 안내
   mt10id?: string; // 시설 ID
+  relates?: { relate: KopisRelate[] }; // 예매처 목록
   // 추가 필드들
-  [key: string]: string | undefined;
+  [key: string]: string | KopisRelate[] | { relate: KopisRelate[] } | undefined;
 }
 
 /**

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, Calendar, Clock, MapPin, Users, Ticket, Baby } from "lucide-react";
+import { X, Calendar, Clock, MapPin, Users, Ticket, Baby, ExternalLink } from "lucide-react";
 import { createPortal } from "react-dom";
 import { usePerformanceDetail } from "@/queries/kopis";
 
@@ -158,6 +158,32 @@ export default function PerformanceDetailModal({
                   />
                 )}
               </div>
+
+              {/* 예매처 */}
+              {detail.relates?.relate && detail.relates.relate.length > 0 && (
+                <div className="flex gap-3 py-2.5">
+                  <div className="text-muted-foreground mt-0.5 flex-shrink-0">
+                    <ExternalLink className="w-4 h-4" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-muted-foreground mb-1.5">예매처</p>
+                    <div className="flex flex-wrap gap-2">
+                      {detail.relates.relate.map((relate, index) => (
+                        <a
+                          key={index}
+                          href={relate.relateurl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors"
+                        >
+                          {relate.relatenm}
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
