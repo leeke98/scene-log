@@ -434,7 +434,7 @@ export default function TicketFormPage() {
               페이지를 벗어나면 입력한 내용이 사라집니다. 정말 나가시겠어요?
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="gap-2 sm:gap-0">
+          <DialogFooter className="flex-row justify-center gap-4 sm:justify-between sm:gap-0">
             <Button variant="outline" onClick={() => setShowLeaveDialog(false)}>
               계속 작성
             </Button>

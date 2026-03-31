@@ -3,6 +3,15 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/queries/auth";
 import { useUiStore } from "@/stores/uiStore";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import logoBlack from "@/assets/logo_black.png";
 import logoWhite from "@/assets/logo_white.png";
@@ -41,7 +50,9 @@ export default function Sidebar() {
   const isReportSection = location.pathname.startsWith("/report");
   const [reportOpen, setReportOpen] = useState(isReportSection);
 
-  const handleLogout = () => {
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
+
+  const handleLogoutConfirm = () => {
     logout();
     navigate("/login");
   };
@@ -52,6 +63,7 @@ export default function Sidebar() {
   };
 
   return (
+    <>
     <aside
       className={cn(
         "hidden md:flex flex-col border-r bg-background sticky top-0 h-screen shrink-0 transition-[width] duration-200",
@@ -174,7 +186,7 @@ export default function Sidebar() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={handleLogout}
+              onClick={() => setLogoutDialogOpen(true)}
               title="로그아웃"
               className="text-muted-foreground hover:text-foreground"
             >
@@ -207,7 +219,7 @@ export default function Sidebar() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={handleLogout}
+                onClick={() => setLogoutDialogOpen(true)}
                 title="로그아웃"
                 className="text-muted-foreground hover:text-foreground"
               >
@@ -218,5 +230,21 @@ export default function Sidebar() {
         )}
       </div>
     </aside>
+
+    <Dialog open={logoutDialogOpen} onOpenChange={setLogoutDialogOpen}>
+      <DialogContent className="max-w-xs">
+        <DialogHeader>
+          <DialogTitle>로그아웃</DialogTitle>
+          <DialogDescription>로그아웃 하시겠습니까?</DialogDescription>
+        </DialogHeader>
+        <DialogFooter className="flex-row justify-center gap-4 sm:justify-between sm:gap-0">
+          <DialogClose asChild>
+            <Button variant="outline">취소</Button>
+          </DialogClose>
+          <Button variant="destructive" onClick={handleLogoutConfirm}>로그아웃</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }
