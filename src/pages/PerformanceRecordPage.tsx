@@ -110,76 +110,74 @@ export default function PerformanceRecordPage() {
     <Layout>
       <div className="container mx-auto px-4">
         {/* 헤더 */}
-        <div className="mb-8">
-          {/* 검색 및 필터 */}
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-            <div className="flex items-center gap-3 flex-wrap">
-              <Select
-                value={selectedGenre}
-                onValueChange={(value) =>
-                  setSelectedGenre(value as "전체" | "뮤지컬" | "연극")
-                }
-              >
-                <SelectTrigger className="w-[120px]">
-                  <SelectValue placeholder="장르 선택" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="전체">전체</SelectItem>
-                  <SelectItem value="뮤지컬">뮤지컬</SelectItem>
-                  <SelectItem value="연극">연극</SelectItem>
-                </SelectContent>
-              </Select>
-              <div className="flex items-center gap-1 rounded-md border bg-muted p-0.5 text-sm">
-                {(["작품명", "배우명"] as const).map((mode) => (
-                  <button
-                    key={mode}
-                    onClick={() => {
-                      setSearchMode(mode);
-                      setInputValue("");
-                      setSearchTerm("");
-                    }}
-                    className={`px-3 py-1 rounded transition-colors ${
-                      searchMode === mode
-                        ? "bg-background text-foreground shadow-sm"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    {mode}
-                  </button>
-                ))}
-              </div>
-              <div className="relative flex-1 sm:flex-none">
-                <button
-                  onClick={handleSearchClick}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
-                >
-                  <Search className="w-4 h-4" />
-                </button>
-                <Input
-                  type="text"
-                  placeholder={`${searchMode} 검색`}
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  onKeyDown={handleSearchKeyDown}
-                  className="pl-10 pr-8 w-full sm:w-[300px]"
-                />
+        <div className="mb-8 flex flex-col gap-3">
+          {/* 1행: 검색창 */}
+          <div className="flex items-center">
+            <Select
+              value={searchMode}
+              onValueChange={(value) => {
+                setSearchMode(value as "작품명" | "배우명");
+                setInputValue("");
+                setSearchTerm("");
+              }}
+            >
+              <SelectTrigger className="w-[105px] rounded-r-none border-r-0 focus:ring-0 focus:ring-offset-0 shrink-0 bg-muted/50">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="작품명">작품명</SelectItem>
+                <SelectItem value="배우명">배우명</SelectItem>
+              </SelectContent>
+            </Select>
+            <div className="relative flex-1">
+              <Input
+                type="text"
+                placeholder={`${searchMode}으로 검색`}
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyDown={handleSearchKeyDown}
+                className="rounded-l-none pr-16"
+              />
+              <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-0.5">
                 {inputValue && (
                   <button
                     onClick={() => {
                       setInputValue("");
                       setSearchTerm("");
                     }}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    className="p-1 text-muted-foreground hover:text-foreground transition-colors"
                   >
                     <X className="w-4 h-4" />
                   </button>
                 )}
+                <button
+                  onClick={handleSearchClick}
+                  className="p-1 text-muted-foreground hover:text-primary transition-colors"
+                >
+                  <Search className="w-4 h-4" />
+                </button>
               </div>
             </div>
-            <Button
-              onClick={() => navigate("/tickets/new")}
-              className="sm:ml-auto w-full sm:w-auto"
-            >
+          </div>
+
+          {/* 2행: 장르 필터 + 새 기록 추가 */}
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-1.5">
+              {(["전체", "뮤지컬", "연극"] as const).map((genre) => (
+                <button
+                  key={genre}
+                  onClick={() => setSelectedGenre(genre)}
+                  className={`px-3 py-1 rounded-full text-sm border transition-colors ${
+                    selectedGenre === genre
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "border-border text-muted-foreground hover:border-foreground hover:text-foreground"
+                  }`}
+                >
+                  {genre}
+                </button>
+              ))}
+            </div>
+            <Button onClick={() => navigate("/tickets/new")} size="sm">
               새 기록 추가
             </Button>
           </div>
