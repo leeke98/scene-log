@@ -3,6 +3,7 @@ import { X, ChevronRight, Eye, Wallet } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { useActorDetail } from "@/queries/reports/queries";
+import { EmptyState } from "@/components/ui/empty-state";
 
 // 작품 태그 색상 (jewel tone, 순환)
 const tagColors = [
@@ -200,9 +201,7 @@ export default function ActorDetailModal({
               ))}
             </div>
           ) : (
-            <div className="rounded-xl border border-border/50 bg-muted/20 px-4 py-6 text-center text-sm text-muted-foreground">
-              티켓 정보가 없습니다.
-            </div>
+            <EmptyState message="티켓 정보가 없습니다." variant="inline" size="sm" />
           )}
         </div>
       </div>

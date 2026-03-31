@@ -1,6 +1,7 @@
 import { useRef, useCallback, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 
 // 작품 태그 색상 (jewel tone, 순환) - 모달과 동일
 const tagColors = [
@@ -61,11 +62,8 @@ export default function ActorCardList({
   if (actors.length === 0) {
     return (
       <Card className="shadow-sm border-border rounded-xl">
-        <CardContent className="px-6 py-16">
-          <div className="flex flex-col items-center gap-2 text-muted-foreground">
-            <span className="text-3xl">🎭</span>
-            <span className="text-sm">검색 결과가 없습니다.</span>
-          </div>
+        <CardContent className="px-6">
+          <EmptyState icon="🎭" message="검색 결과가 없습니다." size="lg" />
         </CardContent>
       </Card>
     );

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Top10Performance } from "@/types/report";
+import { EmptyState } from "@/components/ui/empty-state";
 
 interface TopPerformancesPosterProps {
   performances: Top10Performance[];
@@ -95,11 +96,9 @@ export default function TopPerformancesPoster({
     return (
       <div
         className="w-full flex items-center justify-center"
-        style={{
-          height: height ? `${height}px` : "auto",
-        }}
+        style={{ height: height ? `${height}px` : "auto" }}
       >
-        <span className="text-muted-foreground text-sm">데이터가 없습니다</span>
+        <EmptyState message="데이터가 없습니다" className="py-0" />
       </div>
     );
   }

@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import DatePicker from "@/components/DatePicker";
 import { usePerformanceSearch } from "@/hooks/usePerformanceSearch";
+import { EmptyState } from "@/components/ui/empty-state";
 
 interface PerformanceSearchModalProps {
   isOpen: boolean;
@@ -233,20 +234,10 @@ export default function PerformanceSearchModal({
             )}
 
           {!isLoading && performances.length === 0 && !error && (
-            <div className="text-center py-12 text-muted-foreground">
-              {!modalDate ? (
-                <div className="space-y-1">
-                  <p className="text-sm font-medium">공연 날짜를 먼저 선택해주세요.</p>
-                  <p className="text-xs">
-                    날짜 선택 후 작품명을 입력하고 검색 버튼을 눌러주세요.
-                  </p>
-                </div>
-              ) : (
-                <p className="text-sm">
-                  작품명을 입력하고 검색 버튼을 눌러주세요.
-                </p>
-              )}
-            </div>
+            <EmptyState
+              message={!modalDate ? "공연 날짜를 먼저 선택해주세요." : "작품명을 입력하고 검색 버튼을 눌러주세요."}
+              description={!modalDate ? "날짜 선택 후 작품명을 입력하고 검색 버튼을 눌러주세요." : undefined}
+            />
           )}
         </div>
       </div>

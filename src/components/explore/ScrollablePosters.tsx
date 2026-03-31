@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { type KopisPerformance } from "@/services/kopisApi";
 import PerformancePoster from "./PerformancePoster";
+import { EmptyState } from "@/components/ui/empty-state";
 
 interface ScrollablePostersProps {
   performances: KopisPerformance[];
@@ -83,11 +84,7 @@ export default function ScrollablePosters({
   }
 
   if (performances.length === 0) {
-    return (
-      <div className="text-center text-muted-foreground py-8">
-        예매 순위 데이터가 없습니다.
-      </div>
-    );
+    return <EmptyState message="예매 순위 데이터가 없습니다." size="sm" />;
   }
 
   return (

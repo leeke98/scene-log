@@ -3,6 +3,7 @@ import { X, Star, Eye, Wallet, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { usePerformanceDetail } from "@/queries/reports/queries";
+import { EmptyState } from "@/components/ui/empty-state";
 
 interface PerformanceDetailModalProps {
   isOpen: boolean;
@@ -232,9 +233,7 @@ export default function PerformanceDetailModal({
               ))}
             </div>
           ) : (
-            <div className="rounded-xl border border-border/50 bg-muted/20 px-4 py-6 text-center text-sm text-muted-foreground">
-              티켓 정보가 없습니다.
-            </div>
+            <EmptyState message="티켓 정보가 없습니다." variant="inline" size="sm" />
           )}
         </div>
       </div>

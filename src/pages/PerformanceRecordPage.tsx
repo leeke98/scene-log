@@ -5,6 +5,7 @@ import TicketCard from "@/components/TicketCard";
 import TicketCardSkeleton from "@/components/TicketCardSkeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   Select,
   SelectContent,
@@ -208,21 +209,20 @@ export default function PerformanceRecordPage() {
             <Button onClick={() => window.location.reload()}>다시 시도</Button>
           </div>
         ) : tickets.length === 0 ? (
-          <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-            <p className="text-muted-foreground text-lg">
-              {searchTerm || selectedGenre !== "전체"
+          <EmptyState
+            message={
+              searchTerm || selectedGenre !== "전체"
                 ? "검색 결과가 없습니다."
-                : "아직 기록된 공연이 없습니다."}
-            </p>
-            {!searchTerm && selectedGenre === "전체" && (
-              <Button
-                onClick={() => navigate("/tickets/new")}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground"
-              >
-                첫 공연 기록하기
-              </Button>
-            )}
-          </div>
+                : "아직 기록된 공연이 없습니다."
+            }
+            action={
+              !searchTerm && selectedGenre === "전체"
+                ? { label: "첫 공연 기록하기", onClick: () => navigate("/tickets/new") }
+                : undefined
+            }
+            size="lg"
+            className="min-h-[400px]"
+          />
         ) : (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-8">

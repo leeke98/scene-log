@@ -2,6 +2,7 @@ import { useRef, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { useSearchPerformances } from "@/queries/kopis";
 import PerformancePoster from "./PerformancePoster";
+import { EmptyState } from "@/components/ui/empty-state";
 
 interface SearchResultsProps {
   searchTerm: string;
@@ -69,10 +70,10 @@ export default function SearchResults({
 
   if (performances.length === 0) {
     return (
-      <div className="text-center text-muted-foreground py-12">
-        <p className="text-base">"{searchTerm}"에 대한 검색 결과가 없습니다.</p>
-        <p className="text-sm mt-1">다른 검색어나 장르 필터를 시도해보세요.</p>
-      </div>
+      <EmptyState
+        message={`"${searchTerm}"에 대한 검색 결과가 없습니다.`}
+        description="다른 검색어나 장르 필터를 시도해보세요."
+      />
     );
   }
 

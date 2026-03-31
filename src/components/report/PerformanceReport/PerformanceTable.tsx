@@ -1,6 +1,7 @@
 import { Star } from "lucide-react";
 import type { PerformanceStats } from "@/types/report";
 import { Card } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 
 interface PerformanceTableProps {
   performances: PerformanceStats[];
@@ -80,12 +81,7 @@ export default function PerformanceTable({
   }
 
   if (performances.length === 0) {
-    return (
-      <div className="flex flex-col items-center gap-2 py-16 text-muted-foreground">
-        <span className="text-3xl">🎭</span>
-        <span className="text-sm">데이터가 없습니다.</span>
-      </div>
-    );
+    return <EmptyState icon="🎭" message="데이터가 없습니다." size="lg" />;
   }
 
   return (
