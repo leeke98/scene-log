@@ -1,6 +1,12 @@
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-type PeriodType = "연간" | "월" | "누적";
+type PeriodType = "연간" | "월" | "직접" | "누적";
 
 interface PeriodFilterProps {
   activePeriod: PeriodType;
@@ -12,16 +18,20 @@ export default function PeriodFilter({
   onPeriodChange,
 }: PeriodFilterProps) {
   return (
-    <Tabs
+    <Select
       value={activePeriod}
       onValueChange={(value) => onPeriodChange(value as PeriodType)}
     >
-      <TabsList className="h-8 md:h-10">
-        <TabsTrigger value="연간" className="text-xs md:text-sm px-2.5 md:px-3">연간</TabsTrigger>
-        <TabsTrigger value="월" className="text-xs md:text-sm px-2.5 md:px-3">월</TabsTrigger>
-        <TabsTrigger value="누적" className="text-xs md:text-sm px-2.5 md:px-3">누적</TabsTrigger>
-      </TabsList>
-    </Tabs>
+      <SelectTrigger className="h-8 md:h-10 w-20 md:w-24 text-xs md:text-sm">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="연간">연간</SelectItem>
+        <SelectItem value="월">월</SelectItem>
+        <SelectItem value="직접">직접</SelectItem>
+        <SelectItem value="누적">누적</SelectItem>
+      </SelectContent>
+    </Select>
   );
 }
 
