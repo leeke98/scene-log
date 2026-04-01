@@ -14,28 +14,30 @@ import {
 interface OverallMonthlyTabProps {
   year: string;
   month: string; // "YYYY-MM" 형식
+  genre?: "뮤지컬" | "연극";
 }
 
 export default function OverallMonthlyTab({
   year,
   month,
+  genre,
 }: OverallMonthlyTabProps) {
   // month가 "YYYY-MM" 형식이므로 "MM" 부분만 추출
   const monthOnly = month.split("-")[1]; // "YYYY-MM" -> "MM"
 
   // 전체 요약 데이터 가져오기
-  const { data: summary } = useSummary(year, monthOnly);
+  const { data: summary } = useSummary(year, monthOnly, genre);
 
   const { summaryRef, posterHeight } = useSummaryHeight([summary]);
 
   // 주별 통계 데이터 가져오기
-  const { data: weeklyStats } = useWeeklyStats(month);
+  const { data: weeklyStats } = useWeeklyStats(month, genre);
 
   // 요일별 통계 데이터 가져오기
-  const { data: dayOfWeekStats } = useDayOfWeekStats(year, monthOnly);
+  const { data: dayOfWeekStats } = useDayOfWeekStats(year, monthOnly, genre);
 
   // 가장 많이 본 작품 데이터 가져오기
-  const { data: top10Performances } = useMostViewedPerformance(year, monthOnly);
+  const { data: top10Performances } = useMostViewedPerformance(year, monthOnly, genre);
 
   // 주별 관람수 차트 데이터 매핑 (실제 데이터 기반)
   // 해당 월의 모든 주차를 표시하고, 데이터가 없는 주차는 0으로 채움

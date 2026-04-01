@@ -13,22 +13,23 @@ import {
 
 interface OverallAnnualTabProps {
   year: string;
+  genre?: "뮤지컬" | "연극";
 }
 
-export default function OverallAnnualTab({ year }: OverallAnnualTabProps) {
+export default function OverallAnnualTab({ year, genre }: OverallAnnualTabProps) {
   // 전체 요약 데이터 가져오기
-  const { data: summary } = useSummary(year);
+  const { data: summary } = useSummary(year, undefined, genre);
 
   const { summaryRef, posterHeight } = useSummaryHeight([summary]);
 
   // 월별 통계 데이터 가져오기
-  const { data: monthlyStats } = useMonthlyStats(year);
+  const { data: monthlyStats } = useMonthlyStats(year, genre);
 
   // 요일별 통계 데이터 가져오기
-  const { data: dayOfWeekStats } = useDayOfWeekStats(year);
+  const { data: dayOfWeekStats } = useDayOfWeekStats(year, undefined, genre);
 
   // 가장 많이 본 작품 데이터 가져오기
-  const { data: top10Performances } = useMostViewedPerformance(year);
+  const { data: top10Performances } = useMostViewedPerformance(year, undefined, genre);
 
   // 월별 관람수 차트 데이터 매핑 (실제 데이터 기반)
   // 1월부터 12월까지 모든 달을 표시하고, 데이터가 없는 달은 0으로 채움

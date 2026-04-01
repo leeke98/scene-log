@@ -10,17 +10,21 @@ import {
   useGrassData,
 } from "@/queries/reports/queries";
 
-export default function OverallCumulativeTab() {
+interface OverallCumulativeTabProps {
+  genre?: "뮤지컬" | "연극";
+}
+
+export default function OverallCumulativeTab({ genre }: OverallCumulativeTabProps) {
   // 전체 요약 데이터 가져오기 (누적 데이터이므로 파라미터 없음)
-  const { data: summary } = useSummary();
+  const { data: summary } = useSummary(undefined, undefined, genre);
 
   const { summaryRef, posterHeight } = useSummaryHeight([summary]);
 
   // 요일별 통계 데이터 가져오기 (누적 데이터이므로 파라미터 없음)
-  const { data: dayOfWeekStats } = useDayOfWeekStats();
+  const { data: dayOfWeekStats } = useDayOfWeekStats(undefined, undefined, genre);
 
   // 가장 많이 본 작품 데이터 가져오기 (누적 데이터이므로 파라미터 없음)
-  const { data: top10Performances } = useMostViewedPerformance();
+  const { data: top10Performances } = useMostViewedPerformance(undefined, undefined, genre);
 
   // 잔디밭 데이터 가져오기
   const { data: grassData } = useGrassData();

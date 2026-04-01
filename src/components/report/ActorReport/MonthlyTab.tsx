@@ -8,12 +8,14 @@ interface ActorMonthlyTabProps {
   searchTerm: string;
   year: string;
   month: string; // "YYYY-MM" 형식
+  genre?: "뮤지컬" | "연극";
 }
 
 export default function ActorMonthlyTab({
   searchTerm,
   year,
   month,
+  genre,
 }: ActorMonthlyTabProps) {
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedActor = searchParams.get("actor");
@@ -31,6 +33,7 @@ export default function ActorMonthlyTab({
     search: searchTerm || undefined,
     year,
     month: monthOnly,
+    genre,
   });
 
   const actors = useMemo(() => {

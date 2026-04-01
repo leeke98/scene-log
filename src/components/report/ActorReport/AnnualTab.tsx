@@ -7,11 +7,13 @@ import { useInfiniteActorStats } from "@/queries/reports/queries";
 interface ActorAnnualTabProps {
   searchTerm: string;
   year: string;
+  genre?: "뮤지컬" | "연극";
 }
 
 export default function ActorAnnualTab({
   searchTerm,
   year,
+  genre,
 }: ActorAnnualTabProps) {
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedActor = searchParams.get("actor");
@@ -25,6 +27,7 @@ export default function ActorAnnualTab({
   } = useInfiniteActorStats({
     search: searchTerm || undefined,
     year,
+    genre,
   });
 
   const actors = useMemo(() => {

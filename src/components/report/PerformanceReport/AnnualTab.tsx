@@ -10,18 +10,20 @@ import { useSummary } from "@/queries/reports/queries";
 interface PerformanceAnnualTabProps {
   searchTerm: string;
   year: string;
+  genre?: "뮤지컬" | "연극";
 }
 
 export default function PerformanceAnnualTab({
   searchTerm,
   year,
+  genre,
 }: PerformanceAnnualTabProps) {
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedPerformance = searchParams.get("performance");
   const isModalOpen = !!selectedPerformance;
   const limit = 20;
 
-  const { data: summaryData } = useSummary(year);
+  const { data: summaryData } = useSummary(year, undefined, genre);
 
   const {
     data,
@@ -33,6 +35,7 @@ export default function PerformanceAnnualTab({
   } = useInfinitePerformanceStats({
     search: searchTerm || undefined,
     year,
+    genre,
     limit,
   });
 

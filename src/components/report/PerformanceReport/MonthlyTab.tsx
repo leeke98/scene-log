@@ -10,12 +10,14 @@ interface PerformanceMonthlyTabProps {
   searchTerm: string;
   year: string;
   month: string; // "YYYY-MM" 형식
+  genre?: "뮤지컬" | "연극";
 }
 
 export default function PerformanceMonthlyTab({
   searchTerm,
   year,
   month,
+  genre,
 }: PerformanceMonthlyTabProps) {
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedPerformance = searchParams.get("performance");
@@ -24,7 +26,7 @@ export default function PerformanceMonthlyTab({
 
   const monthOnly = month.split("-")[1];
 
-  const { data: summaryData } = useSummary(year, monthOnly);
+  const { data: summaryData } = useSummary(year, monthOnly, genre);
 
   const {
     data,
@@ -37,6 +39,7 @@ export default function PerformanceMonthlyTab({
     search: searchTerm || undefined,
     year,
     month: monthOnly,
+    genre,
     limit,
   });
 
