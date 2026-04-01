@@ -15,162 +15,136 @@ import type {
   PerformanceListStats,
 } from "@/types/report";
 
-/**
- * 전체 통계 요약
- */
+type Genre = "뮤지컬" | "연극";
+
+function buildQuery(params: Record<string, string | undefined>): string {
+  const q = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== "") q.append(key, value);
+  }
+  return q.toString() ? `?${q.toString()}` : "";
+}
+
 export async function getSummary(
   year?: string,
-  month?: string
+  month?: string,
+  genre?: Genre,
+  startDate?: string,
+  endDate?: string
 ): Promise<TicketSummary> {
-  const endpoint =
-    year && month
-      ? `/reports/summary?year=${year}&month=${month}`
-      : year
-      ? `/reports/summary?year=${year}`
-      : "/reports/summary";
-  return apiGet<TicketSummary>(endpoint);
+  return apiGet<TicketSummary>(`/reports/summary${buildQuery({ year, month, genre, startDate, endDate })}`);
 }
 
-/**
- * 월별 통계
- */
-export async function getMonthlyStats(year?: string): Promise<MonthlyStats[]> {
-  const endpoint = year ? `/reports/monthly?year=${year}` : "/reports/monthly";
-  return apiGet<MonthlyStats[]>(endpoint);
+export async function getMonthlyStats(
+  year?: string,
+  genre?: Genre,
+  startDate?: string,
+  endDate?: string
+): Promise<MonthlyStats[]> {
+  return apiGet<MonthlyStats[]>(`/reports/monthly${buildQuery({ year, genre, startDate, endDate })}`);
 }
 
-/**
- * 주별 통계
- */
 export async function getWeeklyStats(
-  yearMonth?: string
+  yearMonth?: string,
+  genre?: Genre,
+  startDate?: string,
+  endDate?: string
 ): Promise<WeeklyStats[]> {
-  const endpoint = yearMonth
-    ? `/reports/weekly?yearMonth=${yearMonth}`
-    : "/reports/weekly";
-  return apiGet<WeeklyStats[]>(endpoint);
+  return apiGet<WeeklyStats[]>(`/reports/weekly${buildQuery({ yearMonth, genre, startDate, endDate })}`);
 }
 
-/**
- * 요일별 통계
- */
 export async function getDayOfWeekStats(
   year?: string,
-  month?: string
+  month?: string,
+  genre?: Genre,
+  startDate?: string,
+  endDate?: string
 ): Promise<DayOfWeekStats[]> {
-  const endpoint =
-    year && month
-      ? `/reports/day-of-week?year=${year}&month=${month}`
-      : year
-      ? `/reports/day-of-week?year=${year}`
-      : "/reports/day-of-week";
-  return apiGet<DayOfWeekStats[]>(endpoint);
+  return apiGet<DayOfWeekStats[]>(`/reports/day-of-week${buildQuery({ year, month, genre, startDate, endDate })}`);
 }
 
-/**
- * 배우별 통계
- */
 export async function getActorStats(params?: {
   search?: string;
   year?: string;
   month?: string;
+  startDate?: string;
+  endDate?: string;
+  genre?: Genre;
   page?: number;
   limit?: number;
 }): Promise<ActorListStats> {
-  const { search, year, month, page, limit } = params || {};
-  const queryParams = new URLSearchParams();
-  if (search) queryParams.append("search", search);
-  if (year) queryParams.append("year", year);
-  if (month) queryParams.append("month", month);
-  if (page) queryParams.append("page", page.toString());
-  if (limit) queryParams.append("limit", limit.toString());
-  const endpoint = `/reports/actors${
-    queryParams.toString() ? `?${queryParams.toString()}` : ""
-  }`;
-  return apiGet<ActorListStats>(endpoint);
+  const { search, year, month, startDate, endDate, genre, page, limit } = params || {};
+  const q = new URLSearchParams();
+  if (search) q.append("search", search);
+  if (year) q.append("year", year);
+  if (month) q.append("month", month);
+  if (startDate) q.append("startDate", startDate);
+  if (endDate) q.append("endDate", endDate);
+  if (genre) q.append("genre", genre);
+  if (page) q.append("page", page.toString());
+  if (limit) q.append("limit", limit.toString());
+  return apiGet<ActorListStats>(`/reports/actors${q.toString() ? `?${q.toString()}` : ""}`);
 }
 
-/**
- * 배우 상세 정보
- */
 export async function getActorDetail(params?: {
   actorName: string;
   year?: string;
   month?: string;
+  startDate?: string;
+  endDate?: string;
+  genre?: Genre;
 }): Promise<ActorDetail> {
-  const { actorName } = params || {};
-  const queryParams = new URLSearchParams();
-  if (params?.year) queryParams.append("year", params.year);
-  if (params?.month) queryParams.append("month", params.month);
+  const { actorName, year, month, startDate, endDate, genre } = params || {};
   if (!actorName) throw new Error("actorName is required");
-  const endpoint = `/reports/actors/${encodeURIComponent(actorName)}${
-    queryParams.toString() ? `?${queryParams.toString()}` : ""
-  }`;
-  return apiGet<ActorDetail>(endpoint);
+  return apiGet<ActorDetail>(`/reports/actors/${encodeURIComponent(actorName)}${buildQuery({ year, month, startDate, endDate, genre })}`);
 }
 
-/**
- * 작품별 통계
- */
 export async function getPerformanceStats(params?: {
   search?: string;
   year?: string;
   month?: string;
+  startDate?: string;
+  endDate?: string;
+  genre?: Genre;
   limit?: number;
   page?: number;
 }): Promise<PerformanceListStats> {
-  const queryParams = new URLSearchParams();
-  if (params?.search) queryParams.append("search", params.search);
-  if (params?.year) queryParams.append("year", params.year);
-  if (params?.month) queryParams.append("month", params.month);
-  if (params?.limit) queryParams.append("limit", params.limit.toString());
-  if (params?.page) queryParams.append("page", params.page.toString());
-  const endpoint = `/reports/performances${
-    queryParams.toString() ? `?${queryParams.toString()}` : ""
-  }`;
-  return apiGet<PerformanceListStats>(endpoint);
+  const { search, year, month, startDate, endDate, genre, limit, page } = params || {};
+  const q = new URLSearchParams();
+  if (search) q.append("search", search);
+  if (year) q.append("year", year);
+  if (month) q.append("month", month);
+  if (startDate) q.append("startDate", startDate);
+  if (endDate) q.append("endDate", endDate);
+  if (genre) q.append("genre", genre);
+  if (limit) q.append("limit", limit.toString());
+  if (page) q.append("page", page.toString());
+  return apiGet<PerformanceListStats>(`/reports/performances${q.toString() ? `?${q.toString()}` : ""}`);
 }
 
-/**
- * 가장 많이 본 작품 Top 10
- */
 export async function getMostViewedPerformance(
   year?: string,
-  month?: string
+  month?: string,
+  genre?: Genre,
+  startDate?: string,
+  endDate?: string
 ): Promise<Top10Performance[]> {
-  const queryParams = new URLSearchParams();
-  if (year) queryParams.append("year", year);
-  if (month) queryParams.append("month", month);
-  const endpoint = `/reports/performances/top${
-    queryParams.toString() ? `?${queryParams.toString()}` : ""
-  }`;
-  return apiGet<Top10Performance[]>(endpoint);
+  return apiGet<Top10Performance[]>(`/reports/performances/top${buildQuery({ year, month, genre, startDate, endDate })}`);
 }
 
-/**
- * 작품 상세 정보
- */
 export async function getPerformanceDetail(params?: {
   performanceName: string;
   year?: string;
   month?: string;
+  startDate?: string;
+  endDate?: string;
+  genre?: Genre;
 }): Promise<PerformanceDetail> {
-  const { performanceName } = params || {};
-  const queryParams = new URLSearchParams();
-  if (params?.year) queryParams.append("year", params.year);
-  if (params?.month) queryParams.append("month", params.month);
+  const { performanceName, year, month, startDate, endDate, genre } = params || {};
   if (!performanceName) throw new Error("performanceName is required");
-  if (!performanceName) throw new Error("performanceName is required");
-  const endpoint = `/reports/performances/${encodeURIComponent(
-    performanceName
-  )}${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
-  return apiGet<PerformanceDetail>(endpoint);
+  return apiGet<PerformanceDetail>(`/reports/performances/${encodeURIComponent(performanceName)}${buildQuery({ year, month, startDate, endDate, genre })}`);
 }
 
-/**
- * 잔디밭 데이터
- */
 export async function getGrassData(): Promise<GrassData[]> {
-  const endpoint = "/reports/grass";
-  return apiGet<GrassData[]>(endpoint);
+  return apiGet<GrassData[]>("/reports/grass");
 }

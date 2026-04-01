@@ -85,9 +85,12 @@ export interface GrassData {
 }
 
 export interface ReportFilter {
-  type: "year" | "month" | "cumulative"; // 필터 타입
+  type: "year" | "month" | "cumulative" | "custom"; // 필터 타입
   year?: string; // 연도 (YYYY)
   month?: string; // 월 (YYYY-MM)
+  startDate?: string; // 직접 설정 시작일 (YYYY-MM-DD)
+  endDate?: string; // 직접 설정 종료일 (YYYY-MM-DD)
+  genre?: "뮤지컬" | "연극"; // 장르
 }
 
 export interface ActorDetail {

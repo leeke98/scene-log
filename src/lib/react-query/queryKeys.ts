@@ -28,18 +28,21 @@ export const queryKeys = {
   // 리포트 관련
   reports: {
     all: ["reports"] as const,
-    summary: (year?: string, month?: string) =>
-      [...queryKeys.reports.all, "summary", year, month] as const,
-    monthly: (year?: string) =>
-      [...queryKeys.reports.all, "monthly", year] as const,
-    weekly: (yearMonth?: string) =>
-      [...queryKeys.reports.all, "weekly", yearMonth] as const,
-    dayOfWeek: (year?: string, month?: string) =>
-      [...queryKeys.reports.all, "dayOfWeek", year, month] as const,
+    summary: (year?: string, month?: string, genre?: string, startDate?: string, endDate?: string) =>
+      [...queryKeys.reports.all, "summary", year, month, genre, startDate, endDate] as const,
+    monthly: (year?: string, genre?: string, startDate?: string, endDate?: string) =>
+      [...queryKeys.reports.all, "monthly", year, genre, startDate, endDate] as const,
+    weekly: (yearMonth?: string, genre?: string, startDate?: string, endDate?: string) =>
+      [...queryKeys.reports.all, "weekly", yearMonth, genre, startDate, endDate] as const,
+    dayOfWeek: (year?: string, month?: string, genre?: string, startDate?: string, endDate?: string) =>
+      [...queryKeys.reports.all, "dayOfWeek", year, month, genre, startDate, endDate] as const,
     actors: (params?: {
       search?: string;
       year?: string;
       month?: string;
+      startDate?: string;
+      endDate?: string;
+      genre?: string;
       page?: number;
       limit?: number;
     }) =>
@@ -49,6 +52,9 @@ export const queryKeys = {
         params?.search,
         params?.year,
         params?.month,
+        params?.startDate,
+        params?.endDate,
+        params?.genre,
         params?.page,
         params?.limit,
       ] as const,
@@ -56,6 +62,9 @@ export const queryKeys = {
       actorName: string;
       year?: string;
       month?: string;
+      startDate?: string;
+      endDate?: string;
+      genre?: string;
     }) =>
       [
         ...queryKeys.reports.all,
@@ -63,11 +72,17 @@ export const queryKeys = {
         params.actorName,
         params.year,
         params.month,
+        params.startDate,
+        params.endDate,
+        params.genre,
       ] as const,
     performances: (params?: {
       search?: string;
       year?: string;
       month?: string;
+      startDate?: string;
+      endDate?: string;
+      genre?: string;
       page?: number;
       limit?: number;
     }) =>
@@ -77,6 +92,9 @@ export const queryKeys = {
         params?.search,
         params?.year,
         params?.month,
+        params?.startDate,
+        params?.endDate,
+        params?.genre,
         params?.page,
         params?.limit,
       ] as const,
@@ -84,6 +102,9 @@ export const queryKeys = {
       performanceName: string;
       year?: string;
       month?: string;
+      startDate?: string;
+      endDate?: string;
+      genre?: string;
     }) =>
       [
         ...queryKeys.reports.all,
@@ -91,6 +112,9 @@ export const queryKeys = {
         params.performanceName,
         params.year,
         params.month,
+        params.startDate,
+        params.endDate,
+        params.genre,
       ] as const,
     grass: () => [...queryKeys.reports.all, "grass"] as const,
   },
