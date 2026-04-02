@@ -3,6 +3,7 @@ import { formatDateToISO } from "@/lib/dateUtils";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useTicket, useCreateTicket, useUpdateTicket } from "@/queries/tickets";
 import { toast } from "react-toastify";
+import { uploadImageToCloudinary } from "@/lib/cloudinary";
 
 export type TicketFormData = {
   date: string;
@@ -32,10 +33,14 @@ export function useTicketForm() {
   const createTicketMutation = useCreateTicket();
   const updateTicketMutation = useUpdateTicket();
 
-  const isPending =
-    createTicketMutation.isPending || updateTicketMutation.isPending;
+  const [isUploadingPoster, setIsUploadingPoster] = useState(false);
+  const [pendingPosterFile, setPendingPosterFile] = useState<File | null>(null);
 
-  const [isDirty, setIsDirty] = useState(false);
+  const isPending =
+    createTicketMutation.isPending || updateTicketMutation.isPending || isUploadingPoster;
+
+  const [isDirtyFlag, setIsDirty] = useState(false);
+  const isDirty = isDirtyFlag || pendingPosterFile !== null;
 
   const [initialTicketData, setInitialTicketData] =
     useState<TicketFormData | null>(null);
@@ -130,6 +135,7 @@ export function useTicketForm() {
     posterUrl: string;
     isChild?: boolean;
   }) => {
+    setPendingPosterFile(null); // KOPIS 포스터로 교체 시 pending 파일 초기화
     setFormDataDirty((prev) => ({
       ...prev,
       performanceName: performance.performanceName,
@@ -178,6 +184,21 @@ export function useTicketForm() {
       return;
     }
 
+    // 저장 시점에 pending 파일이 있으면 Cloudinary 업로드
+    let resolvedPosterUrl = formData.posterUrl;
+    if (pendingPosterFile) {
+      setIsUploadingPoster(true);
+      try {
+        resolvedPosterUrl = await uploadImageToCloudinary(pendingPosterFile);
+        setPendingPosterFile(null);
+      } catch {
+        toast.error("이미지 업로드에 실패했습니다. 다시 시도해주세요.");
+        setIsUploadingPoster(false);
+        return;
+      }
+      setIsUploadingPoster(false);
+    }
+
     const timeFormatted = formData.time.includes(":")
       ? formData.time.split(":").length === 2
         ? `${formData.time}:00`
@@ -202,7 +223,7 @@ export function useTicketForm() {
         : undefined,
       rating: formData.rating || undefined,
       review: formData.review || undefined,
-      posterUrl: formData.posterUrl || undefined,
+      posterUrl: resolvedPosterUrl || undefined,
     };
 
     try {
@@ -263,6 +284,10 @@ export function useTicketForm() {
     }
   };
 
+  const handlePosterFileSelect = (file: File | null) => {
+    setPendingPosterFile(file);
+  };
+
   return {
     formData,
     setFormData: setFormDataDirty,
@@ -279,5 +304,6 @@ export function useTicketForm() {
     handlePriceChange,
     handleSubmit,
     navigate,
+    setPendingPosterFile: handlePosterFileSelect,
   };
 }

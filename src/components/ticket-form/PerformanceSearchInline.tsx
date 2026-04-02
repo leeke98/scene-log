@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
-import { Search, Loader2 } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Search, Loader2, ImageUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { usePerformanceSearch } from "@/hooks/usePerformanceSearch";
 import { EmptyState } from "@/components/ui/empty-state";
+import { toast } from "react-toastify";
 
 interface Props {
   date: string;
@@ -20,6 +21,7 @@ interface Props {
     isChild?: boolean;
   }) => void;
   onManualNameChange: (name: string) => void;
+  onPosterFileSelect: (file: File | null) => void;
 }
 
 export default function PerformanceSearchInline({
@@ -31,10 +33,47 @@ export default function PerformanceSearchInline({
   posterUrl,
   onPerformanceSelect,
   onManualNameChange,
+  onPosterFileSelect,
 }: Props) {
   const [isManual, setIsManual] = useState(false);
   const [showSearch, setShowSearch] = useState(!performanceName);
   const [showResults, setShowResults] = useState(false);
+  const [localPreviewUrl, setLocalPreviewUrl] = useState("");
+  const localPreviewUrlRef = useRef("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // 컴포넌트 언마운트 시 blob URL 해제
+  useEffect(() => {
+    return () => {
+      if (localPreviewUrlRef.current) URL.revokeObjectURL(localPreviewUrlRef.current);
+    };
+  }, []);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("5MB 이하의 이미지만 업로드할 수 있습니다.");
+      return;
+    }
+
+    // 이전 blob URL 해제 후 새 미리보기 생성
+    if (localPreviewUrlRef.current) URL.revokeObjectURL(localPreviewUrlRef.current);
+    const blobUrl = URL.createObjectURL(file);
+    localPreviewUrlRef.current = blobUrl;
+    setLocalPreviewUrl(blobUrl);
+    onPosterFileSelect(file);
+
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const clearLocalPreview = () => {
+    if (localPreviewUrlRef.current) URL.revokeObjectURL(localPreviewUrlRef.current);
+    localPreviewUrlRef.current = "";
+    setLocalPreviewUrl("");
+    onPosterFileSelect(null);
+  };
 
   useEffect(() => {
     if (performanceName && !isManual) {
@@ -61,6 +100,8 @@ export default function PerformanceSearchInline({
     onSelect: (perf) => {
       onPerformanceSelect(perf);
       setShowResults(false);
+      setShowSearch(false);
+      clearLocalPreview(); // KOPIS 공연 선택 시 pending 파일 초기화
     },
     onClose: () => setShowResults(false),
   });
@@ -101,21 +142,42 @@ export default function PerformanceSearchInline({
         </div>
       </div>
 
+      {/* 숨김 파일 input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleFileSelect}
+      />
+
       {/* 선택된 공연 표시 */}
       {performanceName && !showSearch && !isManual && (
         <div className="flex gap-3 items-start">
-          {posterUrl ? (
-            <img
-              src={posterUrl}
-              alt={performanceName}
-              className="w-[72px] aspect-[3/4] object-cover rounded-lg flex-shrink-0"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = "none";
-              }}
-            />
-          ) : (
-            <div className="w-[72px] aspect-[3/4] bg-muted rounded-lg flex-shrink-0" />
-          )}
+          <div className="flex-shrink-0 relative group">
+            {(localPreviewUrl || posterUrl) ? (
+              <img
+                src={localPreviewUrl || posterUrl}
+                alt={performanceName}
+                className="w-[72px] aspect-[3/4] object-cover rounded-lg"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = "none";
+                }}
+              />
+            ) : (
+              <div className="w-[72px] aspect-[3/4] bg-muted rounded-lg" />
+            )}
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="absolute inset-0 flex flex-col items-center justify-center gap-1 rounded-lg bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity text-white"
+            >
+              <ImageUp className="w-4 h-4" />
+              <span className="text-[10px] leading-tight text-center px-1">
+                {(localPreviewUrl || posterUrl) ? "사진 교체" : "업로드"}
+              </span>
+            </button>
+          </div>
           <div className="flex-1 pt-0.5 min-w-0">
             <p className="font-semibold text-sm leading-snug">{performanceName}</p>
             {theater && (
@@ -150,16 +212,43 @@ export default function PerformanceSearchInline({
       {/* 직접 입력 모드 */}
       {isManual && (
         <div className="space-y-2">
-          <div>
-            <Label className="text-xs font-semibold text-muted-foreground mb-1.5 block">
-              공연명
-            </Label>
-            <Input
-              value={performanceName}
-              onChange={(e) => onManualNameChange(e.target.value)}
-              placeholder="공연명을 직접 입력하세요"
-              autoFocus
-            />
+          <div className="flex gap-3 items-end">
+            {/* 포스터 업로드 영역 */}
+            <div className="flex-shrink-0 relative group">
+              <div className="w-[72px] aspect-[3/4] bg-muted rounded-lg overflow-hidden">
+                {(localPreviewUrl || posterUrl) && (
+                  <img
+                    src={localPreviewUrl || posterUrl}
+                    alt="포스터"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = "none";
+                    }}
+                  />
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="absolute inset-0 flex flex-col items-center justify-center gap-1 rounded-lg bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity text-white"
+              >
+                <ImageUp className="w-4 h-4" />
+                <span className="text-[10px] leading-tight text-center px-1">
+                  {(localPreviewUrl || posterUrl) ? "사진 교체" : "업로드"}
+                </span>
+              </button>
+            </div>
+            <div className="flex-1 min-w-0">
+              <Label className="text-xs font-semibold text-muted-foreground mb-1.5 block">
+                공연명
+              </Label>
+              <Input
+                value={performanceName}
+                onChange={(e) => onManualNameChange(e.target.value)}
+                placeholder="공연명을 직접 입력하세요"
+                autoFocus
+              />
+            </div>
           </div>
           <button
             type="button"

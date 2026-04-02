@@ -108,6 +108,7 @@ export default function TicketFormPage() {
     handlePriceChange,
     handleSubmit,
     navigate,
+    setPendingPosterFile,
   } = useTicketForm();
 
   const [currentStep, setCurrentStep] = useState(1);
@@ -229,6 +230,7 @@ export default function TicketFormPage() {
                 onManualNameChange={(name) =>
                   setFormData((prev) => ({ ...prev, performanceName: name }))
                 }
+                onPosterFileSelect={setPendingPosterFile}
               />
             </div>
           )}
