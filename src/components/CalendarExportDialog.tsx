@@ -54,6 +54,7 @@ export default function CalendarExportDialog({
   }, [monthTickets]);
 
   const toProxyUrl = (url: string) => {
+    if (url.startsWith("https://")) return url;
     return `${API_BASE_URL}/proxy/image?url=${encodeURIComponent(url)}`;
   };
 
