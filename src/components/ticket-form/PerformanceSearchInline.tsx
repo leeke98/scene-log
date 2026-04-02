@@ -14,6 +14,7 @@ interface Props {
   performanceName: string;
   theater: string;
   posterUrl: string;
+  posterPreviewUrl: string;
   onPerformanceSelect: (perf: {
     performanceName: string;
     theater: string;
@@ -21,7 +22,7 @@ interface Props {
     isChild?: boolean;
   }) => void;
   onManualNameChange: (name: string) => void;
-  onPosterFileSelect: (file: File | null) => void;
+  onPosterFileSelect: (file: File | null, previewUrl: string) => void;
 }
 
 export default function PerformanceSearchInline({
@@ -31,6 +32,7 @@ export default function PerformanceSearchInline({
   performanceName,
   theater,
   posterUrl,
+  posterPreviewUrl,
   onPerformanceSelect,
   onManualNameChange,
   onPosterFileSelect,
@@ -38,16 +40,8 @@ export default function PerformanceSearchInline({
   const [isManual, setIsManual] = useState(false);
   const [showSearch, setShowSearch] = useState(!performanceName);
   const [showResults, setShowResults] = useState(false);
-  const [localPreviewUrl, setLocalPreviewUrl] = useState("");
-  const localPreviewUrlRef = useRef("");
+  const prevBlobUrlRef = useRef("");
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // 컴포넌트 언마운트 시 blob URL 해제
-  useEffect(() => {
-    return () => {
-      if (localPreviewUrlRef.current) URL.revokeObjectURL(localPreviewUrlRef.current);
-    };
-  }, []);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -59,20 +53,18 @@ export default function PerformanceSearchInline({
     }
 
     // 이전 blob URL 해제 후 새 미리보기 생성
-    if (localPreviewUrlRef.current) URL.revokeObjectURL(localPreviewUrlRef.current);
+    if (prevBlobUrlRef.current) URL.revokeObjectURL(prevBlobUrlRef.current);
     const blobUrl = URL.createObjectURL(file);
-    localPreviewUrlRef.current = blobUrl;
-    setLocalPreviewUrl(blobUrl);
-    onPosterFileSelect(file);
+    prevBlobUrlRef.current = blobUrl;
+    onPosterFileSelect(file, blobUrl);
 
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const clearLocalPreview = () => {
-    if (localPreviewUrlRef.current) URL.revokeObjectURL(localPreviewUrlRef.current);
-    localPreviewUrlRef.current = "";
-    setLocalPreviewUrl("");
-    onPosterFileSelect(null);
+    if (prevBlobUrlRef.current) URL.revokeObjectURL(prevBlobUrlRef.current);
+    prevBlobUrlRef.current = "";
+    onPosterFileSelect(null, "");
   };
 
   useEffect(() => {
@@ -155,9 +147,9 @@ export default function PerformanceSearchInline({
       {performanceName && !showSearch && !isManual && (
         <div className="flex gap-3 items-start">
           <div className="flex-shrink-0 relative group">
-            {(localPreviewUrl || posterUrl) ? (
+            {(posterPreviewUrl || posterUrl) ? (
               <img
-                src={localPreviewUrl || posterUrl}
+                src={posterPreviewUrl || posterUrl}
                 alt={performanceName}
                 className="w-[72px] aspect-[3/4] object-cover rounded-lg"
                 onError={(e) => {
@@ -174,7 +166,7 @@ export default function PerformanceSearchInline({
             >
               <ImageUp className="w-4 h-4" />
               <span className="text-[10px] leading-tight text-center px-1">
-                {(localPreviewUrl || posterUrl) ? "사진 교체" : "업로드"}
+                {(posterPreviewUrl || posterUrl) ? "사진 교체" : "업로드"}
               </span>
             </button>
           </div>
@@ -216,9 +208,9 @@ export default function PerformanceSearchInline({
             {/* 포스터 업로드 영역 */}
             <div className="flex-shrink-0 relative group">
               <div className="w-[72px] aspect-[3/4] bg-muted rounded-lg overflow-hidden">
-                {(localPreviewUrl || posterUrl) && (
+                {(posterPreviewUrl || posterUrl) && (
                   <img
-                    src={localPreviewUrl || posterUrl}
+                    src={posterPreviewUrl || posterUrl}
                     alt="포스터"
                     className="w-full h-full object-cover"
                     onError={(e) => {
@@ -234,7 +226,7 @@ export default function PerformanceSearchInline({
               >
                 <ImageUp className="w-4 h-4" />
                 <span className="text-[10px] leading-tight text-center px-1">
-                  {(localPreviewUrl || posterUrl) ? "사진 교체" : "업로드"}
+                  {(posterPreviewUrl || posterUrl) ? "사진 교체" : "업로드"}
                 </span>
               </button>
             </div>

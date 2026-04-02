@@ -35,6 +35,7 @@ export function useTicketForm() {
 
   const [isUploadingPoster, setIsUploadingPoster] = useState(false);
   const [pendingPosterFile, setPendingPosterFile] = useState<File | null>(null);
+  const [posterPreviewUrl, setPosterPreviewUrl] = useState("");
 
   const isPending =
     createTicketMutation.isPending || updateTicketMutation.isPending || isUploadingPoster;
@@ -136,6 +137,7 @@ export function useTicketForm() {
     isChild?: boolean;
   }) => {
     setPendingPosterFile(null); // KOPIS 포스터로 교체 시 pending 파일 초기화
+    setPosterPreviewUrl("");
     setFormDataDirty((prev) => ({
       ...prev,
       performanceName: performance.performanceName,
@@ -284,8 +286,9 @@ export function useTicketForm() {
     }
   };
 
-  const handlePosterFileSelect = (file: File | null) => {
+  const handlePosterFileSelect = (file: File | null, previewUrl: string) => {
     setPendingPosterFile(file);
+    setPosterPreviewUrl(previewUrl);
   };
 
   return {
@@ -304,6 +307,7 @@ export function useTicketForm() {
     handlePriceChange,
     handleSubmit,
     navigate,
+    posterPreviewUrl,
     setPendingPosterFile: handlePosterFileSelect,
   };
 }

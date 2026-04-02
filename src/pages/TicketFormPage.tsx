@@ -17,6 +17,7 @@ import CastingField from "@/components/ticket-form/CastingField";
 import PriceInput from "@/components/ticket-form/PriceInput";
 import PerformanceSearchInline from "@/components/ticket-form/PerformanceSearchInline";
 import { useTicketForm } from "@/hooks/useTicketForm";
+import { toast } from "react-toastify";
 import {
   Star,
   Loader2,
@@ -108,6 +109,7 @@ export default function TicketFormPage() {
     handlePriceChange,
     handleSubmit,
     navigate,
+    posterPreviewUrl,
     setPendingPosterFile,
   } = useTicketForm();
 
@@ -226,6 +228,7 @@ export default function TicketFormPage() {
                 performanceName={formData.performanceName}
                 theater={formData.theater}
                 posterUrl={formData.posterUrl}
+                posterPreviewUrl={posterPreviewUrl}
                 onPerformanceSelect={handlePerformanceSelect}
                 onManualNameChange={(name) =>
                   setFormData((prev) => ({ ...prev, performanceName: name }))
@@ -401,7 +404,13 @@ export default function TicketFormPage() {
                 key="next"
                 type="button"
                 size="sm"
-                onClick={() => setCurrentStep((s) => s + 1)}
+                onClick={() => {
+                  if (currentStep === 1 && !formData.performanceName) {
+                    toast.warn("공연명을 입력해주세요.");
+                    return;
+                  }
+                  setCurrentStep((s) => s + 1);
+                }}
               >
                 다음
                 <ChevronRight className="w-4 h-4 ml-1" />
