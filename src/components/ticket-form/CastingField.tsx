@@ -6,6 +6,7 @@ import { useActorSearch } from "@/queries/actors";
 import { useCreateActor } from "@/queries/actors";
 import type { Actor } from "@/types/actor";
 import { toast } from "react-toastify";
+import { cn } from "@/lib/utils";
 
 const domainLabel: Record<string, string> = {
   뮤지컬: "뮤지컬",
@@ -28,8 +29,10 @@ export default function CastingField({
   const [inputValue, setInputValue] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const createActorMutation = useCreateActor();
 
@@ -56,11 +59,18 @@ export default function CastingField({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // 검색 결과 바뀌면 하이라이트 초기화
+  useEffect(() => {
+    setHighlightedIndex(-1);
+    itemRefs.current = [];
+  }, [searchResults, isOpen]);
+
   const handleSelect = (actor: Actor) => {
     onAddActor(actor);
     setInputValue("");
     setDebouncedQuery("");
     setIsOpen(false);
+    setHighlightedIndex(-1);
     inputRef.current?.focus();
   };
 
@@ -73,6 +83,7 @@ export default function CastingField({
       setInputValue("");
       setDebouncedQuery("");
       setIsOpen(false);
+      setHighlightedIndex(-1);
       inputRef.current?.focus();
     } catch {
       toast.error("배우 등록에 실패했습니다. 다시 시도해주세요.");
@@ -135,6 +146,34 @@ export default function CastingField({
             onKeyDown={(e) => {
               if (e.key === "Escape") {
                 setIsOpen(false);
+                setHighlightedIndex(-1);
+                return;
+              }
+
+              if (!showDropdown || isSearching) return;
+
+              // filteredResults 항목 수 + 새 배우 등록 버튼 1개
+              const itemCount = (filteredResults?.length ?? 0) + 1;
+
+              if (e.key === "ArrowDown") {
+                e.preventDefault();
+                const next = (highlightedIndex + 1) % itemCount;
+                setHighlightedIndex(next);
+                itemRefs.current[next]?.scrollIntoView({ block: "nearest" });
+              } else if (e.key === "ArrowUp") {
+                e.preventDefault();
+                const prev = (highlightedIndex - 1 + itemCount) % itemCount;
+                setHighlightedIndex(prev);
+                itemRefs.current[prev]?.scrollIntoView({ block: "nearest" });
+              } else if (e.key === "Enter") {
+                if (highlightedIndex === -1) return;
+                e.preventDefault();
+                const resultsLength = filteredResults?.length ?? 0;
+                if (highlightedIndex < resultsLength) {
+                  handleSelect(filteredResults![highlightedIndex]);
+                } else {
+                  void handleCreateActor();
+                }
               }
             }}
             className="w-full"
@@ -151,11 +190,16 @@ export default function CastingField({
                 </div>
               ) : filteredResults && filteredResults.length > 0 ? (
                 <ul className="max-h-60 overflow-y-auto divide-y divide-border/50">
-                  {filteredResults.map((actor) => (
+                  {filteredResults.map((actor, idx) => (
                     <li key={actor.id}>
                       <button
+                        ref={(el) => { itemRefs.current[idx] = el; }}
                         type="button"
-                        className="w-full flex items-start gap-3 px-4 py-3 text-left hover:bg-muted/60 transition-colors"
+                        className={cn(
+                          "w-full flex items-start gap-3 px-4 py-3 text-left transition-colors",
+                          highlightedIndex === idx ? "bg-muted/80" : "hover:bg-muted/60"
+                        )}
+                        onMouseEnter={() => setHighlightedIndex(idx)}
                         onMouseDown={(e) => e.preventDefault()}
                         onClick={() => handleSelect(actor)}
                       >
@@ -185,8 +229,13 @@ export default function CastingField({
               {/* 새 배우 등록 */}
               {!isSearching && (
                 <button
+                  ref={(el) => { itemRefs.current[filteredResults?.length ?? 0] = el; }}
                   type="button"
-                  className="w-full flex items-center gap-2 px-4 py-3 text-sm text-muted-foreground hover:bg-muted/60 transition-colors border-t border-border/50"
+                  className={cn(
+                    "w-full flex items-center gap-2 px-4 py-3 text-sm text-muted-foreground transition-colors border-t border-border/50",
+                    highlightedIndex === (filteredResults?.length ?? 0) ? "bg-muted/80" : "hover:bg-muted/60"
+                  )}
+                  onMouseEnter={() => setHighlightedIndex(filteredResults?.length ?? 0)}
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={handleCreateActor}
                   disabled={createActorMutation.isPending}
