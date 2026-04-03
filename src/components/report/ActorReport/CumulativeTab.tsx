@@ -32,6 +32,7 @@ export default function ActorCumulativeTab({
     return data.pages
       .flatMap((page) => page.data)
       .map((actor) => ({
+        id: actor.actorId,
         name: actor.actorName,
         totalViewCount: actor.viewCount,
         watchedPerformances: actor.performanceList,
@@ -46,9 +47,9 @@ export default function ActorCumulativeTab({
       });
   }, [data]);
 
-  const handleActorClick = (actorName: string) => {
+  const handleActorClick = (actorId: string) => {
     setSearchParams((prev) => {
-      prev.set("actor", actorName);
+      prev.set("actor", actorId);
       return prev;
     });
   };
@@ -74,7 +75,7 @@ export default function ActorCumulativeTab({
         <ActorDetailModal
           isOpen={isModalOpen}
           onClose={handleCloseModal}
-          actorName={selectedActor}
+          actorId={selectedActor}
         />
       )}
     </div>

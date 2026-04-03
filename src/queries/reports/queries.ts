@@ -86,7 +86,7 @@ export function useInfiniteActorStats(params?: {
 }
 
 export function useActorDetail(params: {
-  actorName: string;
+  actorId: string;
   year?: string;
   month?: string;
   startDate?: string;
@@ -96,7 +96,7 @@ export function useActorDetail(params: {
   return useQuery({
     queryKey: queryKeys.reports.actorDetail(params),
     queryFn: () => reportApi.getActorDetail(params),
-    enabled: !!params.actorName,
+    enabled: !!params.actorId,
   });
 }
 

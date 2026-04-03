@@ -99,25 +99,25 @@ describe("reportApi — 엔드포인트 빌드", () => {
   });
 
   describe("getActorDetail", () => {
-    it("actorName이 없으면 에러를 던진다", async () => {
+    it("actorId가 없으면 에러를 던진다", async () => {
       await expect(
-        getActorDetail({ actorName: "" })
-      ).rejects.toThrow("actorName is required");
+        getActorDetail({ actorId: "" })
+      ).rejects.toThrow("actorId is required");
     });
 
-    it("actorName이 URL 인코딩되어 경로에 포함된다", async () => {
+    it("actorId가 URL 인코딩되어 경로에 포함된다", async () => {
       vi.mocked(apiGet).mockResolvedValue({});
 
-      await getActorDetail({ actorName: "홍길동" });
+      await getActorDetail({ actorId: "actor-uuid-123" });
 
       const call = vi.mocked(apiGet).mock.calls[0][0];
-      expect(call).toContain(encodeURIComponent("홍길동"));
+      expect(call).toContain("actor-uuid-123");
     });
 
     it("year, month가 쿼리스트링에 포함된다", async () => {
       vi.mocked(apiGet).mockResolvedValue({});
 
-      await getActorDetail({ actorName: "배우명", year: "2025", month: "01" });
+      await getActorDetail({ actorId: "actor-uuid-123", year: "2025", month: "01" });
 
       const call = vi.mocked(apiGet).mock.calls[0][0];
       expect(call).toContain("year=2025");

@@ -87,16 +87,16 @@ export async function getActorStats(params?: {
 }
 
 export async function getActorDetail(params?: {
-  actorName: string;
+  actorId: string;
   year?: string;
   month?: string;
   startDate?: string;
   endDate?: string;
   genre?: Genre;
 }): Promise<ActorDetail> {
-  const { actorName, year, month, startDate, endDate, genre } = params || {};
-  if (!actorName) throw new Error("actorName is required");
-  return apiGet<ActorDetail>(`/reports/actors/${encodeURIComponent(actorName)}${buildQuery({ year, month, startDate, endDate, genre })}`);
+  const { actorId, year, month, startDate, endDate, genre } = params || {};
+  if (!actorId) throw new Error("actorId is required");
+  return apiGet<ActorDetail>(`/reports/actors/${encodeURIComponent(actorId)}${buildQuery({ year, month, startDate, endDate, genre })}`);
 }
 
 export async function getPerformanceStats(params?: {

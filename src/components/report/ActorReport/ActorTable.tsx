@@ -13,6 +13,7 @@ const tagColors = [
 ];
 
 export interface ActorData {
+  id: string;
   name: string;
   totalViewCount: number;
   watchedPerformances: string[];
@@ -21,7 +22,7 @@ export interface ActorData {
 
 interface ActorCardListProps {
   actors: ActorData[];
-  onActorClick: (actorName: string) => void;
+  onActorClick: (actorId: string) => void;
   hasNextPage?: boolean;
   isFetchingNextPage?: boolean;
   fetchNextPage?: () => void;
@@ -78,9 +79,9 @@ export default function ActorCardList({
 
           return (
             <Card
-              key={`${actor.name}-${index}`}
+              key={actor.id}
               className="shadow-sm border-border rounded-xl cursor-pointer transition-colors hover:bg-violet-50/60 dark:hover:bg-violet-950/20"
-              onClick={() => onActorClick(actor.name)}
+              onClick={() => onActorClick(actor.id)}
             >
               <CardContent className="p-4">
                 {/* 상단: 랭크뱃지 + 이름 */}

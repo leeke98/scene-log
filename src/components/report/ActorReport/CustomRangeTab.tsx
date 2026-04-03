@@ -28,6 +28,7 @@ export default function ActorCustomRangeTab({ searchTerm, startDate, endDate, ge
     return data.pages
       .flatMap((page) => page.data)
       .map((actor) => ({
+        id: actor.actorId,
         name: actor.actorName,
         totalViewCount: actor.viewCount,
         watchedPerformances: actor.performanceList,
@@ -40,8 +41,8 @@ export default function ActorCustomRangeTab({ searchTerm, startDate, endDate, ge
       });
   }, [data]);
 
-  const handleActorClick = (actorName: string) => {
-    setSearchParams((prev) => { prev.set("actor", actorName); return prev; });
+  const handleActorClick = (actorId: string) => {
+    setSearchParams((prev) => { prev.set("actor", actorId); return prev; });
   };
 
   const handleCloseModal = () => {
@@ -61,7 +62,7 @@ export default function ActorCustomRangeTab({ searchTerm, startDate, endDate, ge
         <ActorDetailModal
           isOpen={isModalOpen}
           onClose={handleCloseModal}
-          actorName={selectedActor}
+          actorId={selectedActor}
         />
       )}
     </div>

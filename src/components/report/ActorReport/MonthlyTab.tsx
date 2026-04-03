@@ -41,6 +41,7 @@ export default function ActorMonthlyTab({
     return data.pages
       .flatMap((page) => page.data)
       .map((actor) => ({
+        id: actor.actorId,
         name: actor.actorName,
         totalViewCount: actor.viewCount,
         watchedPerformances: actor.performanceList,
@@ -55,9 +56,9 @@ export default function ActorMonthlyTab({
       });
   }, [data]);
 
-  const handleActorClick = (actorName: string) => {
+  const handleActorClick = (actorId: string) => {
     setSearchParams((prev) => {
-      prev.set("actor", actorName);
+      prev.set("actor", actorId);
       return prev;
     });
   };
@@ -83,7 +84,7 @@ export default function ActorMonthlyTab({
         <ActorDetailModal
           isOpen={isModalOpen}
           onClose={handleCloseModal}
-          actorName={selectedActor}
+          actorId={selectedActor}
           year={year}
           month={monthOnly}
         />

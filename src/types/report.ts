@@ -47,6 +47,7 @@ export interface ActorListStats {
 }
 
 export interface ActorStats {
+  actorId: string; // 배우 ID
   actorName: string; // 배우 이름
   viewCount: number; // 총 관람 횟수
   totalTicketPrice: number; // 관람 금액

@@ -17,7 +17,7 @@ const tagColors = [
 interface ActorDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
-  actorName: string;
+  actorId: string;
   year?: string;
   month?: string;
 }
@@ -25,14 +25,14 @@ interface ActorDetailModalProps {
 export default function ActorDetailModal({
   isOpen,
   onClose,
-  actorName,
+  actorId,
   year,
   month,
 }: ActorDetailModalProps) {
   const navigate = useNavigate();
 
   const { data: actorDetail, isLoading, error } = useActorDetail({
-    actorName,
+    actorId,
     year,
     month,
   });

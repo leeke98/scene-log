@@ -59,7 +59,7 @@ export const queryKeys = {
         params?.limit,
       ] as const,
     actorDetail: (params: {
-      actorName: string;
+      actorId: string;
       year?: string;
       month?: string;
       startDate?: string;
@@ -69,7 +69,7 @@ export const queryKeys = {
       [
         ...queryKeys.reports.all,
         "actorDetail",
-        params.actorName,
+        params.actorId,
         params.year,
         params.month,
         params.startDate,
