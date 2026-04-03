@@ -13,9 +13,11 @@ npm run dev       # Start dev server (proxies /api → backend)
 npm run build     # TypeScript check + Vite production build
 npm run lint      # ESLint
 npm run preview   # Preview production build
+npm run test      # Run tests with Vitest
+npm run test -- --run src/__tests__/apiClient.test.ts  # Run a single test file
 ```
 
-No test runner is configured.
+Tests live in `src/__tests__/` (Vitest + jsdom). Setup file: `src/__tests__/setup.ts`.
 
 ## Architecture
 
