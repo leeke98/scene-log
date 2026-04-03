@@ -4,6 +4,7 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useTicket, useCreateTicket, useUpdateTicket } from "@/queries/tickets";
 import { toast } from "react-toastify";
 import { uploadImageToCloudinary } from "@/lib/cloudinary";
+import type { Actor } from "@/types/actor";
 
 export type TicketFormData = {
   date: string;
@@ -13,7 +14,7 @@ export type TicketFormData = {
   isChild?: boolean;
   theater: string;
   seat: string;
-  casting: string[];
+  casting: Actor[];
   ticketPrice: string;
   companion: string;
   mdPrice: string;
@@ -82,18 +83,7 @@ export function useTicketForm() {
         isChild: ticket.isChild,
         theater: ticket.theater,
         seat: ticket.seat || "",
-        casting: (() => {
-          const casting = ticket.casting;
-          if (!casting) return [] as string[];
-          if (Array.isArray(casting)) return casting as string[];
-          if (typeof casting === "string") {
-            return (casting as string)
-              .split(",")
-              .map((c: string) => c.trim())
-              .filter(Boolean) as string[];
-          }
-          return [] as string[];
-        })(),
+        casting: ticket.casting || [],
         ticketPrice: ticket.ticketPrice?.toString() || "",
         companion: ticket.companion || "",
         mdPrice: ticket.mdPrice?.toString() || "",
@@ -147,11 +137,11 @@ export function useTicketForm() {
     }));
   };
 
-  const handleAddActor = (actorName: string) => {
-    if (actorName && !formData.casting.includes(actorName)) {
+  const handleAddActor = (actor: Actor) => {
+    if (!formData.casting.some((a) => a.id === actor.id)) {
       setFormDataDirty((prev) => ({
         ...prev,
-        casting: [...prev.casting, actorName],
+        casting: [...prev.casting, actor],
       }));
     }
   };
@@ -207,6 +197,11 @@ export function useTicketForm() {
         : formData.time
       : `${formData.time}:00:00`;
 
+    const castingIds =
+      formData.casting.length > 0
+        ? formData.casting.map((a) => a.id)
+        : undefined;
+
     const ticketData = {
       date: formData.date,
       time: timeFormatted,
@@ -215,7 +210,7 @@ export function useTicketForm() {
       isChild: formData.isChild,
       theater: formData.theater,
       seat: formData.seat || undefined,
-      casting: formData.casting.length > 0 ? formData.casting : undefined,
+      castingIds,
       ticketPrice: formData.ticketPrice
         ? Number(formData.ticketPrice.replace(/,/g, ""))
         : undefined,
@@ -249,10 +244,11 @@ export function useTicketForm() {
         if (ticketData.seat !== initialTicketData.seat)
           updateData.seat = ticketData.seat;
 
+        const initialIds = initialTicketData.casting.map((a) => a.id).sort();
+        const currentIds = formData.casting.map((a) => a.id).sort();
         const castingChanged =
-          JSON.stringify(ticketData.casting || []) !==
-          JSON.stringify(initialTicketData.casting || []);
-        if (castingChanged) updateData.casting = ticketData.casting;
+          JSON.stringify(currentIds) !== JSON.stringify(initialIds);
+        if (castingChanged) updateData.castingIds = currentIds;
 
         const ticketPriceStr = ticketData.ticketPrice?.toString() || "";
         if (ticketPriceStr !== initialTicketData.ticketPrice)

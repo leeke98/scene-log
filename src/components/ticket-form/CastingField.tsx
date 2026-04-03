@@ -1,12 +1,22 @@
-import { Plus, X } from "lucide-react";
-import { useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useEffect, useRef, useState } from "react";
+import { X, UserPlus, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useActorSearch } from "@/queries/actors";
+import { useCreateActor } from "@/queries/actors";
+import type { Actor } from "@/types/actor";
+import { toast } from "react-toastify";
+
+const domainLabel: Record<string, string> = {
+  뮤지컬: "뮤지컬",
+  연극: "연극",
+  클래식: "클래식",
+  기타: "기타",
+};
 
 type CastingFieldProps = {
-  casting: string[];
-  onAddActor: (name: string) => void;
+  casting: Actor[];
+  onAddActor: (actor: Actor) => void;
   onRemoveActor: (index: number) => void;
 };
 
@@ -15,30 +25,85 @@ export default function CastingField({
   onAddActor,
   onRemoveActor,
 }: CastingFieldProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
   const [inputValue, setInputValue] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleAdd = () => {
-    const value = inputValue.trim();
-    if (value) {
-      onAddActor(value);
-      setInputValue("");
-    }
+  const createActorMutation = useCreateActor();
+
+  // debounce 300ms
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedQuery(inputValue.trim()), 300);
+    return () => clearTimeout(timer);
+  }, [inputValue]);
+
+  const { data: searchResults, isLoading: isSearching } =
+    useActorSearch(debouncedQuery);
+
+  // 클릭 외부 감지 → 드롭다운 닫기
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleSelect = (actor: Actor) => {
+    onAddActor(actor);
+    setInputValue("");
+    setDebouncedQuery("");
+    setIsOpen(false);
     inputRef.current?.focus();
   };
+
+  const handleCreateActor = async () => {
+    const name = inputValue.trim();
+    if (!name) return;
+    try {
+      const actor = await createActorMutation.mutateAsync({ name });
+      onAddActor(actor);
+      setInputValue("");
+      setDebouncedQuery("");
+      setIsOpen(false);
+      inputRef.current?.focus();
+    } catch {
+      toast.error("배우 등록에 실패했습니다. 다시 시도해주세요.");
+    }
+  };
+
+  const showDropdown =
+    isOpen && debouncedQuery.length > 0 && (isSearching || (searchResults !== undefined));
+
+  const filteredResults = searchResults?.filter(
+    (r) => !casting.some((a) => a.id === r.id)
+  );
 
   return (
     <div>
       <Label htmlFor="casting">캐스팅</Label>
-      <div className="space-y-2">
+      <div className="space-y-2" ref={containerRef}>
+        {/* 선택된 배우 태그 */}
         {casting.length > 0 && (
           <div className="flex flex-wrap gap-2">
             {casting.map((actor, index) => (
               <div
-                key={`${actor}-${index}`}
+                key={actor.id}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary rounded-md text-sm"
               >
-                <span>{actor}</span>
+                <span>{actor.name}</span>
+                {actor.domain && (
+                  <span className="text-xs text-primary/60">
+                    {domainLabel[actor.domain] ?? actor.domain}
+                  </span>
+                )}
                 <button
                   type="button"
                   onClick={() => onRemoveActor(index)}
@@ -50,31 +115,94 @@ export default function CastingField({
             ))}
           </div>
         )}
-        <div className="flex gap-2">
+
+        {/* 검색 입력 */}
+        <div className="relative">
           <Input
             ref={inputRef}
             id="casting"
             type="text"
-            enterKeyHint="done"
-            placeholder="배우를 한 명씩 입력하세요"
+            enterKeyHint="search"
+            placeholder="배우 이름으로 검색"
             value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
+            onChange={(e) => {
+              setInputValue(e.target.value);
+              setIsOpen(true);
+            }}
+            onFocus={() => {
+              if (inputValue.trim()) setIsOpen(true);
+            }}
             onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                handleAdd();
+              if (e.key === "Escape") {
+                setIsOpen(false);
               }
             }}
-            className="flex-1"
+            className="w-full"
+            autoComplete="off"
           />
-          <Button
-            type="button"
-            size="icon"
-            onClick={handleAdd}
-            disabled={!inputValue.trim()}
-          >
-            <Plus className="h-4 w-4" />
-          </Button>
+
+          {/* 드롭다운 */}
+          {showDropdown && (
+            <div className="absolute z-50 top-full mt-1 w-full bg-popover border border-border rounded-lg shadow-lg overflow-hidden">
+              {isSearching ? (
+                <div className="flex items-center justify-center gap-2 px-4 py-3 text-sm text-muted-foreground">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  검색 중...
+                </div>
+              ) : filteredResults && filteredResults.length > 0 ? (
+                <ul className="max-h-60 overflow-y-auto divide-y divide-border/50">
+                  {filteredResults.map((actor) => (
+                    <li key={actor.id}>
+                      <button
+                        type="button"
+                        className="w-full flex items-start gap-3 px-4 py-3 text-left hover:bg-muted/60 transition-colors"
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => handleSelect(actor)}
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-sm">
+                              {actor.name}
+                            </span>
+                            {actor.domain && (
+                              <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                                {domainLabel[actor.domain] ?? actor.domain}
+                              </span>
+                            )}
+                          </div>
+                          {actor.performances.length > 0 && (
+                            <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                              {actor.performances.slice(0, 3).join(" · ")}
+                            </p>
+                          )}
+                        </div>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+
+              {/* 새 배우 등록 */}
+              {!isSearching && (
+                <button
+                  type="button"
+                  className="w-full flex items-center gap-2 px-4 py-3 text-sm text-muted-foreground hover:bg-muted/60 transition-colors border-t border-border/50"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={handleCreateActor}
+                  disabled={createActorMutation.isPending}
+                >
+                  {createActorMutation.isPending ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <UserPlus className="w-4 h-4" />
+                  )}
+                  <span>
+                    &quot;{inputValue.trim()}&quot; 새 배우로 등록
+                  </span>
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

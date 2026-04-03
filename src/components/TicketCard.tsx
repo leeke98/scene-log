@@ -139,7 +139,7 @@ export default function TicketCard({ ticket }: TicketCardProps) {
                       key={index}
                       className="inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 bg-primary/10 text-primary rounded-md text-xs font-medium"
                     >
-                      {actor}
+                      {actor.name}
                     </span>
                   ))}
                   {ticket.casting && ticket.casting.length > 4 && (

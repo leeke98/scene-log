@@ -204,7 +204,7 @@ export default function TicketDetailPage() {
                     key={index}
                     className="inline-flex items-center px-2.5 py-1 bg-secondary text-secondary-foreground rounded-md text-xs font-medium"
                   >
-                    {actor}
+                    {actor.name}
                   </span>
                 ))}
               </div>

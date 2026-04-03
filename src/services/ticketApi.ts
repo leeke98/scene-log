@@ -2,6 +2,7 @@
  * 티켓 관련 API
  */
 import { apiGet, apiPost, apiPut, apiDelete } from "@/lib/apiClient";
+import type { Actor } from "@/types/actor";
 
 export interface CalendarTicket {
   id: string;
@@ -28,7 +29,7 @@ export interface CreateTicketRequest {
   rating?: number;
   review?: string;
   posterUrl?: string;
-  casting?: string[];
+  castingIds?: string[];
 }
 
 export interface UpdateTicketRequest extends Partial<CreateTicketRequest> {}
@@ -61,7 +62,7 @@ export interface Ticket {
   rating?: number;
   review?: string;
   posterUrl?: string;
-  casting?: string[];
+  casting?: Actor[];
   createdAt?: string;
   updatedAt?: string;
 }
