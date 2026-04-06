@@ -101,6 +101,7 @@ export default function TicketFormPage() {
     isEditMode,
     isLoadingTicket,
     isPending,
+    isFutureDate,
     handleChange,
     handleRatingClick,
     handlePerformanceSelect,
@@ -410,7 +411,7 @@ export default function TicketFormPage() {
                 type="button"
                 size="sm"
                 onClick={() => {
-                  if (currentStep === 1 && !formData.performanceName) {
+                  if (currentStep === 1 && !isFutureDate && !formData.performanceName) {
                     toast.warn("공연명을 입력해주세요.");
                     return;
                   }

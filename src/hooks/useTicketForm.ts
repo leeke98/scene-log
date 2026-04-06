@@ -172,14 +172,20 @@ export function useTicketForm() {
       }));
     };
 
+  const today = formatDateToISO(new Date());
+  const isFutureDate = !!formData.date && formData.date > today;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!formData.date) {
+      toast.error("날짜를 입력해주세요.");
+      return;
+    }
+
     if (
-      !formData.date ||
-      !formData.time ||
-      !formData.performanceName ||
-      !formData.theater
+      !isFutureDate &&
+      (!formData.time || !formData.performanceName || !formData.theater)
     ) {
       toast.error("필수 필드(날짜, 시간, 공연명, 극장)를 모두 입력해주세요.");
       return;
@@ -309,6 +315,7 @@ export function useTicketForm() {
     isEditMode,
     isLoadingTicket,
     isPending,
+    isFutureDate,
     handleChange,
     handleDateChange,
     handleRatingClick,
