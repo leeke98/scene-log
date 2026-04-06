@@ -9,7 +9,7 @@ import TicketFormPage from "@/pages/TicketFormPage";
 import TicketDetailPage from "@/pages/TicketDetailPage";
 import ReportPage from "@/pages/ReportPage";
 import ExplorePage from "@/pages/ExplorePage";
-import SettingsPage from "@/pages/SettingsPage";
+import MyPage from "@/pages/MyPage";
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -131,10 +131,10 @@ function AppRoutes() {
         }
       />
       <Route
-        path="/settings"
+        path="/mypage"
         element={
           <PrivateRoute>
-            <SettingsPage />
+            <MyPage />
           </PrivateRoute>
         }
       />

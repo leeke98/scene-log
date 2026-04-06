@@ -26,7 +26,7 @@ import {
   PanelLeftOpen,
   Sun,
   Moon,
-  Settings,
+  User,
 } from "lucide-react";
 
 const menuItems = [
@@ -164,11 +164,11 @@ export default function Sidebar() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => navigate("/settings")}
-              title="설정"
+              onClick={() => navigate("/mypage")}
+              title="마이페이지"
               className="text-muted-foreground hover:text-foreground"
             >
-              <Settings className="w-4 h-4" />
+              <User className="w-4 h-4" />
             </Button>
             <Button
               variant="ghost"
@@ -196,9 +196,9 @@ export default function Sidebar() {
         ) : (
           <div className="flex items-center justify-between gap-2">
             <Link
-              to="/settings"
+              to="/mypage"
               className="text-sm font-medium text-foreground truncate hover:underline"
-              title="설정"
+              title="마이페이지"
             >
               {user?.nickname}님
             </Link>
