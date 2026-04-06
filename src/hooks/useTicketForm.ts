@@ -21,6 +21,8 @@ export type TicketFormData = {
   rating: number;
   review: string;
   posterUrl: string;
+  isLinked: boolean;
+  kopisId: string;
 };
 
 export function useTicketForm() {
@@ -63,6 +65,8 @@ export function useTicketForm() {
     rating: 0,
     review: "",
     posterUrl: "",
+    isLinked: false,
+    kopisId: "",
   });
 
   useEffect(() => {
@@ -90,6 +94,8 @@ export function useTicketForm() {
         rating: ticket.rating || 0,
         review: ticket.review || "",
         posterUrl: ticket.posterUrl || "",
+        isLinked: ticket.isLinked || false,
+        kopisId: ticket.kopisId || "",
       };
 
       setFormData(loadedData);
@@ -125,6 +131,7 @@ export function useTicketForm() {
     theater: string;
     posterUrl: string;
     isChild?: boolean;
+    mt20id?: string;
   }) => {
     setPendingPosterFile(null); // KOPIS 포스터로 교체 시 pending 파일 초기화
     setPosterPreviewUrl("");
@@ -134,6 +141,8 @@ export function useTicketForm() {
       theater: performance.theater,
       posterUrl: performance.posterUrl,
       isChild: performance.isChild,
+      isLinked: !!performance.mt20id,
+      kopisId: performance.mt20id || "",
     }));
   };
 
@@ -221,6 +230,8 @@ export function useTicketForm() {
       rating: formData.rating || undefined,
       review: formData.review || undefined,
       posterUrl: resolvedPosterUrl || undefined,
+      isLinked: formData.isLinked,
+      kopisId: formData.kopisId || undefined,
     };
 
     try {
@@ -265,6 +276,10 @@ export function useTicketForm() {
           updateData.review = ticketData.review;
         if (ticketData.posterUrl !== initialTicketData.posterUrl)
           updateData.posterUrl = ticketData.posterUrl;
+        if (ticketData.isLinked !== initialTicketData.isLinked)
+          updateData.isLinked = ticketData.isLinked;
+        if (ticketData.kopisId !== (initialTicketData.kopisId || undefined))
+          updateData.kopisId = ticketData.kopisId;
 
         if (Object.keys(updateData).length === 0) {
           toast.info("변경된 내용이 없습니다.");

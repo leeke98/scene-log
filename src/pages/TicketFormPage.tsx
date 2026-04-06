@@ -231,7 +231,12 @@ export default function TicketFormPage() {
                 posterPreviewUrl={posterPreviewUrl}
                 onPerformanceSelect={handlePerformanceSelect}
                 onManualNameChange={(name) =>
-                  setFormData((prev) => ({ ...prev, performanceName: name }))
+                  setFormData((prev) => ({
+                    ...prev,
+                    performanceName: name,
+                    isLinked: false,
+                    kopisId: "",
+                  }))
                 }
                 onPosterFileSelect={setPendingPosterFile}
               />

@@ -20,6 +20,7 @@ interface Props {
     theater: string;
     posterUrl: string;
     isChild?: boolean;
+    mt20id?: string;
   }) => void;
   onManualNameChange: (name: string) => void;
   onPosterFileSelect: (file: File | null, previewUrl: string) => void;

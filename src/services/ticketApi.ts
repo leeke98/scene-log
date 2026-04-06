@@ -29,6 +29,8 @@ export interface CreateTicketRequest {
   rating?: number;
   review?: string;
   posterUrl?: string;
+  isLinked?: boolean;
+  kopisId?: string;
   castingIds?: string[];
 }
 
@@ -62,6 +64,8 @@ export interface Ticket {
   rating?: number;
   review?: string;
   posterUrl?: string;
+  isLinked?: boolean;
+  kopisId?: string | null;
   casting?: Actor[];
   createdAt?: string;
   updatedAt?: string;

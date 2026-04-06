@@ -15,6 +15,7 @@ interface UsePerformanceSearchParams {
     theater: string;
     posterUrl: string;
     isChild?: boolean;
+    mt20id?: string;
   }) => void;
   onClose: () => void;
 }
@@ -120,6 +121,7 @@ export function usePerformanceSearch({
       theater: cleanedTheater,
       posterUrl: detailData.poster || "",
       isChild: false,
+      mt20id: selectedMt20id,
     });
 
     onClose();
@@ -152,6 +154,7 @@ export function usePerformanceSearch({
         ),
         theater: cleanTheaterName(performance.fcltynm),
         posterUrl: performance.poster || "",
+        mt20id: selectedMt20id,
       });
       onClose();
       setSearchTerm("");
