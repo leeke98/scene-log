@@ -1,7 +1,9 @@
 import { useState } from "react";
-import { X, Calendar, Clock, MapPin, Users, Ticket, Baby, ExternalLink } from "lucide-react";
+import { X, Calendar, Clock, MapPin, Users, Ticket, Baby, ExternalLink, Heart } from "lucide-react";
 import { createPortal } from "react-dom";
 import { usePerformanceDetail } from "@/queries/kopis";
+import { useMarks, useAddMark, useRemoveMark } from "@/queries/marks";
+import { cleanTheaterName, normalizePerformanceName } from "@/services/kopisApi";
 
 interface PerformanceDetailModalProps {
   isOpen: boolean;
@@ -30,6 +32,32 @@ export default function PerformanceDetailModal({
     error,
   } = usePerformanceDetail(isOpen && mt20id ? mt20id : undefined);
 
+  const { data: marks = [] } = useMarks();
+  const addMark = useAddMark();
+  const removeMark = useRemoveMark();
+
+  const isMarked = mt20id ? marks.some((m) => m.kopisId === mt20id) : false;
+
+  const handleHeartClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!mt20id || !detail) return;
+
+    if (isMarked) {
+      removeMark.mutate(mt20id);
+    } else {
+      addMark.mutate({
+        kopisId: mt20id,
+        title: normalizePerformanceName(detail.prfnm),
+        posterUrl: detail.poster ?? null,
+        startDate: detail.prfpdfrom ?? null,
+        endDate: detail.prfpdto ?? null,
+        venue: cleanTheaterName(detail.fcltynm) ?? null,
+      });
+    }
+  };
+
+  const isHeartPending = addMark.isPending || removeMark.isPending;
+
   if (!isOpen) return null;
 
   const modalContent = (
@@ -57,7 +85,23 @@ export default function PerformanceDetailModal({
           {/* 그라데이션 오버레이 */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
-          {/* 닫기 버튼 */}
+          {/* 하트 버튼 (좌측 상단) */}
+          {detail && !isLoading && (
+            <button
+              onClick={handleHeartClick}
+              disabled={isHeartPending}
+              className="absolute top-3 left-3 p-1.5 rounded-full bg-black/40 text-white/90 hover:bg-black/60 transition-colors disabled:opacity-60"
+              aria-label={isMarked ? "위시리스트에서 제거" : "위시리스트에 추가"}
+            >
+              <Heart
+                className={`w-4 h-4 transition-colors ${
+                  isMarked ? "fill-red-400 text-red-400" : "fill-none"
+                }`}
+              />
+            </button>
+          )}
+
+          {/* 닫기 버튼 (우측 상단) */}
           <button
             onClick={onClose}
             className="absolute top-3 right-3 p-1.5 rounded-full bg-black/40 text-white/90 hover:bg-black/60 transition-colors"
