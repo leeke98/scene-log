@@ -32,6 +32,10 @@ export function useTicketForm() {
 
   const isEditMode = !!id;
   const dateFromUrl = searchParams.get("date");
+  const kopisIdFromUrl = searchParams.get("kopisId");
+  const performanceNameFromUrl = searchParams.get("performanceName");
+  const posterUrlFromUrl = searchParams.get("posterUrl");
+  const theaterFromUrl = searchParams.get("theater");
   const { data: ticket, isLoading: isLoadingTicket } = useTicket(id);
   const createTicketMutation = useCreateTicket();
   const updateTicketMutation = useUpdateTicket();
@@ -53,10 +57,10 @@ export function useTicketForm() {
       ? ""
       : dateFromUrl || formatDateToISO(new Date()),
     time: "20:00",
-    performanceName: "",
+    performanceName: performanceNameFromUrl || "",
     genre: "뮤지컬",
     isChild: undefined,
-    theater: "",
+    theater: theaterFromUrl || "",
     seat: "",
     casting: [],
     ticketPrice: "",
@@ -64,9 +68,9 @@ export function useTicketForm() {
     mdPrice: "",
     rating: 0,
     review: "",
-    posterUrl: "",
-    isLinked: false,
-    kopisId: "",
+    posterUrl: posterUrlFromUrl || "",
+    isLinked: !!kopisIdFromUrl,
+    kopisId: kopisIdFromUrl || "",
   });
 
   useEffect(() => {
