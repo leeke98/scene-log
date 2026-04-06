@@ -119,6 +119,12 @@ export const queryKeys = {
     grass: () => [...queryKeys.reports.all, "grass"] as const,
   },
 
+  // 위시리스트 관련
+  marks: {
+    all: ["marks"] as const,
+    list: () => [...queryKeys.marks.all, "list"] as const,
+  },
+
   // KOPIS API 관련
   kopis: {
     all: ["kopis"] as const,

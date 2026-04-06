@@ -12,3 +12,6 @@ export * from "./tickets";
 
 // 리포트 관련
 export * from "./reports";
+
+// 위시리스트 관련
+export * from "./marks";
