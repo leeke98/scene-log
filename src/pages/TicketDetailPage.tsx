@@ -5,7 +5,8 @@ import { type ApiError } from "@/lib/apiClient";
 import { toast } from "react-toastify";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Pencil, Trash2, MapPin, Armchair, Users, Ticket, ShoppingBag, Calendar, Clock, Copy, Check, MessageSquareText } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2, MapPin, Armchair, Users, Ticket, ShoppingBag, Calendar, Clock, Copy, Check, MessageSquareText, Info } from "lucide-react";
+import PerformanceDetailModal from "@/components/explore/PerformanceDetailModal";
 
 function StarRating({ rating }: { rating: number }) {
   return (
@@ -29,6 +30,7 @@ export default function TicketDetailPage() {
   const { data: ticket, isLoading, error } = useTicket(id);
   const deleteTicketMutation = useDeleteTicket();
   const [copied, setCopied] = useState(false);
+  const [isKopisModalOpen, setIsKopisModalOpen] = useState(false);
 
   const handleCopyReview = (text: string) => {
     navigator.clipboard.writeText(text).then(() => {
@@ -144,11 +146,29 @@ export default function TicketDetailPage() {
           {/* 포스터 */}
           {ticket.posterUrl && (
             <div className="flex-shrink-0 flex justify-center sm:justify-start">
-              <img
-                src={ticket.posterUrl}
-                alt={ticket.performanceName}
-                className="w-52 rounded-lg object-cover shadow-md"
-              />
+              <div className="relative group w-52">
+                <img
+                  src={ticket.posterUrl}
+                  alt={ticket.performanceName}
+                  className="w-full rounded-lg object-cover shadow-md"
+                />
+                {ticket.kopisId && (
+                  <>
+                    <button
+                      onClick={() => setIsKopisModalOpen(true)}
+                      className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <span className="text-white text-sm font-semibold">상세 정보</span>
+                    </button>
+                    <button
+                      onClick={() => setIsKopisModalOpen(true)}
+                      className="absolute bottom-2 right-2 p-1 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
+                    >
+                      <Info className="w-4 h-4" />
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           )}
 
@@ -262,6 +282,12 @@ export default function TicketDetailPage() {
           </div>
         )}
       </div>
+
+      <PerformanceDetailModal
+        isOpen={isKopisModalOpen}
+        onClose={() => setIsKopisModalOpen(false)}
+        mt20id={ticket.kopisId ?? null}
+      />
     </Layout>
   );
 }
