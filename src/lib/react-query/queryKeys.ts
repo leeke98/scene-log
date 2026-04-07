@@ -125,6 +125,13 @@ export const queryKeys = {
     list: () => [...queryKeys.marks.all, "list"] as const,
   },
 
+  // 재관람카드 관련
+  rewatch: {
+    all: ["rewatch"] as const,
+    seasons: () => [...queryKeys.rewatch.all, "seasons"] as const,
+    detail: (seasonId: string) => [...queryKeys.rewatch.all, "detail", seasonId] as const,
+  },
+
   // KOPIS API 관련
   kopis: {
     all: ["kopis"] as const,
