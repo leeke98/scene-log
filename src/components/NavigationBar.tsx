@@ -29,6 +29,7 @@ export default function NavigationBar() {
     { path: "/records", label: "공연기록" },
     { path: "/report", label: "리포트" },
     { path: "/explore", label: "탐색" },
+    { path: "/rewatch", label: "재관람카드" },
   ];
 
   return (

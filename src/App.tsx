@@ -10,6 +10,7 @@ import TicketDetailPage from "@/pages/TicketDetailPage";
 import ReportPage from "@/pages/ReportPage";
 import ExplorePage from "@/pages/ExplorePage";
 import MyPage from "@/pages/MyPage";
+import RewatchPage from "@/pages/RewatchPage";
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -135,6 +136,14 @@ function AppRoutes() {
         element={
           <PrivateRoute>
             <MyPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/rewatch"
+        element={
+          <PrivateRoute>
+            <RewatchPage />
           </PrivateRoute>
         }
       />

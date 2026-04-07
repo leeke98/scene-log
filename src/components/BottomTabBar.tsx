@@ -1,12 +1,13 @@
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Home, BookOpen, BarChart2, Compass } from "lucide-react";
+import { Home, BookOpen, BarChart2, Compass, Stamp } from "lucide-react";
 
 const tabItems = [
   { path: "/", label: "홈", icon: Home },
   { path: "/records", label: "공연기록", icon: BookOpen },
   { path: "/report", label: "리포트", icon: BarChart2 },
   { path: "/explore", label: "탐색", icon: Compass },
+  { path: "/rewatch", label: "재관람카드", icon: Stamp },
 ];
 
 export default function BottomTabBar() {
