@@ -27,6 +27,7 @@ import {
   Sun,
   Moon,
   User,
+  Stamp,
 } from "lucide-react";
 
 const menuItems = [
@@ -34,6 +35,7 @@ const menuItems = [
   { path: "/records", label: "공연기록", icon: BookOpen },
   { path: "/report", label: "리포트", icon: BarChart2 },
   { path: "/explore", label: "탐색", icon: Compass },
+  { path: "/rewatch", label: "재관람카드", icon: Stamp },
 ];
 
 const reportSubItems = [
