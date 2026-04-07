@@ -8,6 +8,9 @@ import {
   addRewatchMilestone,
   updateRewatchMilestone,
   deleteRewatchMilestone,
+  addMilestoneReward,
+  updateMilestoneReward,
+  deleteMilestoneReward,
   addRewatchCard,
   deleteRewatchCard,
   addTicketToCard,
@@ -60,10 +63,12 @@ export function useAddRewatchMilestone(seasonId: string) {
   return useMutation({
     mutationFn: (data: {
       stampCount: number;
-      rewardType: RewatchRewardType;
-      discountPercent?: number | null;
-      voucherQty?: number | null;
-      merchandiseDesc?: string | null;
+      rewards: Array<{
+        rewardType: RewatchRewardType;
+        discountPercent?: number | null;
+        voucherQty?: number | null;
+        merchandiseDesc?: string | null;
+      }>;
     }) => addRewatchMilestone(seasonId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.rewatch.seasons() });
@@ -83,12 +88,7 @@ export function useUpdateRewatchMilestone(seasonId: string) {
       data,
     }: {
       milestoneId: string;
-      data: {
-        stampCount?: number;
-        discountPercent?: number | null;
-        voucherQty?: number | null;
-        merchandiseDesc?: string | null;
-      };
+      data: { stampCount?: number };
     }) => updateRewatchMilestone(milestoneId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.rewatch.seasons() });
@@ -112,6 +112,74 @@ export function useDeleteRewatchMilestone(seasonId: string) {
     },
     onError: (error: ApiError) => {
       toast.error(error.error || "재관람 혜택 삭제에 실패했습니다.");
+    },
+  });
+}
+
+// ─── Milestone Rewards ────────────────────────────────────────────────────────
+
+export function useAddMilestoneReward(seasonId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      milestoneId,
+      data,
+    }: {
+      milestoneId: string;
+      data: {
+        rewardType: RewatchRewardType;
+        discountPercent?: number | null;
+        voucherQty?: number | null;
+        merchandiseDesc?: string | null;
+      };
+    }) => addMilestoneReward(milestoneId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.rewatch.seasons() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.rewatch.detail(seasonId) });
+      toast.success("혜택이 추가되었습니다.");
+    },
+    onError: (error: ApiError) => {
+      toast.error(error.error || "혜택 추가에 실패했습니다.");
+    },
+  });
+}
+
+export function useUpdateMilestoneReward(seasonId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      rewardId,
+      data,
+    }: {
+      rewardId: string;
+      data: {
+        discountPercent?: number | null;
+        voucherQty?: number | null;
+        merchandiseDesc?: string | null;
+      };
+    }) => updateMilestoneReward(rewardId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.rewatch.seasons() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.rewatch.detail(seasonId) });
+      toast.success("혜택이 수정되었습니다.");
+    },
+    onError: (error: ApiError) => {
+      toast.error(error.error || "혜택 수정에 실패했습니다.");
+    },
+  });
+}
+
+export function useDeleteMilestoneReward(seasonId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (rewardId: string) => deleteMilestoneReward(rewardId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.rewatch.seasons() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.rewatch.detail(seasonId) });
+      toast.success("혜택이 삭제되었습니다.");
+    },
+    onError: (error: ApiError) => {
+      toast.error(error.error || "혜택 삭제에 실패했습니다.");
     },
   });
 }
@@ -215,13 +283,13 @@ export function useUseVoucher(seasonId: string) {
   return useMutation({
     mutationFn: ({
       cardId,
-      milestoneId,
+      rewardId,
       ticketId,
     }: {
       cardId: string;
-      milestoneId: string;
+      rewardId: string;
       ticketId: string;
-    }) => useVoucher(cardId, { milestoneId, ticketId }),
+    }) => useVoucher(cardId, { rewardId, ticketId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.rewatch.detail(seasonId) });
       toast.success("할인권 사용이 처리되었습니다.");
@@ -257,13 +325,13 @@ export function useUpdateMerchandise(seasonId: string) {
   return useMutation({
     mutationFn: ({
       cardId,
-      milestoneId,
+      rewardId,
       received,
     }: {
       cardId: string;
-      milestoneId: string;
+      rewardId: string;
       received: boolean;
-    }) => updateMerchandiseReceipt(cardId, milestoneId, received),
+    }) => updateMerchandiseReceipt(cardId, rewardId, received),
     onSuccess: (_data, { received }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.rewatch.detail(seasonId) });
       toast.success(received ? "굿즈 수령이 완료되었습니다." : "굿즈 수령이 취소되었습니다.");

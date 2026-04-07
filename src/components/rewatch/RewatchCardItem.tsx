@@ -63,10 +63,9 @@ function StampCountInput({
 }
 
 function StampGrid({ total, max }: { total: number; max: number }) {
-  const cells = max;
   return (
     <div className="flex flex-wrap gap-1">
-      {Array.from({ length: cells }).map((_, i) => (
+      {Array.from({ length: max }).map((_, i) => (
         <div
           key={i}
           className={`w-5 h-5 rounded-sm flex-shrink-0 ${
@@ -89,7 +88,7 @@ export function RewatchCardItem({
 }: RewatchCardItemProps) {
   const [isAddTicketOpen, setIsAddTicketOpen] = useState(false);
   const [voucherTicketId, setVoucherTicketId] = useState<string>("");
-  const [voucherMilestoneId, setVoucherMilestoneId] = useState<string>("");
+  const [voucherRewardId, setVoucherRewardId] = useState<string>("");
   const [isVoucherOpen, setIsVoucherOpen] = useState(false);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
 
@@ -108,8 +107,8 @@ export function RewatchCardItem({
     return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
   };
 
-  const openVoucherDialog = (milestoneId: string) => {
-    setVoucherMilestoneId(milestoneId);
+  const openVoucherDialog = (rewardId: string) => {
+    setVoucherRewardId(rewardId);
     setVoucherTicketId(allSeasonTickets[0]?.ticketId ?? "");
     setIsVoucherOpen(true);
   };
@@ -146,111 +145,126 @@ export function RewatchCardItem({
             const status = card.milestoneStatuses.find((s) => s.milestoneId === m.id);
             const achieved = status?.achieved ?? false;
 
-            if (m.rewardType === "DISCOUNT_VOUCHER") {
-              const remaining = status?.voucherRemaining ?? (m.voucherQty ?? 1);
-              const usages = status?.usages ?? [];
+            return (
+              <div key={m.id} className="space-y-1">
+                {m.rewards.map((reward) => {
+                  const rewardStatus = status?.rewardStatuses.find((rs) => rs.rewardId === reward.id);
 
-              return (
-                <div
-                  key={m.id}
-                  className={`rounded-md px-3 py-2 text-xs ${
-                    achieved ? "bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800" : "bg-muted"
-                  }`}
-                >
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <Ticket className={`w-3.5 h-3.5 flex-shrink-0 ${achieved ? "text-blue-500" : "text-muted-foreground"}`} />
-                    <span className="font-medium">{m.stampCount}회</span>
-                    <span className="text-muted-foreground">→</span>
-                    <span>
-                      {m.discountPercent ? `${m.discountPercent}% 할인권` : "할인권"}
-                      {m.voucherQty && m.voucherQty > 1 ? ` ×${m.voucherQty}` : ""}
-                    </span>
-                    {achieved ? (
-                      <>
-                        <span className="ml-auto text-blue-600 dark:text-blue-400 font-medium">
-                          잔여 {remaining}장
-                        </span>
-                        {remaining > 0 && allSeasonTickets.length > 0 && (
-                          <button
-                            onClick={() => openVoucherDialog(m.id)}
-                            className="text-blue-600 dark:text-blue-400 underline hover:no-underline"
-                          >
-                            사용 처리
-                          </button>
-                        )}
-                      </>
-                    ) : (
-                      <span className="ml-auto text-muted-foreground">
-                        {card.totalStamps}/{m.stampCount}
-                      </span>
-                    )}
-                  </div>
-                  {/* 사용 이력 */}
-                  {usages.length > 0 && (
-                    <div className="mt-1.5 space-y-0.5">
-                      {usages.map((u) => {
-                        const ticket = allSeasonTickets.find((t) => t.ticketId === u.ticketId);
-                        return (
-                          <div key={u.id} className="flex items-center gap-1 text-muted-foreground">
-                            <Check className="w-3 h-3 text-blue-500 flex-shrink-0" />
-                            <span>
-                              {ticket ? formatDate(ticket.date) : "할인권"} 사용
+                  if (reward.rewardType === "DISCOUNT_VOUCHER") {
+                    const remaining = rewardStatus?.voucherRemaining ?? (reward.voucherQty ?? 1);
+                    const usages = rewardStatus?.usages ?? [];
+
+                    return (
+                      <div
+                        key={reward.id}
+                        className={`rounded-md px-3 py-2 text-xs ${
+                          achieved
+                            ? "bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800"
+                            : "bg-muted"
+                        }`}
+                      >
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <Ticket className={`w-3.5 h-3.5 flex-shrink-0 ${achieved ? "text-blue-500" : "text-muted-foreground"}`} />
+                          <span className="font-medium">{m.stampCount}회</span>
+                          <span className="text-muted-foreground">→</span>
+                          <span>
+                            {reward.discountPercent ? `${reward.discountPercent}% 할인권` : "할인권"}
+                            {reward.voucherQty && reward.voucherQty > 1 ? ` ×${reward.voucherQty}` : ""}
+                          </span>
+                          {achieved ? (
+                            <>
+                              <span className="ml-auto text-blue-600 dark:text-blue-400 font-medium">
+                                잔여 {remaining}장
+                              </span>
+                              {remaining > 0 && allSeasonTickets.length > 0 && (
+                                <button
+                                  onClick={() => openVoucherDialog(reward.id)}
+                                  className="text-blue-600 dark:text-blue-400 underline hover:no-underline"
+                                >
+                                  사용 처리
+                                </button>
+                              )}
+                            </>
+                          ) : (
+                            <span className="ml-auto text-muted-foreground">
+                              {card.totalStamps}/{m.stampCount}
                             </span>
-                            <button
-                              disabled={cancellingId === u.id}
-                              onClick={() => {
-                                setCancellingId(u.id);
-                                cancelVoucher(u.id, { onSettled: () => setCancellingId(null) });
-                              }}
-                              className="ml-auto hover:text-destructive transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                            >
-                              취소
-                            </button>
+                          )}
+                        </div>
+                        {/* 사용 이력 */}
+                        {usages.length > 0 && (
+                          <div className="mt-1.5 space-y-0.5">
+                            {usages.map((u) => {
+                              const ticket = allSeasonTickets.find((t) => t.ticketId === u.ticketId);
+                              return (
+                                <div key={u.id} className="flex items-center gap-1 text-muted-foreground">
+                                  <Check className="w-3 h-3 text-blue-500 flex-shrink-0" />
+                                  <span>
+                                    {ticket ? formatDate(ticket.date) : "할인권"} 사용
+                                  </span>
+                                  <button
+                                    disabled={cancellingId === u.id}
+                                    onClick={() => {
+                                      setCancellingId(u.id);
+                                      cancelVoucher(u.id, { onSettled: () => setCancellingId(null) });
+                                    }}
+                                    className="ml-auto hover:text-destructive transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                                  >
+                                    취소
+                                  </button>
+                                </div>
+                              );
+                            })}
                           </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              );
-            } else {
-              // MERCHANDISE
-              const received = status?.merchandiseReceived ?? false;
-              return (
-                <div
-                  key={m.id}
-                  className={`rounded-md px-3 py-2 text-xs ${
-                    achieved ? "bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800" : "bg-muted"
-                  }`}
-                >
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <Gift className={`w-3.5 h-3.5 flex-shrink-0 ${achieved ? "text-purple-500" : "text-muted-foreground"}`} />
-                    <span className="font-medium">{m.stampCount}회</span>
-                    <span className="text-muted-foreground">→</span>
-                    <span>{m.merchandiseDesc || "굿즈"}</span>
-                    {achieved ? (
-                      <label className="ml-auto flex items-center gap-1 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={received}
-                          onChange={(e) =>
-                            updateMerchandise({ cardId: card.id, milestoneId: m.id, received: e.target.checked })
-                          }
-                          className="w-3.5 h-3.5"
-                        />
-                        <span className={received ? "text-purple-600 dark:text-purple-400 font-medium" : ""}>
-                          {received ? "수령 완료" : "수령 처리"}
-                        </span>
-                      </label>
-                    ) : (
-                      <span className="ml-auto text-muted-foreground">
-                        {card.totalStamps}/{m.stampCount}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              );
-            }
+                        )}
+                      </div>
+                    );
+                  } else {
+                    const received = rewardStatus?.merchandiseReceived ?? false;
+                    return (
+                      <div
+                        key={reward.id}
+                        className={`rounded-md px-3 py-2 text-xs ${
+                          achieved
+                            ? "bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800"
+                            : "bg-muted"
+                        }`}
+                      >
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <Gift className={`w-3.5 h-3.5 flex-shrink-0 ${achieved ? "text-purple-500" : "text-muted-foreground"}`} />
+                          <span className="font-medium">{m.stampCount}회</span>
+                          <span className="text-muted-foreground">→</span>
+                          <span>{reward.merchandiseDesc || "굿즈"}</span>
+                          {achieved ? (
+                            <label className="ml-auto flex items-center gap-1 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={received}
+                                onChange={(e) =>
+                                  updateMerchandise({
+                                    cardId: card.id,
+                                    rewardId: reward.id,
+                                    received: e.target.checked,
+                                  })
+                                }
+                                className="w-3.5 h-3.5"
+                              />
+                              <span className={received ? "text-purple-600 dark:text-purple-400 font-medium" : ""}>
+                                {received ? "수령 완료" : "수령 처리"}
+                              </span>
+                            </label>
+                          ) : (
+                            <span className="ml-auto text-muted-foreground">
+                              {card.totalStamps}/{m.stampCount}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  }
+                })}
+              </div>
+            );
           })}
         </div>
       )}
@@ -324,7 +338,7 @@ export function RewatchCardItem({
                 disabled={!voucherTicketId || isUsingVoucher}
                 onClick={() => {
                   useVoucher(
-                    { cardId: card.id, milestoneId: voucherMilestoneId, ticketId: voucherTicketId },
+                    { cardId: card.id, rewardId: voucherRewardId, ticketId: voucherTicketId },
                     { onSuccess: () => setIsVoucherOpen(false) }
                   );
                 }}

@@ -2,13 +2,18 @@ import { apiGet, apiPost, apiPut, apiPatch, apiDelete } from "@/lib/apiClient";
 
 export type RewatchRewardType = "DISCOUNT_VOUCHER" | "MERCHANDISE";
 
-export interface RewatchMilestoneSummary {
+export interface RewatchReward {
   id: string;
-  stampCount: number;
   rewardType: RewatchRewardType;
   discountPercent: number | null;
   voucherQty: number | null;
   merchandiseDesc: string | null;
+}
+
+export interface RewatchMilestoneSummary {
+  id: string;
+  stampCount: number;
+  rewards: RewatchReward[];
 }
 
 export interface RewatchCardSummary {
@@ -48,17 +53,26 @@ export interface RewatchCardTicketDetail {
   posterUrl: string | null;
 }
 
-export interface RewatchMilestoneStatus {
-  milestoneId: string;
-  achieved: boolean;
+export interface RewatchRewardStatus {
+  rewardId: string;
+  rewardType: RewatchRewardType;
   // DISCOUNT_VOUCHER
+  discountPercent?: number | null;
+  voucherQty?: number | null;
   voucherUsed?: number;
   voucherRemaining?: number;
   usages?: { id: string; ticketId: string; usedAt: string }[];
   // MERCHANDISE
+  merchandiseDesc?: string | null;
   merchandiseReceiptId?: string | null;
   merchandiseReceived?: boolean;
   merchandiseReceivedAt?: string | null;
+}
+
+export interface RewatchMilestoneStatus {
+  milestoneId: string;
+  achieved: boolean;
+  rewardStatuses: RewatchRewardStatus[];
 }
 
 export interface RewatchCardDetail {
@@ -115,10 +129,12 @@ export function addRewatchMilestone(
   seasonId: string,
   data: {
     stampCount: number;
-    rewardType: RewatchRewardType;
-    discountPercent?: number | null;
-    voucherQty?: number | null;
-    merchandiseDesc?: string | null;
+    rewards: Array<{
+      rewardType: RewatchRewardType;
+      discountPercent?: number | null;
+      voucherQty?: number | null;
+      merchandiseDesc?: string | null;
+    }>;
   }
 ): Promise<{ data: RewatchMilestoneDetail }> {
   return apiPost(`/rewatch/seasons/${seasonId}/milestones`, data);
@@ -126,18 +142,42 @@ export function addRewatchMilestone(
 
 export function updateRewatchMilestone(
   milestoneId: string,
-  data: {
-    stampCount?: number;
-    discountPercent?: number | null;
-    voucherQty?: number | null;
-    merchandiseDesc?: string | null;
-  }
+  data: { stampCount?: number }
 ): Promise<{ data: RewatchMilestoneDetail }> {
   return apiPut(`/rewatch/milestones/${milestoneId}`, data);
 }
 
 export function deleteRewatchMilestone(milestoneId: string): Promise<{ message: string }> {
   return apiDelete(`/rewatch/milestones/${milestoneId}`);
+}
+
+// ─── Milestone Rewards ────────────────────────────────────────────────────────
+
+export function addMilestoneReward(
+  milestoneId: string,
+  data: {
+    rewardType: RewatchRewardType;
+    discountPercent?: number | null;
+    voucherQty?: number | null;
+    merchandiseDesc?: string | null;
+  }
+): Promise<{ data: RewatchReward }> {
+  return apiPost(`/rewatch/milestones/${milestoneId}/rewards`, data);
+}
+
+export function updateMilestoneReward(
+  rewardId: string,
+  data: {
+    discountPercent?: number | null;
+    voucherQty?: number | null;
+    merchandiseDesc?: string | null;
+  }
+): Promise<{ data: RewatchReward }> {
+  return apiPut(`/rewatch/rewards/${rewardId}`, data);
+}
+
+export function deleteMilestoneReward(rewardId: string): Promise<{ message: string }> {
+  return apiDelete(`/rewatch/rewards/${rewardId}`);
 }
 
 // ─── Cards ────────────────────────────────────────────────────────────────────
@@ -181,7 +221,7 @@ export function removeTicketFromCard(
 
 export function useVoucher(
   cardId: string,
-  data: { milestoneId: string; ticketId: string }
+  data: { rewardId: string; ticketId: string }
 ): Promise<{ data: { id: string } }> {
   return apiPost(`/rewatch/cards/${cardId}/voucher-usages`, data);
 }
@@ -194,8 +234,8 @@ export function cancelVoucherUsage(usageId: string): Promise<{ message: string }
 
 export function updateMerchandiseReceipt(
   cardId: string,
-  milestoneId: string,
+  rewardId: string,
   received: boolean
 ): Promise<{ data: unknown }> {
-  return apiPatch(`/rewatch/cards/${cardId}/merchandise-receipts/${milestoneId}`, { received });
+  return apiPatch(`/rewatch/cards/${cardId}/merchandise-receipts/${rewardId}`, { received });
 }
