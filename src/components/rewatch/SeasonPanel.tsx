@@ -143,6 +143,8 @@ export function SeasonPanel({ season }: SeasonPanelProps) {
                     key={card.id}
                     seasonId={season.id}
                     seasonTitle={season.title}
+                    seasonPosterUrl={season.posterUrl}
+                    seasonVenue={season.venue}
                     card={card}
                     milestones={detail.milestones}
                     cardIndex={idx + 1}

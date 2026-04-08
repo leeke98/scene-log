@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Loader2, Search } from "lucide-react";
+import { Loader2, Search, PenLine } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,6 +21,8 @@ interface AddTicketDialogProps {
   seasonId: string;
   cardId: string;
   defaultSearch?: string;
+  defaultPosterUrl?: string;
+  defaultTheater?: string;
   alreadyAddedTicketIds: string[];
 }
 
@@ -29,8 +32,11 @@ export function AddTicketDialog({
   seasonId,
   cardId,
   defaultSearch = "",
+  defaultPosterUrl = "",
+  defaultTheater = "",
   alreadyAddedTicketIds,
 }: AddTicketDialogProps) {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState(defaultSearch);
   const [submittedTerm, setSubmittedTerm] = useState(defaultSearch);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
@@ -133,13 +139,30 @@ export function AddTicketDialog({
           )}
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            취소
-          </Button>
-          <Button onClick={handleSubmit} disabled={!selectedTicket || isPending}>
-            추가
-          </Button>
+        <DialogFooter className="flex-row items-center justify-between sm:justify-between">
+          <button
+            onClick={() => {
+              onClose();
+              const params = new URLSearchParams();
+              params.set("performanceName", submittedTerm || defaultSearch);
+              if (defaultPosterUrl) params.set("posterUrl", defaultPosterUrl);
+              if (defaultTheater) params.set("theater", defaultTheater);
+              params.set("returnTo", "/rewatch");
+              navigate(`/tickets/new?${params.toString()}`);
+            }}
+            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <PenLine className="w-3 h-3" />
+            새 기록 추가하기
+          </button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={onClose}>
+              취소
+            </Button>
+            <Button onClick={handleSubmit} disabled={!selectedTicket || isPending}>
+              추가
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

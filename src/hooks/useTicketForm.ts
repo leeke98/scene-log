@@ -36,6 +36,7 @@ export function useTicketForm() {
   const performanceNameFromUrl = searchParams.get("performanceName");
   const posterUrlFromUrl = searchParams.get("posterUrl");
   const theaterFromUrl = searchParams.get("theater");
+  const returnToFromUrl = searchParams.get("returnTo");
   const { data: ticket, isLoading: isLoadingTicket } = useTicket(id);
   const createTicketMutation = useCreateTicket();
   const updateTicketMutation = useUpdateTicket();
@@ -300,7 +301,7 @@ export function useTicketForm() {
         navigate(`/tickets/${id}`, { replace: true });
       } else {
         await createTicketMutation.mutateAsync(ticketData);
-        navigate("/");
+        navigate(returnToFromUrl || "/");
       }
     } catch (error: unknown) {
       console.error("티켓 저장 오류:", error);

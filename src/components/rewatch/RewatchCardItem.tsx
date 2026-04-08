@@ -16,6 +16,8 @@ import { AddTicketDialog } from "./AddTicketDialog";
 interface RewatchCardItemProps {
   seasonId: string;
   seasonTitle: string;
+  seasonPosterUrl?: string | null;
+  seasonVenue?: string | null;
   card: RewatchCardDetail;
   milestones: RewatchMilestoneDetail[];
   cardIndex: number;
@@ -80,6 +82,8 @@ function StampGrid({ total, max }: { total: number; max: number }) {
 export function RewatchCardItem({
   seasonId,
   seasonTitle,
+  seasonPosterUrl,
+  seasonVenue,
   card,
   milestones,
   cardIndex,
@@ -356,6 +360,8 @@ export function RewatchCardItem({
         seasonId={seasonId}
         cardId={card.id}
         defaultSearch={seasonTitle}
+        defaultPosterUrl={seasonPosterUrl ?? undefined}
+        defaultTheater={seasonVenue ?? undefined}
         alreadyAddedTicketIds={allUsedTicketIds}
       />
     </div>
