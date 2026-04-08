@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { useSearchPerformances } from "@/queries/kopis";
 import { useCreateRewatchSeason } from "@/queries/rewatch";
 import type { KopisPerformance } from "@/services/kopisApi";
-import { normalizePerformanceName, cleanTheaterName } from "@/services/kopisApi";
+import { normalizePerformanceName, cleanTheaterName, getPerformanceDetail } from "@/services/kopisApi";
 
 interface AddSeasonModalProps {
   isOpen: boolean;
@@ -36,7 +36,20 @@ export function AddSeasonModal({ isOpen, onClose }: AddSeasonModalProps) {
     onClose();
   };
 
-  const handleSelect = (p: KopisPerformance) => {
+  const [isFetchingDetail, setIsFetchingDetail] = useState(false);
+
+  const handleSelect = async (p: KopisPerformance) => {
+    setIsFetchingDetail(true);
+    let venue = p.fcltynm ? cleanTheaterName(p.fcltynm) : null;
+    try {
+      const detail = await getPerformanceDetail(p.mt20id);
+      const detailVenue = detail.prfplcnm || detail.fcltynm;
+      if (detailVenue) venue = cleanTheaterName(detailVenue);
+    } catch {
+      // 상세 조회 실패 시 목록에서 가져온 공연장명 사용
+    } finally {
+      setIsFetchingDetail(false);
+    }
     createSeason(
       {
         mt20id: p.mt20id,
@@ -44,7 +57,7 @@ export function AddSeasonModal({ isOpen, onClose }: AddSeasonModalProps) {
         posterUrl: p.poster || null,
         startDate: p.prfpdfrom || null,
         endDate: p.prfpdto || null,
-        venue: p.fcltynm ? cleanTheaterName(p.fcltynm) : null,
+        venue
       },
       { onSuccess: handleClose }
     );
@@ -87,7 +100,7 @@ export function AddSeasonModal({ isOpen, onClose }: AddSeasonModalProps) {
                 <button
                   key={p.mt20id}
                   onClick={() => handleSelect(p)}
-                  disabled={isPending}
+                  disabled={isPending || isFetchingDetail}
                   className="w-full flex gap-3 p-3 rounded-lg border text-left hover:bg-accent transition-colors disabled:opacity-50"
                 >
                   {p.poster && (
