@@ -1,98 +1,76 @@
-# Scene Log (공연 관람 기록 사이트) / Frontend
+# Scene Log — 공연 관람 기록 서비스
 
-공연 관람 기록을 관리하고 통계를 확인할 수 있는 웹 애플리케이션입니다.
+연극·뮤지컬 관람 기록을 저장하고 다양한 통계와 리포트를 제공하는 웹 애플리케이션입니다.
 
 ## 프로젝트 소개
 
-Scene Log는 사용자가 관람한 공연(연극, 뮤지컬)의 정보를 기록하고, 이를 바탕으로 다양한 통계와 리포트를 제공하는 서비스입니다. 공연 날짜, 작품명, 배우 정보, 좌석, 가격, 별점, 후기 등을 기록할 수 있으며, 월별/연도별 통계, 작품별/배우별 분석 리포트를 제공합니다.
+Scene Log는 사용자가 관람한 공연의 정보(날짜, 작품명, 배우, 좌석, 가격, 별점, 후기 등)를 기록하고, 월별·연도별 통계, 작품별·배우별 분석 리포트를 제공하는 개인 공연 기록 서비스입니다. KOPIS(공연예술통합전산망) 연동으로 공연 정보를 편리하게 검색하고 가져올 수 있습니다.
+
+## 주요 기능
+
+- **사용자 인증** — 이메일/비밀번호 및 Google OAuth 로그인
+- **공연 기록 관리** — 티켓 정보 등록, 수정, 삭제
+- **캘린더 뷰** — 관람 이력을 달력으로 확인
+- **통계 리포트** — 전체 / 작품별 / 배우별 분석 (차트 포함)
+- **KOPIS 연동** — 공연 정보 검색 및 자동 입력
+- **배우 관리** — 배우 데이터 검색 및 중복 병합
 
 ## 기술 스택
 
 ### Frontend
 
-- **React 18.3** - UI 라이브러리
-- **TypeScript** - 타입 안정성
-- **Vite** - 빌드 도구 및 개발 서버
-- **React Router DOM** - 클라이언트 사이드 라우팅
-- **Tailwind CSS** - 유틸리티 기반 CSS 프레임워크
-- **Radix UI** - 접근성 있는 UI 컴포넌트 라이브러리
-- **Recharts** - 차트 및 데이터 시각화
+| 영역 | 기술 |
+|---|---|
+| UI 라이브러리 | React 18, TypeScript |
+| 빌드 도구 | Vite |
+| 라우팅 | React Router DOM |
+| 서버 상태 | TanStack Query (React Query) |
+| 클라이언트 상태 | Zustand |
+| 스타일 | Tailwind CSS, Radix UI (Shadcn/UI 패턴) |
+| 차트 | Recharts |
+| 아이콘 | lucide-react |
+| 드래그 앤 드롭 | @dnd-kit |
+| 테스트 | Vitest + jsdom |
 
 ### Backend
 
-- **Node.js** (서버 폴더 구조 확인됨)
+| 영역 | 기술 |
+|---|---|
+| 런타임 | Node.js, Express, TypeScript |
+| ORM | Prisma |
+| 데이터베이스 | PostgreSQL (Supabase) |
+| 인증 | JWT (액세스 토큰 + httpOnly 리프레시 토큰) |
+| 문서화 | Swagger (OpenAPI) |
 
-### Database
+## 아키텍처
 
-- **MySQL** - 관계형 데이터베이스
-
-## 프로젝트 구조
+### 데이터 흐름
 
 ```
-scene-log/
-├── database/                    # 데이터베이스 관련 파일
-│   ├── schema.sql              # 데이터베이스 스키마 정의
-│   ├── mock_data.sql           # 테스트용 더미 데이터
-│   └── README.md               # 데이터베이스 문서
-│
-├── src/                        # 프론트엔드 소스 코드
-│   ├── assets/                 # 정적 자산 (이미지 등)
-│   │
-│   ├── components/             # React 컴포넌트
-│   │   ├── charts/             # 차트 컴포넌트
-│   │   ├── report/             # 리포트 관련 컴포넌트
-│   │   ├── ui/                 # 재사용 가능한 Shadcn/UI 컴포넌트
-│   │
-│   ├── contexts/               # React Context
-│   │
-│   ├── data/                   # 데이터 파일
-│   │   └── mockTickets.ts      # 목업 티켓 데이터
-│   │
-│   ├── lib/                    # 유틸리티 함수
-│   │   └── utils.ts            # 공통 유틸리티
-│   │
-│   ├── pages/                  # 페이지 컴포넌트
-│   │
-│   ├── services/               # API 서비스
-│   │   └── kopisApi.ts         # KOPIS API 연동
-│   │
-│   ├── styles/                 # 스타일 파일
-│   │
-│   ├── types/                  # TypeScript 타입 정의
-│   │
-│   ├── App.tsx                 # 메인 App 컴포넌트
-│   ├── App.css                 # App 스타일
-│   ├── index.css               # 전역 스타일
-│   └── main.tsx                # 애플리케이션 진입점
-│
-├── public/                     # 정적 파일
-│   └── vite.svg
-│
-├── .gitignore                  # Git 무시 파일 목록
-├── components.json             # shadcn/ui 설정
-├── eslint.config.js            # ESLint 설정
-├── index.html                  # HTML 진입점
-├── package.json                # 프로젝트 의존성 및 스크립트
-├── package-lock.json           # 의존성 잠금 파일
-├── postcss.config.js           # PostCSS 설정
-├── tailwind.config.js          # Tailwind CSS 설정
-├── tsconfig.json               # TypeScript 설정
-├── tsconfig.app.json           # 앱용 TypeScript 설정
-├── tsconfig.node.json          # Node용 TypeScript 설정
-└── vite.config.ts              # Vite 설정
+Page
+  └─ TanStack Query hook (src/queries/)
+       └─ service 함수 (src/services/)
+            └─ apiClient (src/lib/apiClient.ts)
+                 └─ Backend REST API
 ```
 
-## 주요 기능
+- **서버 상태**: TanStack Query가 캐싱, 리페치, 뮤테이션 관리
+- **클라이언트 상태**: Zustand (`authStore`) — 인증 정보를 localStorage에 유지
 
-- 🔐 **사용자 인증**: 로그인 및 회원가입
-- 📝 **공연 기록 관리**: 공연 정보 등록, 수정, 삭제
-- 📅 **캘린더 뷰**: 관람 기록을 캘린더 형식으로 확인
-- 📊 **통계 리포트**:
-  - 전체 통계 (월별/연도별/누적)
-  - 작품별 통계 및 분석
-  - 배우별 통계 및 분석
-- 🔍 **탐색 기능**: 공연 정보 검색 및 탐색
-- 📈 **데이터 시각화**: 차트를 통한 통계 시각화
+### 주요 디렉토리
+
+```
+src/
+├── components/       # 도메인별 UI 컴포넌트 (report/, explore/, charts/, ui/)
+├── lib/
+│   └── apiClient.ts  # JWT Bearer 처리, 401 자동 리다이렉트, 개발 로그
+├── pages/            # 라우트 단위 페이지 컴포넌트
+├── queries/          # TanStack Query 훅 (auth/, tickets/, reports/, kopis/)
+├── services/         # 원시 API 호출 (authApi, ticketApi, reportApi, kopisApi)
+├── stores/
+│   └── authStore.ts  # Zustand 인증 스토어
+└── types/            # 공유 TypeScript 인터페이스
+```
 
 ## 시작하기
 
@@ -101,16 +79,23 @@ scene-log/
 - Node.js >= 22.12.0
 - npm >= 10.0.0
 
+### 환경 변수
+
+| 변수 | 설명 |
+|---|---|
+| `VITE_API_BASE_URL` | 백엔드 베이스 URL (개발 시 `/api` 프록시 기본값 사용) |
+| `VITE_KOPIS_SERVICE_KEY` | KOPIS API 키 |
+
 ### 설치 및 실행
 
 ```bash
 # 의존성 설치
 npm install
 
-# 개발 서버 실행
+# 개발 서버 실행 (/api → localhost:3001 프록시)
 npm run dev
 
-# 프로덕션 빌드
+# 프로덕션 빌드 (TypeScript 체크 포함)
 npm run build
 
 # 빌드 미리보기
@@ -118,8 +103,11 @@ npm run preview
 
 # 린팅
 npm run lint
+
+# 테스트
+npm run test
 ```
 
 ## 라이선스
 
-이 프로젝트는 개인 프로젝트입니다.
+개인 프로젝트입니다.
