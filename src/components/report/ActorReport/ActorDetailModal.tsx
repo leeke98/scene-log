@@ -1,9 +1,11 @@
-import { useEffect } from "react";
-import { X, ChevronRight, Eye, Wallet } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { X, ChevronRight, Eye, Wallet, Camera, Trash2, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { useActorDetail } from "@/queries/reports/queries";
+import { useUploadActorImage, useDeleteActorImage } from "@/queries/actors";
 import { EmptyState } from "@/components/ui/empty-state";
+import { toast } from "react-toastify";
 
 // 작품 태그 색상 (jewel tone, 순환)
 const tagColors = [
@@ -30,6 +32,11 @@ export default function ActorDetailModal({
   month,
 }: ActorDetailModalProps) {
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const imageMenuRef = useRef<HTMLDivElement>(null);
+  const [showImageMenu, setShowImageMenu] = useState(false);
+  // undefined: 서버 데이터 그대로, null: 로컬에서 삭제됨, string: 로컬에서 업로드됨
+  const [localImageUrl, setLocalImageUrl] = useState<string | null | undefined>(undefined);
 
   const { data: actorDetail, isLoading, error } = useActorDetail({
     actorId,
@@ -37,15 +44,32 @@ export default function ActorDetailModal({
     month,
   });
 
-  // 바텀시트 열릴 때 body 스크롤 방지
+  const uploadMutation = useUploadActorImage(actorId);
+  const deleteMutation = useDeleteActorImage(actorId);
+
+  // 바텀시트 열릴 때 body 스크롤 방지 + 닫힐 때 메뉴 초기화
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
       return () => {
         document.body.style.overflow = "";
+        setShowImageMenu(false);
+        setLocalImageUrl(undefined);
       };
     }
   }, [isOpen]);
+
+  // 이미지 메뉴 외부 클릭 시 닫기
+  useEffect(() => {
+    if (!showImageMenu) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (imageMenuRef.current && !imageMenuRef.current.contains(e.target as Node)) {
+        setShowImageMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showImageMenu]);
 
   if (!isOpen) return null;
 
@@ -55,6 +79,23 @@ export default function ActorDetailModal({
 
   const handleTicketClick = (ticketId: string) => {
     navigate(`/tickets/${ticketId}`);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = "";
+    uploadMutation.mutate(file, {
+      onSuccess: (data) => setLocalImageUrl(data.imageUrl),
+      onError: () => toast.error("이미지 업로드에 실패했습니다."),
+    });
+  };
+
+  const handleDeleteImage = () => {
+    deleteMutation.mutate(undefined, {
+      onSuccess: () => setLocalImageUrl(null),
+      onError: () => toast.error("이미지 삭제에 실패했습니다."),
+    });
   };
 
   // 로딩/에러 상태
@@ -84,6 +125,10 @@ export default function ActorDetailModal({
     performanceName: ticket.performanceName,
   }));
 
+  const isImageLoading = uploadMutation.isPending || deleteMutation.isPending;
+  const displayImageUrl = localImageUrl !== undefined ? localImageUrl : actor.imageUrl;
+  const hasImage = !!displayImageUrl;
+
   const modalContent = (
     <div
       className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center"
@@ -98,17 +143,94 @@ export default function ActorDetailModal({
           <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
         </div>
 
+        {/* 숨겨진 파일 input */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleFileChange}
+        />
+
         {/* 헤더 */}
         <div className="flex items-start justify-between px-4 pt-4 pb-2 sm:px-5 sm:pt-5 flex-shrink-0">
-          <div>
-            <span className="text-xs text-muted-foreground">배우</span>
-            <h2 className="text-xl font-bold tracking-tight leading-tight">
-              {actor.actorName}
-            </h2>
+          <div className="flex items-start gap-3 min-w-0">
+            {/* 이미지 영역: 업로드 중이거나 이미지 있을 때 표시 */}
+            {(hasImage || uploadMutation.isPending) && (
+              <div className="relative flex-shrink-0">
+                {hasImage ? (
+                  <img
+                    src={displayImageUrl!}
+                    alt={actor.actorName}
+                    className="w-20 h-20 rounded-xl object-cover"
+                  />
+                ) : (
+                  <div className="w-20 h-20 rounded-xl bg-muted" />
+                )}
+                {/* 로딩 스피너 오버레이 */}
+                {isImageLoading && (
+                  <div className="absolute inset-0 rounded-xl bg-black/40 flex items-center justify-center">
+                    <Loader2 className="w-5 h-5 text-white animate-spin" />
+                  </div>
+                )}
+                {/* 코너 뱃지 + 드롭다운 */}
+                {hasImage && !isImageLoading && (
+                  <div ref={imageMenuRef} className="absolute -bottom-1.5 -right-1.5">
+                    <button
+                      onClick={() => setShowImageMenu((v) => !v)}
+                      className="w-6 h-6 rounded-full bg-card border border-border shadow-sm flex items-center justify-center hover:bg-muted transition-colors"
+                      title="사진 편집"
+                    >
+                      <Camera className="w-3 h-3 text-muted-foreground" />
+                    </button>
+                    {showImageMenu && (
+                      <div className="absolute top-8 left-0 bg-card border border-border rounded-xl shadow-lg overflow-hidden z-10 w-28">
+                        <button
+                          onClick={() => { fileInputRef.current?.click(); setShowImageMenu(false); }}
+                          className="w-full flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-muted transition-colors"
+                        >
+                          <Camera className="w-3.5 h-3.5 text-muted-foreground" />
+                          사진 변경
+                        </button>
+                        <div className="border-t border-border/60" />
+                        <button
+                          onClick={() => { handleDeleteImage(); setShowImageMenu(false); }}
+                          className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-destructive hover:bg-muted transition-colors"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          사진 삭제
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="min-w-0">
+              <span className="text-xs text-muted-foreground">배우</span>
+              <div className="flex items-center gap-1.5">
+                <h2 className="text-xl font-bold tracking-tight leading-tight">
+                  {actor.actorName}
+                </h2>
+                {/* 이미지 없을 때만 카메라 아이콘 노출 (subtle) */}
+                {!hasImage && !isImageLoading && (
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isImageLoading}
+                    className="p-1 rounded-md text-muted-foreground/30 hover:text-muted-foreground hover:bg-muted transition-colors flex-shrink-0"
+                    title="사진 추가"
+                  >
+                    <Camera className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
+
           <button
             onClick={onClose}
-            className="mt-0.5 p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            className="mt-0.5 p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors flex-shrink-0"
             aria-label="닫기"
           >
             <X className="w-4 h-4" />
