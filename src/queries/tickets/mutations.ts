@@ -35,6 +35,10 @@ export function useCreateTicket() {
       queryClient.invalidateQueries({
         queryKey: queryKeys.tickets.lists(),
       });
+      // 리포트 쿼리 무효화 (배우/공연 통계가 변경될 수 있음)
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.reports.all,
+      });
       toast.success("티켓이 생성되었습니다.");
     },
     onError: (error: ApiError) => {
@@ -82,6 +86,10 @@ export function useUpdateTicket() {
       queryClient.invalidateQueries({
         queryKey: queryKeys.tickets.lists(),
       });
+      // 리포트 쿼리 무효화 (배우/공연 통계가 변경될 수 있음)
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.reports.all,
+      });
       toast.success("티켓이 수정되었습니다.");
     },
     onError: (error: ApiError) => {
@@ -122,6 +130,10 @@ export function useDeleteTicket() {
       // 재관람카드 쿼리도 무효화 (카드에 연결된 티켓이 삭제될 수 있음)
       queryClient.invalidateQueries({
         queryKey: queryKeys.rewatch.all,
+      });
+      // 리포트 쿼리 무효화 (배우/공연 통계가 변경될 수 있음)
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.reports.all,
       });
       toast.success("티켓이 삭제되었습니다.");
     },
