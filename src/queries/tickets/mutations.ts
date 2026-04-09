@@ -119,6 +119,10 @@ export function useDeleteTicket() {
       queryClient.invalidateQueries({
         queryKey: queryKeys.tickets.lists(),
       });
+      // 재관람카드 쿼리도 무효화 (카드에 연결된 티켓이 삭제될 수 있음)
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.rewatch.all,
+      });
       toast.success("티켓이 삭제되었습니다.");
     },
     onError: (error: ApiError) => {
