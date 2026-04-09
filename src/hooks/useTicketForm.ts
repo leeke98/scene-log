@@ -301,7 +301,7 @@ export function useTicketForm() {
         navigate(`/tickets/${id}`, { replace: true });
       } else {
         await createTicketMutation.mutateAsync(ticketData);
-        navigate(returnToFromUrl || "/");
+        navigate(returnToFromUrl || `/?month=${formData.date.slice(0, 7)}`);
       }
     } catch (error: unknown) {
       console.error("티켓 저장 오류:", error);
