@@ -46,6 +46,7 @@ export default function ActorMonthlyTab({
         totalViewCount: actor.viewCount,
         watchedPerformances: actor.performanceList,
         totalAmount: actor.totalTicketPrice,
+        imageUrl: actor.imageUrl,
       }))
       .sort((a, b) => {
         if (b.totalViewCount !== a.totalViewCount)

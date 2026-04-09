@@ -33,6 +33,7 @@ export default function ActorCustomRangeTab({ searchTerm, startDate, endDate, ge
         totalViewCount: actor.viewCount,
         watchedPerformances: actor.performanceList,
         totalAmount: actor.totalTicketPrice,
+        imageUrl: actor.imageUrl,
       }))
       .sort((a, b) => {
         if (b.totalViewCount !== a.totalViewCount) return b.totalViewCount - a.totalViewCount;

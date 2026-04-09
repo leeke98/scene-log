@@ -18,6 +18,7 @@ export interface ActorData {
   totalViewCount: number;
   watchedPerformances: string[];
   totalAmount: number;
+  imageUrl?: string | null;
 }
 
 interface ActorCardListProps {
@@ -72,7 +73,7 @@ export default function ActorCardList({
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+      <div className="max-w-2xl mx-auto space-y-2">
         {actors.map((actor, index) => {
           const rank = index + 1;
           const rankStyle = rankConfig[rank];
@@ -83,57 +84,61 @@ export default function ActorCardList({
               className="shadow-sm border-border rounded-xl cursor-pointer transition-colors hover:bg-violet-50/60 dark:hover:bg-violet-950/20"
               onClick={() => onActorClick(actor.id)}
             >
-              <CardContent className="p-4">
-                {/* 상단: 랭크뱃지 + 이름 */}
-                <div className="flex items-center gap-2 mb-3">
-                  {rankStyle && (
-                    <span
-                      className={`inline-flex items-center justify-center w-5 h-5 rounded-full ${rankStyle.bg} ${rankStyle.text} text-[10px] font-bold flex-shrink-0 shadow-sm`}
-                    >
-                      {rank}
+              <CardContent className="p-4 flex items-center gap-4">
+                {/* 이미지 영역 (항상 자리 차지) */}
+                {actor.imageUrl ? (
+                  <img
+                    src={actor.imageUrl}
+                    alt={actor.name}
+                    className="flex-shrink-0 w-14 h-14 rounded-xl object-cover object-top"
+                  />
+                ) : (
+                  <div className="flex-shrink-0 w-14 h-14 rounded-xl bg-muted flex items-center justify-center">
+                    <span className="text-[10px] text-muted-foreground/60 text-center leading-tight">
+                      이미지<br />없음
                     </span>
-                  )}
-                  <span className="font-medium text-sm truncate">
-                    {actor.name}
-                  </span>
-                </div>
+                  </div>
+                )}
 
-                {/* 중단: 관극 횟수 + 관람 금액 (stat card) */}
-                <div className="flex gap-6 mb-3">
-                  <div>
-                    <div className="text-lg font-bold leading-tight">
+                {/* 정보 영역 */}
+                <div className="flex-1 min-w-0 space-y-2">
+                  {/* 랭크뱃지 + 이름 */}
+                  <div className="flex items-center gap-2">
+                    {rankStyle ? (
+                      <span
+                        className={`inline-flex items-center justify-center w-5 h-5 rounded-full ${rankStyle.bg} ${rankStyle.text} text-[10px] font-bold flex-shrink-0 shadow-sm`}
+                      >
+                        {rank}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-muted-foreground tabular-nums w-5 text-center flex-shrink-0">
+                        {rank}
+                      </span>
+                    )}
+                    <span className="font-semibold text-sm truncate">{actor.name}</span>
+                  </div>
+
+                  {/* 통계 + 태그 */}
+                  <div className="flex items-center gap-4 flex-wrap">
+                    <span className="text-sm font-medium tabular-nums">
                       {actor.totalViewCount}
-                      <span className="text-sm font-normal text-muted-foreground ml-0.5">
-                        회
-                      </span>
-                    </div>
-                    <div className="text-[11px] text-muted-foreground mt-0.5">
-                      관극 횟수
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-lg font-bold leading-tight">
-                      {actor.totalAmount.toLocaleString()}
-                      <span className="text-sm font-normal text-muted-foreground ml-0.5">
-                        원
-                      </span>
-                    </div>
-                    <div className="text-[11px] text-muted-foreground mt-0.5">
-                      관람 금액
-                    </div>
-                  </div>
-                </div>
-
-                {/* 하단: 관람 작품 태그 */}
-                <div className="flex flex-wrap gap-1.5">
-                  {actor.watchedPerformances.map((performance, idx) => (
-                    <span
-                      key={idx}
-                      className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border ${tagColors[idx % tagColors.length]}`}
-                    >
-                      {performance}
+                      <span className="text-xs font-normal text-muted-foreground ml-0.5">회</span>
                     </span>
-                  ))}
+                    <span className="text-sm font-medium tabular-nums">
+                      {actor.totalAmount.toLocaleString()}
+                      <span className="text-xs font-normal text-muted-foreground ml-0.5">원</span>
+                    </span>
+                    <div className="flex flex-wrap gap-1">
+                      {actor.watchedPerformances.map((performance, idx) => (
+                        <span
+                          key={idx}
+                          className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border ${tagColors[idx % tagColors.length]}`}
+                        >
+                          {performance}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
