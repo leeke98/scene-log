@@ -1,7 +1,7 @@
 /**
  * 배우 관련 API
  */
-import { apiGet, apiPost, apiPut } from "@/lib/apiClient";
+import { apiGet, apiPost, apiPut, apiDelete } from "@/lib/apiClient";
 import type { Actor, ActorSearchResult, CreateActorRequest } from "@/types/actor";
 
 export async function searchActors(q: string): Promise<ActorSearchResult[]> {
@@ -29,4 +29,17 @@ export async function reportActor(
   reason: string
 ): Promise<{ message: string }> {
   return apiPost<{ message: string }>(`/actors/${id}/report`, { reason });
+}
+
+export async function uploadActorImage(
+  actorId: string,
+  imageUrl: string
+): Promise<{ imageUrl: string }> {
+  return apiPost<{ imageUrl: string }>(`/actors/${actorId}/image`, { imageUrl });
+}
+
+export async function deleteActorImage(
+  actorId: string
+): Promise<{ message: string }> {
+  return apiDelete<{ message: string }>(`/actors/${actorId}/image`);
 }

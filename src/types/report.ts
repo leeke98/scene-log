@@ -53,6 +53,7 @@ export interface ActorStats {
   totalTicketPrice: number; // 관람 금액
   uniquePerformances: number; // 본 작품 수
   performanceList: string[]; // 본 작품 목록
+  imageUrl?: string | null; // 유저가 업로드한 배우 이미지
 }
 
 export interface PerformanceStats {
