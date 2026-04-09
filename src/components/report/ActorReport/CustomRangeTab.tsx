@@ -16,7 +16,7 @@ export default function ActorCustomRangeTab({ searchTerm, startDate, endDate, ge
   const selectedActor = searchParams.get("actor");
   const isModalOpen = !!selectedActor;
 
-  const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteActorStats({
+  const { data, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteActorStats({
     search: searchTerm || undefined,
     startDate,
     endDate,
@@ -54,6 +54,7 @@ export default function ActorCustomRangeTab({ searchTerm, startDate, endDate, ge
     <div className="space-y-6">
       <ActorCardList
         actors={actors}
+        isLoading={isLoading}
         onActorClick={handleActorClick}
         hasNextPage={hasNextPage}
         isFetchingNextPage={isFetchingNextPage}

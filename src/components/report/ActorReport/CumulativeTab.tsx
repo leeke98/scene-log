@@ -19,6 +19,7 @@ export default function ActorCumulativeTab({
 
   const {
     data,
+    isLoading,
     hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
@@ -66,6 +67,7 @@ export default function ActorCumulativeTab({
     <div className="space-y-6">
       <ActorCardList
         actors={actors}
+        isLoading={isLoading}
         onActorClick={handleActorClick}
         hasNextPage={hasNextPage}
         isFetchingNextPage={isFetchingNextPage}

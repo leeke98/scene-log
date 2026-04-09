@@ -23,6 +23,7 @@ export interface ActorData {
 
 interface ActorCardListProps {
   actors: ActorData[];
+  isLoading?: boolean;
   onActorClick: (actorId: string) => void;
   hasNextPage?: boolean;
   isFetchingNextPage?: boolean;
@@ -37,6 +38,7 @@ const rankConfig: Record<number, { bg: string; text: string }> = {
 
 export default function ActorCardList({
   actors,
+  isLoading,
   onActorClick,
   hasNextPage,
   isFetchingNextPage,
@@ -60,6 +62,15 @@ export default function ActorCardList({
   useEffect(() => {
     return () => observerRef.current?.disconnect();
   }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center gap-2 py-16 text-muted-foreground">
+        <Loader2 className="h-8 w-8 animate-spin" />
+        <span className="text-sm">불러오는 중...</span>
+      </div>
+    );
+  }
 
   if (actors.length === 0) {
     return (

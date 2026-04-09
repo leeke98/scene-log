@@ -1,4 +1,4 @@
-import { Star } from "lucide-react";
+import { Star, Loader2 } from "lucide-react";
 import type { PerformanceStats } from "@/types/report";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -65,7 +65,7 @@ export default function PerformanceTable({
   if (isLoading) {
     return (
       <div className="flex flex-col items-center gap-2 py-16 text-muted-foreground">
-        <span className="text-3xl">🎭</span>
+        <Loader2 className="h-8 w-8 animate-spin" />
         <span className="text-sm">불러오는 중...</span>
       </div>
     );

@@ -1,3 +1,4 @@
+import { Loader2 } from "lucide-react";
 import { useSummaryHeight } from "@/hooks/useSummaryHeight";
 import { type ChartConfig } from "@/components/ui/chart";
 import BarChartCard from "@/components/charts/BarChartCard";
@@ -26,7 +27,7 @@ export default function OverallMonthlyTab({
   const monthOnly = month.split("-")[1]; // "YYYY-MM" -> "MM"
 
   // 전체 요약 데이터 가져오기
-  const { data: summary } = useSummary(year, monthOnly, genre);
+  const { data: summary, isLoading } = useSummary(year, monthOnly, genre);
 
   const { summaryRef, posterHeight } = useSummaryHeight([summary]);
 
@@ -150,6 +151,15 @@ export default function OverallMonthlyTab({
         mostFrequentActor: "-",
         mostFrequentTheater: "-",
       };
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center gap-2 py-16 text-muted-foreground">
+        <Loader2 className="h-8 w-8 animate-spin" />
+        <span className="text-sm">불러오는 중...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">

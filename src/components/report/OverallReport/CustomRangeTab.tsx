@@ -1,3 +1,4 @@
+import { Loader2 } from "lucide-react";
 import { useSummaryHeight } from "@/hooks/useSummaryHeight";
 import PieChartCard from "@/components/charts/PieChartCard";
 import SummaryCards from "@/components/report/SummaryCards";
@@ -15,7 +16,7 @@ interface OverallCustomRangeTabProps {
 }
 
 export default function OverallCustomRangeTab({ startDate, endDate, genre }: OverallCustomRangeTabProps) {
-  const { data: summary } = useSummary(undefined, undefined, genre, startDate, endDate);
+  const { data: summary, isLoading } = useSummary(undefined, undefined, genre, startDate, endDate);
   const { summaryRef, posterHeight } = useSummaryHeight([summary]);
   const { data: dayOfWeekStats } = useDayOfWeekStats(undefined, undefined, genre, startDate, endDate);
   const { data: top10Performances } = useMostViewedPerformance(undefined, undefined, genre, startDate, endDate);
@@ -37,6 +38,15 @@ export default function OverallCustomRangeTab({ startDate, endDate, genre }: Ove
         mostFrequentActor: "-",
         mostFrequentTheater: "-",
       };
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center gap-2 py-16 text-muted-foreground">
+        <Loader2 className="h-8 w-8 animate-spin" />
+        <span className="text-sm">불러오는 중...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">

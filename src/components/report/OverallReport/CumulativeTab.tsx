@@ -1,3 +1,4 @@
+import { Loader2 } from "lucide-react";
 import { useSummaryHeight } from "@/hooks/useSummaryHeight";
 import SummaryCards from "@/components/report/SummaryCards";
 import TopPerformancesPoster from "@/components/report/TopPerformancesPoster";
@@ -16,7 +17,7 @@ interface OverallCumulativeTabProps {
 
 export default function OverallCumulativeTab({ genre }: OverallCumulativeTabProps) {
   // 전체 요약 데이터 가져오기 (누적 데이터이므로 파라미터 없음)
-  const { data: summary } = useSummary(undefined, undefined, genre);
+  const { data: summary, isLoading } = useSummary(undefined, undefined, genre);
 
   const { summaryRef, posterHeight } = useSummaryHeight([summary]);
 
@@ -51,6 +52,15 @@ export default function OverallCumulativeTab({ genre }: OverallCumulativeTabProp
         mostFrequentActor: "-",
         mostFrequentTheater: "-",
       };
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center gap-2 py-16 text-muted-foreground">
+        <Loader2 className="h-8 w-8 animate-spin" />
+        <span className="text-sm">불러오는 중...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
