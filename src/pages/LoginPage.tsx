@@ -109,6 +109,14 @@ export default function LoginPage() {
               Login
             </Button>
 
+            <button
+              type="button"
+              onClick={() => { setId("demouser"); setPassword("password1234"); }}
+              className="w-full text-sm text-muted-foreground hover:text-foreground underline text-center py-1"
+            >
+              데모 계정 입력하기
+            </button>
+
             <div className="flex items-center gap-3 my-4">
               <div className="flex-1 border-t border-gray-300" />
               <span className="text-sm text-gray-300">또는</span>
